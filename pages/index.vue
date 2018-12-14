@@ -18,33 +18,46 @@
 				</div>
 			</nav>
 
-            <div class="table">
-                <table class="table table-sm table-bordered">
-                    <caption>Last tests</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="text-center">Test id</th>
-                            <th scope="col" class="text-center">Author</th>
-                            <th scope="col" class="text-center">Status</th>
-                            <th scope="col" class="text-center">Start → Stop</th>
-                            <th scope="col" class="text-center">Target</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="job in last_jobs">
-                            <td align="center"><a v-bind:href='"/job?id="+job.id'>{{ job.id }}</a></td>
-                            <td align="center">{{ job.author }}</td>
-                            <td align="center"
-                                v-bind:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
-                            >
-                                {{ job.status }}
-                            </td>
-                            <td align="center">{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}</td>
-                            <td align="center">{{ job.target }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button class="btn-lg" v-on:click="more_tests(last_jobs.length)">I need more tests</button>
+			<div class="table">
+				<table class="table table-sm table-bordered">
+					<caption>Last tests</caption>
+					<thead>
+						<tr>
+							<th scope="col" class="text-center">Test id</th>
+							<th scope="col" class="text-center">Author</th>
+							<th scope="col" class="text-center">Status</th>
+							<th scope="col" class="text-center">Start → Stop</th>
+							<th scope="col" class="text-center">Target</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="job in last_jobs">
+							<td
+								align="center"
+							>
+								<a :href='"/job?id="+job.id'>{{ job.id }}</a>
+							</td>
+							<td
+								align="center"
+							>
+								{{ job.author }}
+							</td>
+							<td
+								align="center"
+								:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
+							>
+								{{ job.status }}
+							</td>
+							<td align="center">
+								{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}
+							</td>
+							<td align="center">
+								{{ job.target }}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<button class="btn-lg" @click="more_tests(last_jobs.length)">I need more tests</button>
 			</div>
 		</div>
 	</div>
@@ -53,7 +66,6 @@
 <script>
 
 export default {
-	//middleware: 'authenticated',
 	data() {
 		return {
 			last_jobs: [],
@@ -68,9 +80,10 @@ export default {
 		this.$api.get('/lastjobs/0')
 			.then(response => {
 				const jobs = this.last_jobs;
+
 				const resp_data = response[0].data.jobs;
 
-				resp_data.forEach(function (item, i, arr) {
+				resp_data.forEach(function(item){
 					jobs.push(item);
 				});
 			});
@@ -82,45 +95,58 @@ export default {
 			this.$api.get('/lastjobs/' + from_)
 				.then(response => {
 					const jobs = this.last_jobs;
+
 					const resp_data = response[0].data.jobs;
 
-					resp_data.forEach(function (item, i, arr) {
+					resp_data.forEach(function(item){
 						jobs.push(item);
 					});
 				});
 		},
 		ts_to_date: function (ts) {
-			var from_ts = new Date(ts * 1000);
-			var today = new Date();
-			var from_ts_hour = from_ts.getHours();
-			var from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-			var from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-			var from_ts_year = from_ts.getFullYear();
+			const from_ts = new Date(ts * 1000);
+
+			const today = new Date();
+
+			const from_ts_hour = from_ts.getHours();
+
+			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
+
+			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
+
+			const from_ts_year = from_ts.getFullYear();
+
 			if (isNaN(from_ts.getDate())) {
-				return 'not yet'
+				return 'not yet';
 			}
-			else if (today.getDate() == from_ts.getDate()) {
+			else if (today.getDate() === from_ts.getDate()) {
 				return from_ts_hour + ':' + from_ts_min;
 			}
-			else if (today.getFullYear() == from_ts_year) {
-				var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-				var month = months[from_ts.getMonth()];
-				var date = from_ts.getDate();
+			else if (today.getFullYear() === from_ts_year) {
+				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+				const month = months[from_ts.getMonth()];
+
+				const date = from_ts.getDate();
+
 				return date + ' ' + month + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 			else {
-				var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-				var month = months[from_ts.getMonth()];
-				var date = from_ts.getDate();
+				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+				const month = months[from_ts.getMonth()];
+
+				const date = from_ts.getDate();
+
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
 		is_in_progress: function (status) {
 			if (status != 'finished') {
-				return false
+				return false;
 			}
 			else {
-				return true
+				return true;
 			}
 		}
 	},

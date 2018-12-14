@@ -61,7 +61,12 @@
 								<!-- rps -->
 								<iframe
 										:src="job.graphs.rps"
-										width="100%" height="100%" marginheight="0" align="top" scrolling="No" frameborder="0"
+										width="100%"
+										height="100%"
+										marginheight="0"
+										align="top"
+										scrolling="No"
+										frameborder="0"
 										style="overflow: hidden;">
 								</iframe>
 								<!-- quantiles -->
@@ -237,7 +242,6 @@ Vue.use(Vuetify);
 
 
 export default {
-	//middleware: 'authenticated',
 	data() {
 		return {
 			test_id: null,
@@ -269,20 +273,25 @@ export default {
 			.then(job_json => {
 				this.job = job_json;
 				this.job.graphs = {};
-				this.job.graphs.rps = "http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-test_id="+this.job.id;
-				this.job.graphs.netcodes = "http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-test_id="+this.job.id;
-				this.job.graphs.quantiles = "http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-test_id="+this.job.id;
-				this.job.graphs.threads = "http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-test_id="+this.job.id;
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
 				this.job.pods_data = JSON.parse(JSON.parse(this.job.environmentDetails));
 				if (this.job.pods_data) {
 					Object.keys(this.job.pods_data).forEach(
 						pod => {
 							this.job.pods_data[pod].graphs = {};
-							var env = this.job.pods_data[pod].labels.env.toUpperCase();
-							var container = this.job.pods_data[pod].labels.release;
-							this.job.pods_data[pod].graphs.cpu = "http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B"+env+"%5D%20K8S%20Prometheus&var-Pod="+pod+"&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-phase=Failed&var-container="+container+"&theme=light&panelId=17";
-							this.job.pods_data[pod].graphs.net = "http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B"+env+"%5D%20K8S%20Prometheus&var-Pod="+pod+"&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-phase=Failed&var-container="+container+"&theme=light&panelId=32";
-							this.job.pods_data[pod].graphs.mem = "http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B"+env+"%5D%20K8S%20Prometheus&var-Pod="+pod+"&from="+this.job.testStart*1000+"&to="+this.job.testStop*1000+"&var-phase=Failed&var-container="+container+"&theme=light&panelId=25";
+							const env = this.job.pods_data[pod].labels.env.toUpperCase();
+
+							const container = this.job.pods_data[pod].labels.release;
+
+							this.job.pods_data[pod].graphs.cpu = `http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B${env}%5D%20K8S%20Prometheus&var-Pod=${pod}&from=${this.job.testStart*1000}&to=
+								${this.job.testStop*1000}&var-phase=Failed&var-container=${container}&theme=light&panelId=17`;
+							this.job.pods_data[pod].graphs.net = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B'
+								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=32';
+							this.job.pods_data[pod].graphs.mem = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B'
+								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=25';
 						}
 					);
 				}
@@ -313,18 +322,26 @@ export default {
 			});
 		},
 		ts_to_date: function (ts) {
-			var from_ts = new Date(ts * 1000);
-			var from_ts_hour = from_ts.getHours();
-			var from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-			var from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-			var from_ts_year = from_ts.getFullYear();
+			const from_ts = new Date(ts * 1000);
+
+			const from_ts_hour = from_ts.getHours();
+
+			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
+
+			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
+
+			const from_ts_year = from_ts.getFullYear();
+
 			if (isNaN(from_ts.getDate())) {
 				return 'not yet'
 			}
 			else {
-				var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-				var month = months[from_ts.getMonth()];
-				var date = from_ts.getDate();
+				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+				const month = months[from_ts.getMonth()];
+
+				const date = from_ts.getDate();
+
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
@@ -337,19 +354,18 @@ export default {
 			}
 		},
 		is_empty: function (list_of_elements) {
-			if (list_of_elements == null || list_of_elements == undefined || list_of_elements == "null") {
-				return false
+			if (list_of_elements === null || list_of_elements === undefined || list_of_elements === "null") {
+				return false;
 			}
 			if (list_of_elements.length != 0) {
-				return true
+				return true;
 			}
 			else {
-				return false
+				return false;
 			}
 		},
 		create_datatable: function () {
 			if (this.dt_initialized) {
-				return
 			}
 			else {
 				$('#cummulativeStats').DataTable({
