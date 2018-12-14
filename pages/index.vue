@@ -31,7 +31,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="job in last_jobs">
+						<tr v-for="job in last_jobs" :key="job.id">
 							<td
 								align="center"
 							>
@@ -83,7 +83,7 @@ export default {
 
 				const resp_data = response[0].data.jobs;
 
-				resp_data.forEach(function(item){
+				resp_data.forEach(function(item) {
 					jobs.push(item);
 				});
 			});
@@ -91,19 +91,19 @@ export default {
 	mounted() {
 	},
 	methods: {
-		more_tests: function (from_) {
+		more_tests: function(from_) {
 			this.$api.get('/lastjobs/' + from_)
 				.then(response => {
 					const jobs = this.last_jobs;
 
 					const resp_data = response[0].data.jobs;
 
-					resp_data.forEach(function(item){
+					resp_data.forEach(function(item) {
 						jobs.push(item);
 					});
 				});
 		},
-		ts_to_date: function (ts) {
+		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
 
 			const today = new Date();
@@ -141,8 +141,8 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		is_in_progress: function (status) {
-			if (status != 'finished') {
+		is_in_progress: function(status) {
+			if (status !== 'finished') {
 				return false;
 			}
 			else {

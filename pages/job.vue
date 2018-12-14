@@ -31,8 +31,9 @@
 							</tr>
 							<tr>
 								<td align="center">Status</td>
-								<td align="center"
-									v-bind:class="{ active: is_in_progress(job.status), warning: !is_in_progress(job.status)}">
+								<td
+									align="center"
+									:class="{ active: is_in_progress(job.status), warning: !is_in_progress(job.status)}">
 									{{ job.status }}
 								</td>
 							</tr>
@@ -60,183 +61,66 @@
 							<div class="col-md-6 col-sm-12">
 								<!-- rps -->
 								<iframe
-										:src="job.graphs.rps"
-										width="100%"
-										height="100%"
-										marginheight="0"
-										align="top"
-										scrolling="No"
-										frameborder="0"
-										style="overflow: hidden;">
+									:src="job.graphs.rps"
+									width="100%"
+									height="100%"
+									marginheight="0"
+									align="top"
+									scrolling="No"
+									frameborder="0"
+									style="overflow: hidden;"
+								>
 								</iframe>
 								<!-- quantiles -->
 								<iframe
-										:src="job.graphs.netcodes"
-										width="100%" height="100%" marginheight="0" align="top" scrolling="No" frameborder="0"
-										style="overflow: hidden;">
+									:src="job.graphs.netcodes"
+									width="100%"
+									height="100%"
+									marginheight="0"
+									align="top"
+									scrolling="No"
+									frameborder="0"
+									style="overflow: hidden;"
+								>
 								</iframe>
 							</div>
 							<div class="col-md-6 col-sm-12">
 								<!-- net codes -->
 								<iframe
-										:src="job.graphs.quantiles"
-										width="100%" height="100%" marginheight="0" align="top" scrolling="No" frameborder="0"
-										style="overflow: hidden;">
+									:src="job.graphs.quantiles"
+									width="100%"
+									height="100%"
+									marginheight="0"
+									align="top"
+									scrolling="No"
+									frameborder="0"
+									style="overflow: hidden;"
+								>
 								</iframe>
 								<!-- tank threads -->
 								<iframe
-										:src="job.graphs.threads"
-										width="100%" height="100%" marginheight="0" align="top" scrolling="No" frameborder="0"
-										style="overflow: hidden;">
+									:src="job.graphs.threads"
+									width="100%"
+									height="100%"
+									marginheight="0"
+									align="top"
+									scrolling="No"
+									frameborder="0"
+									style="overflow: hidden;"
+								>
 								</iframe>
 							</div>
 						</div>
 					</div>
 				</div>
-
-				<!-- summary stats
-				<div class="col-md-12">
-					<h3 align="center">Summary stats</h3>
-					<div class="container-fluid">
-						<table id="StatsOverall" class="hover table table-bordered">
-							<thead>
-							<tr>
-								<th class="dt-head-right">label</th>
-								<th class="dt-head-right">ok</th>
-								<th class="dt-head-right">errors</th>
-								<th class="dt-head-right">avg, ms</th>
-								<th class="dt-head-right">q50, ms</th>
-								<th class="dt-head-right">q75, ms</th>
-								<th class="dt-head-right">q90, ms</th>
-								<th class="dt-head-right">q95, ms</th>
-								<th class="dt-head-right">q98, ms</th>
-								<th class="dt-head-right">q99, ms</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr>
-								<td class="col-md-3 dt-body-right">OVERALL</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.okCount }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.errCount }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.avg }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.q50 }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.q75 }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.q90 }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.q95 }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.q98 }}</td>
-								<td class="col-md-1 dt-body-right">{{ overall_aggregates.q99 }}</td>
-							</tr>
-							</tbody>
-							<tfoot>
-							</tfoot>
-						</table>
-					</div>
-					<div class="container-fluid">
-						<table id="cummulativeStats" class="hover table table-bordered">
-							<thead>
-							<tr>
-								<th class="dt-head-right">label</th>
-								<th class="dt-head-right">ok</th>
-								<th class="dt-head-right">errors</th>
-								<th class="dt-head-right">avg, ms</th>
-								<th class="dt-head-right">q50, ms</th>
-								<th class="dt-head-right">q75, ms</th>
-								<th class="dt-head-right">q90, ms</th>
-								<th class="dt-head-right">q95, ms</th>
-								<th class="dt-head-right">q98, ms</th>
-								<th class="dt-head-right">q99, ms</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr v-for="agg in aggregates">
-								<td class="col-md-3 dt-body-right">{{ agg.label }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.okCount }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.errCount }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.avg }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.q50 }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.q75 }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.q90 }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.q95 }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.q98 }}</td>
-								<td class="col-md-1 dt-body-right">{{ agg.q99 }}</td>
-							</tr>
-							</tbody>
-							<tfoot>
-							</tfoot>
-						</table>
-					</div>
-				</div>
-				-->
-				<!-- k8s pods
-
-				<div>
-					<h3 align="center">k8s pods</h3>
-					<div class="container-fluid">
-						<div class="row">
-							<div class="col-md-6 col-sm-12" v-for="pod in job.pods_data">
-								<button class="btn btn-outline-dark btn-sm podsBtns"  data-toggle="collapse"
-									v-bind:data-target='"#"+pod.name+"_graphs_collapse"' >
-									{{ pod.name }}
-								</button>
-
-								<div v-bind:id='pod.name+"_graphs_collapse"' class="collapse out">
-									<br>
-									<h6>{{ pod_name }}</h6>
-									<br>
-									<div class="container-fluid">
-										<div class="row">
-											<div>
-
-												<img
-														:src="pod.graphs.cpu"
-														width="100%" height="50%" marginheight="0" align="top" scrolling="No" frameborder="0"
-														style="overflow: hidden;">
-												</img>
-
-												<img
-														:src="pod.graphs.mem"
-														width="100%" height="50%" marginheight="0" align="top" scrolling="No" frameborder="0"
-														style="overflow: hidden;">
-												</img>
-
-												<img
-														:src="pod.graphs.net"
-														width="100%" height="50%" marginheight="0" align="top" scrolling="No" frameborder="0"
-														style="overflow: hidden;">
-												</img>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				-->
-				<!-- test config
-				<div>
-					<h3 align="center">Test config</h3>
-					<pre>
-						<code id="code" class="properties">{{ job.config }}</code>
-					</pre>
-				</div>
-
-				<!-- k8s info
-				<div>
-					<h3 align="center">k8s configs</h3>
-					<pre>
-						<code id="code" class="properties">{{ job.environmentDetails }}</code>
-					</pre>
-				</div>-->
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import Vue from 'vue'
-import Vuetify from 'vuetify'
+import Vue from 'vue';
+import Vuetify from 'vuetify';
 
 Vue.use(Vuetify);
 
@@ -245,7 +129,7 @@ export default {
 	data() {
 		return {
 			test_id: null,
-            job: {
+			job: {
 				graphs: {
 					rps: null,
 					netcodes: null,
@@ -253,10 +137,9 @@ export default {
 					threads: null,
 				},
 			},
-            overall_aggregates: {},
-            aggregates: [],
-            pods_data: {},
-            dt_initialized: false,
+			overall_aggregates: {},
+			aggregates: [],
+			pods_data: {},
 		};
 	},
 	head: {
@@ -303,25 +186,20 @@ export default {
 			.then(json => {
 				json.aggregates.forEach(
 					agg => {
-						if (agg.label == '__OVERALL__') {
-							this.overall_aggregates = agg
+						if (agg.label === '__OVERALL__') {
+							this.overall_aggregates = agg;
 						}
 						else {
-							this.aggregates.push(agg)
+							this.aggregates.push(agg);
 						}
 					}
-				)
+				);
 			});
 	},
 	mounted() {
 	},
 	methods: {
-		highlight: function (e) {
-			$('pre code').each(function(i, block) {
-				hljs.highlightBlock(block);
-			});
-		},
-		ts_to_date: function (ts) {
+		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
 
 			const from_ts_hour = from_ts.getHours();
@@ -333,7 +211,7 @@ export default {
 			const from_ts_year = from_ts.getFullYear();
 
 			if (isNaN(from_ts.getDate())) {
-				return 'not yet'
+				return 'not yet';
 			}
 			else {
 				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -345,38 +223,25 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		is_in_progress: function (status) {
-			if (status != 'finished') {
-				return false
-			}
-			else {
-				return true
-			}
-		},
-		is_empty: function (list_of_elements) {
-			if (list_of_elements === null || list_of_elements === undefined || list_of_elements === "null") {
+		is_in_progress: function(status) {
+			if (status !== 'finished') {
 				return false;
 			}
-			if (list_of_elements.length != 0) {
+			else {
+				return true;
+			}
+		},
+		is_empty: function(list_of_elements) {
+			if (list_of_elements === null || list_of_elements === undefined || list_of_elements === 'null') {
+				return false;
+			}
+			if (list_of_elements.length !== 0) {
 				return true;
 			}
 			else {
 				return false;
 			}
 		},
-		create_datatable: function () {
-			if (this.dt_initialized) {
-			}
-			else {
-				$('#cummulativeStats').DataTable({
-					"paging": false,
-					"info": false,
-					"autoWidth": true,
-					"searching": false,
-				});
-				this.dt_initialized = true;
-			}
-		}
 	},
 };
 </script>
