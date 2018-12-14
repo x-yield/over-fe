@@ -1,0 +1,37 @@
+replicaCount: 1
+
+image:
+  pullPolicy: Always
+
+service:
+  ports:
+  - name: http
+    port: 3020
+
+# service description data
+o3:
+  metadata:
+    # service description  (en)
+    description: overload frontend app
+    # severity level
+    severityLevel: LOW
+    # business owner name (en)
+    businessOwnerName: na
+    # business owner email
+    businessOwnerEmail: na
+    # technical owner name (en)
+    technicalOwnerName: na
+    # technical owner email
+    technicalOwnerEmail: na
+    # project slack chanel name
+    slackChan: na
+    # monitoring dashboard url (e.g. grafana)
+    monitoringDashboardUrl: na
+    # opsGenie url
+    opsGenieUrl: na
+    # project confluence url
+    confluenceUrl: na
+    # jira board url
+    jiraBoardUrl: na
+
+

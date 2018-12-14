@@ -1,0 +1,4 @@
+deploy:
+  env:
+  - name: CONFIG_PATH
+    value: config.staging.json
