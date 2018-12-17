@@ -172,7 +172,7 @@ export default {
 							this.job.pods_data[pod].graphs.cpu = `http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B${env}%5D%20K8S%20Prometheus&var-Pod=${pod}&from=${this.job.testStart*1000}&to=
 								${this.job.testStop*1000}&var-phase=Failed&var-container=${container}&theme=light&panelId=17`;
 							this.job.pods_data[pod].graphs.net = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B'
-								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=32';
+								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart+'&to='+this.job.testStop+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=32';
 							this.job.pods_data[pod].graphs.mem = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B'
 								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=25';
 						}

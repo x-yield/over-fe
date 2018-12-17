@@ -3,7 +3,7 @@ include: 'https://gitlab.ozon.ru/pub/ci/raw/0.0.3/.common.gitlab-ci.yml'
 
 variables:
   # свой namespace, по умолчанию берется $CI_PROJECT_NAMESPACE
-  K8S_NAMESPACE: infra
+  K8S_NAMESPACE: $CI_PROJECT_NAMESPACE
   # если не указать будет использоваться $CI_PROJECT_PATH_SLUG (формат group-subgroup-project, например cas-roles)
   SERVICE_NAME: overload-fe
   # Проект в JIRA в котором будут заводится релизы
