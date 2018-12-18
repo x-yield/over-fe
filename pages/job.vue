@@ -201,12 +201,12 @@ export default {
 					this.job.finishedTime = 'now';
 				}
 				else {
-					this.job.finishedTrime = this.job.testStop*1000;
+					this.job.finishedTime = this.job.testStop*1000;
 				}
-				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from='+this.job.testStart*1000+'&to='+this.job.finishedTrime+'&var-test_id='+this.job.id;
-				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from='+this.job.testStart*1000+'&to='+this.job.finishedTrime+'&var-test_id='+this.job.id;
-				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from='+this.job.testStart*1000+'&to='+this.job.finishedTrime+'&var-test_id='+this.job.id;
-				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from='+this.job.testStart*1000+'&to='+this.job.finishedTrime+'&var-test_id='+this.job.id;
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
 				this.job.pods_data = JSON.parse(JSON.parse(this.job.environmentDetails));
 				if (this.job.pods_data) {
 					Object.keys(this.job.pods_data).forEach(
