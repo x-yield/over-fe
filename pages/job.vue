@@ -56,61 +56,107 @@
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">graphs</h3>
-					<div class="container-fluid">
-						<div class="row">
-							<div class="col-md-6 col-sm-12">
-								<!-- rps -->
-								<iframe
-									:src="job.graphs.rps"
-									width="100%"
-									height="100%"
-									marginheight="0"
-									align="top"
-									scrolling="No"
-									frameborder="0"
-									style="overflow: hidden;"
-								>
-								</iframe>
-								<!-- quantiles -->
-								<iframe
-									:src="job.graphs.netcodes"
-									width="100%"
-									height="100%"
-									marginheight="0"
-									align="top"
-									scrolling="No"
-									frameborder="0"
-									style="overflow: hidden;"
-								>
-								</iframe>
-							</div>
-							<div class="col-md-6 col-sm-12">
-								<!-- net codes -->
-								<iframe
-									:src="job.graphs.quantiles"
-									width="100%"
-									height="100%"
-									marginheight="0"
-									align="top"
-									scrolling="No"
-									frameborder="0"
-									style="overflow: hidden;"
-								>
-								</iframe>
-								<!-- tank threads -->
-								<iframe
-									:src="job.graphs.threads"
-									width="100%"
-									height="100%"
-									marginheight="0"
-									align="top"
-									scrolling="No"
-									frameborder="0"
-									style="overflow: hidden;"
-								>
-								</iframe>
-							</div>
+					<div class="row justify-content-between" style="height:300px;">
+						<div class="col-md-6 col-sm-12">
+							<!-- rps -->
+							<iframe
+								:src="job.graphs.rps"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							>
+							</iframe>
 						</div>
+						<div class="col-md-6 col-sm-12">
+							<!-- quantiles -->
+							<iframe
+								:src="job.graphs.netcodes"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							>
+							</iframe>
+						</div>
+					</div>
+					<div class="row justify-content-between" style="height:300px;">
+						<div class="col-md-6 col-sm-12">
+							<!-- net codes -->
+							<iframe
+								:src="job.graphs.quantiles"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							>
+							</iframe>
+						</div>
+						<div class="col-md-6 col-sm-12">
+							<!-- tank threads -->
+							<iframe
+								:src="job.graphs.threads"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							>
+							</iframe>
+						</div>
+					</div>
+				</div>
+
+				<!-- summary stats -->
+				<h3
+					align="center"
+					@click="toggleVisibility"
+				>
+					Summary stats
+				</h3>
+				<div v-show="isSummaryVisible" class="col-md-12">
+					<div class="row justify-content-between">
+						<table id="StatsOverall" class="hover table table-bordered">
+							<thead>
+								<tr>
+									<th>label</th>
+									<th>ok</th>
+									<th>errors</th>
+									<th>q50, ms</th>
+									<th>q75, ms</th>
+									<th>q90, ms</th>
+									<th>q95, ms</th>
+									<th>q98, ms</th>
+									<th>q99, ms</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Overall</td>
+									<td>{{ overall_aggregates.okCount }}</td>
+									<td>{{ overall_aggregates.errCount }}</td>
+									<td>{{ overall_aggregates.q50 }}</td>
+									<td>{{ overall_aggregates.q75 }}</td>
+									<td>{{ overall_aggregates.q90 }}</td>
+									<td>{{ overall_aggregates.q95 }}</td>
+									<td>{{ overall_aggregates.q98 }}</td>
+									<td>{{ overall_aggregates.q99 }}</td>
+								</tr>
+							</tbody>
+							<tfoot>
+							</tfoot>
+						</table>
 					</div>
 				</div>
 			</div>
@@ -119,12 +165,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import Vuetify from 'vuetify';
-
-Vue.use(Vuetify);
-
-
 export default {
 	data() {
 		return {
@@ -138,6 +178,7 @@ export default {
 				},
 			},
 			overall_aggregates: {},
+			isSummaryVisible: true,
 			aggregates: [],
 			pods_data: {},
 		};
@@ -157,15 +198,12 @@ export default {
 				this.job = job_json;
 				this.job.graphs = {};
 				if (isNaN(this.job.testStop)) {
-					this.job.testStop = 'now';
+					this.job.finishedTime = 'now';
 				}
-				else {
-					this.job.testStop = this.job.testStop*1000;
-				}
-				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from='+this.job.testStart*1000+'&to='+this.job.testStop+'&var-test_id='+this.job.id;
-				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from='+this.job.testStart*1000+'&to='+this.job.testStop+'&var-test_id='+this.job.id;
-				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from='+this.job.testStart*1000+'&to='+this.job.testStop+'&var-test_id='+this.job.id;
-				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from='+this.job.testStart*1000+'&to='+this.job.testStop+'&var-test_id='+this.job.id;
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-test_id='+this.job.id;
 				this.job.pods_data = JSON.parse(JSON.parse(this.job.environmentDetails));
 				if (this.job.pods_data) {
 					Object.keys(this.job.pods_data).forEach(
@@ -205,6 +243,9 @@ export default {
 	mounted() {
 	},
 	methods: {
+		toggleVisibility: function() {
+			this.isSummaryVisible = !this.isSummaryVisible;
+		},
 		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
 

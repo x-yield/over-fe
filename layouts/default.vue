@@ -3,9 +3,6 @@
 		<div class="staff-app">
 			<nuxt/>
 		</div>
-		<div class="build-info">
-			{{ $buildInfo.text }}
-		</div>
 	</div>
 </template>
 
