@@ -19,45 +19,50 @@
 			</nav>
 
 			<div class="table">
-				<table class="table table-sm table-bordered">
-					<caption>Last tests</caption>
-					<thead>
-						<tr>
-							<th scope="col" class="text-center">Test id</th>
-							<th scope="col" class="text-center">Author</th>
-							<th scope="col" class="text-center">Status</th>
-							<th scope="col" class="text-center">Start → Stop</th>
-							<th scope="col" class="text-center">Target</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="job in last_jobs" :key="job.id">
-							<td
-								align="center"
-							>
-								<a :href='"/job?id="+job.id'>{{ job.id }}</a>
-							</td>
-							<td
-								align="center"
-							>
-								{{ job.author }}
-							</td>
-							<td
-								align="center"
-								:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
-							>
-								{{ job.status }}
-							</td>
-							<td align="center">
-								{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}
-							</td>
-							<td align="center">
-								{{ job.target }}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<button class="btn-lg" @click="more_tests(last_jobs.length)">I need more tests</button>
+				<div v-if="loading">
+					<h3 align="center">Loading...</h3>
+				</div>
+				<div v-else>
+					<table class="table table-sm table-bordered" >
+						<caption>Last tests</caption>
+						<thead>
+							<tr>
+								<th scope="col" class="text-center">Test id</th>
+								<th scope="col" class="text-center">Author</th>
+								<th scope="col" class="text-center">Status</th>
+								<th scope="col" class="text-center">Start → Stop</th>
+								<th scope="col" class="text-center">Target</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="job in last_jobs" :key="job.id">
+								<td
+									align="center"
+								>
+									<a :href='"/job?id="+job.id'>{{ job.id }}</a>
+								</td>
+								<td
+									align="center"
+								>
+									{{ job.author }}
+								</td>
+								<td
+									align="center"
+									:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
+								>
+									{{ job.status }}
+								</td>
+								<td align="center">
+									{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}
+								</td>
+								<td align="center">
+									{{ job.target }}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<button class="btn-lg" @click="more_tests(last_jobs.length)">I need more tests</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -69,6 +74,7 @@ export default {
 	data() {
 		return {
 			last_jobs: [],
+			loading: true,
 		};
 	},
 	head: {
@@ -86,6 +92,7 @@ export default {
 				resp_data.forEach(function(item) {
 					jobs.push(item);
 				});
+				this.loading = false;
 			});
 	},
 	mounted() {

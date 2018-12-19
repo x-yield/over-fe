@@ -194,11 +194,18 @@ export default {
 	},
 	created() {
 		this.test_id = this.$route.query.id;
-		this.get_test_info(this.test_id);
-		this.get_test_aggregates(this.test_id);
 	},
 	mounted() {
-		this.update();
+		this.get_test_info(this.test_id);
+		this.get_test_aggregates(this.test_id);
+
+		if (this.job.status === 'finished') {
+			// test finished, we dont need to update the page anymore
+		} else {
+			setInterval(function() {
+				this.get_test_info(this.test_id);
+			}.bind(this), 5000);
+		}
 	},
 	methods: {
 		toggleVisibility: function() {
@@ -226,17 +233,6 @@ export default {
 				const date = from_ts.getDate();
 
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-		},
-		update: function() {
-			if (this.job.status === 'finished') {
-				// test finished, we dont need to update the page anymore
-			} else {
-				let obj = this;
-
-				setInterval(function() {
-					obj.get_test_info(obj.test_id);
-				}, 5000);
 			}
 		},
 		get_test_info: function(id) {
