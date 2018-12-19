@@ -19,7 +19,10 @@
 			</nav>
 
 
-			<div>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
+			</div>
+			<div v-else>
 				<!-- test id table -->
 				<h3 align="center">Test #{{ job.id }}</h3>
 				<div class="col-md-12">
@@ -33,7 +36,7 @@
 								<td align="center">Status</td>
 								<td
 									align="center"
-									:class="{ active: is_in_progress(job.status), warning: !is_in_progress(job.status)}">
+								>
 									{{ job.status }}
 								</td>
 							</tr>
@@ -72,9 +75,9 @@
 							</iframe>
 						</div>
 						<div class="col-md-6 col-sm-12">
-							<!-- quantiles -->
+							<!-- net codes -->
 							<iframe
-								:src="job.graphs.netcodes"
+								:src="job.graphs.quantiles"
 								width="100%"
 								height="100%"
 								marginheight="0"
@@ -88,9 +91,9 @@
 					</div>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
-							<!-- net codes -->
+							<!-- quantiles -->
 							<iframe
-								:src="job.graphs.quantiles"
+								:src="job.graphs.netcodes"
 								width="100%"
 								height="100%"
 								marginheight="0"
@@ -181,6 +184,7 @@ export default {
 			isSummaryVisible: true,
 			aggregates: [],
 			pods_data: {},
+			loading: true,
 		};
 	},
 	head: {
@@ -190,60 +194,11 @@ export default {
 	},
 	created() {
 		this.test_id = this.$route.query.id;
-		this.$api.get('/job/' + this.test_id)
-			.then(response => {
-				return response[0].data;
-			})
-			.then(job_json => {
-				this.job = job_json;
-				this.job.graphs = {};
-				if (isNaN(this.job.testStop)) {
-					this.job.finishedTime = 'now';
-				}
-				else {
-					this.job.finishedTime = this.job.testStop*1000;
-				}
-				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
-				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
-				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
-				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from='+this.job.testStart*1000+'&to='+this.job.finishedTime+'&var-test_id='+this.job.id;
-				this.job.pods_data = JSON.parse(JSON.parse(this.job.environmentDetails));
-				if (this.job.pods_data) {
-					Object.keys(this.job.pods_data).forEach(
-						pod => {
-							this.job.pods_data[pod].graphs = {};
-							const env = this.job.pods_data[pod].labels.env.toUpperCase();
-
-							const container = this.job.pods_data[pod].labels.release;
-
-							this.job.pods_data[pod].graphs.cpu = `http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B${env}%5D%20K8S%20Prometheus&var-Pod=${pod}&from=${this.job.testStart*1000}&to=
-								${this.job.testStop*1000}&var-phase=Failed&var-container=${container}&theme=light&panelId=17`;
-							this.job.pods_data[pod].graphs.net = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B'
-								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart+'&to='+this.job.testStop+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=32';
-							this.job.pods_data[pod].graphs.mem = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B'
-								+env+'%5D%20K8S%20Prometheus&var-Pod='+pod+'&from='+this.job.testStart*1000+'&to='+this.job.testStop*1000+'&var-phase=Failed&var-container='+container+'&theme=light&panelId=25';
-						}
-					);
-				}
-			});
-		this.$api.get('/aggregates/' + this.test_id)
-			.then(response => {
-				return response[0].data;
-			})
-			.then(json => {
-				json.aggregates.forEach(
-					agg => {
-						if (agg.label === '__OVERALL__') {
-							this.overall_aggregates = agg;
-						}
-						else {
-							this.aggregates.push(agg);
-						}
-					}
-				);
-			});
+		this.get_test_info(this.test_id);
+		this.get_test_aggregates(this.test_id);
 	},
 	mounted() {
+		this.update();
 	},
 	methods: {
 		toggleVisibility: function() {
@@ -261,7 +216,7 @@ export default {
 			const from_ts_year = from_ts.getFullYear();
 
 			if (isNaN(from_ts.getDate())) {
-				return 'not yet';
+				return 'not yet received';
 			}
 			else {
 				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -273,25 +228,58 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		is_in_progress: function(status) {
-			if (status !== 'finished') {
-				return false;
-			}
-			else {
-				return true;
-			}
-		},
-		is_empty: function(list_of_elements) {
-			if (list_of_elements === null || list_of_elements === undefined || list_of_elements === 'null') {
-				return false;
-			}
-			if (list_of_elements.length !== 0) {
-				return true;
-			}
-			else {
-				return false;
+		update: function() {
+			if (this.job.status === 'finished') {
+				// test finished, we dont need to update the page anymore
+			} else {
+				let obj = this;
+
+				setInterval(function() {
+					obj.get_test_info(obj.test_id);
+				}, 5000);
 			}
 		},
+		get_test_info: function(id) {
+			this.$api.get('/job/' + id)
+				.then(response => {
+					return response[0].data;
+				})
+				.then(job_json => {
+					if (!job_json) { return; }
+					this.job = job_json;
+					this.job.graphs = {};
+					if (isNaN(this.job.testStop)) {
+						this.job.finishedTime = 'now';
+					}
+					else {
+						this.job.finishedTime = this.job.testStop * 1000;
+					}
+					this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					this.loading = false;
+				});
+		},
+		get_test_aggregates: function(id) {
+			this.$api.get('/aggregates/' + id)
+				.then(response => {
+					return response[0].data;
+				})
+				.then(json => {
+					if (!json.aggregates) { return; }
+					json.aggregates.forEach(
+						agg => {
+							if (agg.label === '__OVERALL__') {
+								this.overall_aggregates = agg;
+							}
+							else {
+								this.aggregates.push(agg);
+							}
+						}
+					);
+				});
+		}
 	},
 };
 </script>
