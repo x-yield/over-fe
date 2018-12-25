@@ -164,8 +164,9 @@ export default {
 <style scoped>
 	.overload-fe {
 		padding-top: 20px;
+		width: 90%;
 		margin: auto;
-		padding-left: 20px;
+		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
 	}

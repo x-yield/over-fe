@@ -18,13 +18,100 @@
 				</div>
 			</nav>
 
+			<modal v-show="editorVisibility" @close="toggleEditor">
+				<h3 slot="header">Редактирование теста {{ job.id }}</h3>
+				<h3 slot="body">
+					<div class="overload-fe-container job-editor">
+						<Container fluid>
+							<Row>
+								<Column>
+									<Input
+										label="Author"
+										:value="job.author"
+										v-model="job.author"
+									/>
+								</Column>
+							</Row>
+							<Row>
+								<Column>
+									<Input
+										label="Description"
+										:value="job.desc"
+										v-model="job.desc"
+									/>
+								</Column>
+							</Row>
+							<Row>
+								<Column>
+									<Input
+										label="Status"
+										v-model="job.status"
+										:value="job.status"
+									/>
+								</Column>
+							</Row>
+							<Row>
+								<Column>
+									<Input
+										label="Tank"
+										v-model="job.tank"
+										:value="job.tank"
+									/>
+								</Column>
+							</Row>
+							<Row>
+								<Column>
+									<Input
+										label="Target"
+										v-model="job.target"
+										:value="job.target"
+									/>
+								</Column>
+							</Row>
+						</Container>
+					</div>
+				</h3>
+				<h3 slot="footer">
+					<div class="overload-fe-container buttons">
+						<Row>
+							<Column>
+								<Button
+									theme="primary"
+									@click="save"
+									:icon="loading ? 'actions-spinner' : ''"
+								>
+									Сохранить
+								</Button>
+							</Column>
+							<Column>
+								<Button
+									theme="secondary"
+									@click="toggleEditor"
+								>
+									Отмена
+								</Button>
+							</Column>
+						</Row>
+					</div>
+
+				</h3>
+			</modal>
+
 
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
 				<!-- test id table -->
-				<h3 align="center">Test #{{ job.id }}</h3>
+				<h3 align="center">Test #{{ job.id }}
+					<img
+						alt="edit"
+						width=30px
+						height=30px
+						:src="'/icons/edit.png'"
+						@click="toggleEditor"
+					/>
+				</h3>
 				<div class="col-md-12">
 					<table class="table table-sm table-hover">
 						<tbody>
@@ -51,6 +138,10 @@
 							<tr>
 								<td align="center">Target</td>
 								<td align="center">{{ job.target }}</td>
+							</tr>
+							<tr>
+								<td align="center">Description</td>
+								<td align="center">{{ job.desc }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -168,6 +259,22 @@
 </template>
 
 <script>
+import Modal from '../components/Modal';
+import Layout from '@ozonui/layout';
+import '@ozonui/layout/src/grid.css';
+import Input from '@ozonui/form-input';
+import FormSelect from '@ozonui/form-select';
+import Button from '@ozonui/custom-button';
+
+const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
+
+const {
+	container,
+	row,
+	column,
+} = Layout;
+
+
 export default {
 	data() {
 		return {
@@ -179,18 +286,30 @@ export default {
 					quantiles: null,
 					threads: null,
 				},
+				status: null,
 			},
 			overall_aggregates: {},
 			isSummaryVisible: true,
 			aggregates: [],
 			pods_data: {},
 			loading: true,
+			error: null,
+			success: null,
+			editorVisibility: false,
 		};
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
+		Modal,
+		Button,
+		Input,
+		Select,
+		Option,
+		Row: row,
+		Column: column,
+		Container: container
 	},
 	created() {
 		this.test_id = this.$route.query.id;
@@ -202,12 +321,23 @@ export default {
 		if (this.job.status === 'finished') {
 			// test finished, we dont need to update the page anymore
 		} else {
-			setInterval(function() {
+			this.watcher = setInterval(function() {
 				this.get_test_info(this.test_id);
+				if (this.job.status === 'finished') {
+					clearInterval(this.watcher);
+				}
 			}.bind(this), 5000);
 		}
 	},
 	methods: {
+		save() {
+			this.$store.dispatch('job/updateJob', this.job);
+			this.toggleEditor();
+		},
+		toggleEditor: function() {
+			clearInterval(this.watcher);
+			this.editorVisibility = !this.editorVisibility;
+		},
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
 		},
@@ -238,10 +368,9 @@ export default {
 		get_test_info: function(id) {
 			this.$api.get('/job/' + id)
 				.then(response => {
-					return response[0].data;
+					return response[0].data.job;
 				})
 				.then(job_json => {
-					if (!job_json) { return; }
 					this.job = job_json;
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
@@ -284,8 +413,9 @@ export default {
 <style scoped>
 	.overload-fe {
 		padding-top: 20px;
+		width: 90%;
 		margin: auto;
-		padding-left: 20px;
+		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
 	}
@@ -293,11 +423,16 @@ export default {
 	.overload-fe-container {
 		flex: 1;
 	}
+
 	td > * {
 		vertical-align : middle;
 	}
-    .podsBtns {
-        font-size: 9pt;
-        background-color: #94e88a;
-    }
+
+	.buttons {
+		padding-top: 10px;
+	}
+
+	.job-editor * {
+		padding-top: 10px;
+	}
 </style>
