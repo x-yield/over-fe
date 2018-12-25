@@ -162,26 +162,26 @@
 					align="center"
 					@click="toggleVisibility"
 				>
-					Summary Details
+					Detailed stats
 				</h4>
 				<div v-show="isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th>label</th>
-									<th>ok</th>
-									<th>errors</th>
-									<th>q50, ms</th>
-									<th>q75, ms</th>
-									<th>q90, ms</th>
-									<th>q95, ms</th>
-									<th>q98, ms</th>
-									<th>q99, ms</th>
+									<th @click="sort_aggregates('label')">label</th>
+									<th @click="sort_aggregates('ok')">ok</th>
+									<th @click="sort_aggregates('errors')">errors</th>
+									<th @click="sort_aggregates('q50, ms')">q50, ms</th>
+									<th @click="sort_aggregates('q75, ms')">q75, ms</th>
+									<th @click="sort_aggregates('q90, ms')">q90, ms</th>
+									<th @click="sort_aggregates('q95, ms')">q95, ms</th>
+									<th @click="sort_aggregates('q98, ms')">q98, ms</th>
+									<th @click="sort_aggregates('q99, ms')">q99, ms</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr v-for="aggregate in aggregates">
+								<tr v-for="aggregate in sortedAggregates" :key="aggregate.label">
 									<td>{{ aggregate.label }}</td>
 									<td>{{ aggregate.okCount }}</td>
 									<td>{{ aggregate.errCount }}</td>
@@ -219,13 +219,14 @@ export default {
 			aggregates: [],
 			pods_data: {},
 			loading: true,
+			currentSort: 'label',
+			currentSortDir: 'asc'
 		};
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
-	components: {
-	},
+	components: {},
 	created() {
 		this.test_id = this.$route.query.id;
 	},
@@ -236,7 +237,7 @@ export default {
 		if (this.job.status === 'finished') {
 			// test finished, we dont need to update the page anymore
 		} else {
-			setInterval(function() {
+			setInterval(function () {
 				this.get_test_info(this.test_id);
 			}.bind(this), 5000);
 		}
@@ -258,8 +259,7 @@ export default {
 
 			if (isNaN(from_ts.getDate())) {
 				return 'not yet received';
-			}
-			else {
+			} else {
 				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 				const month = months[from_ts.getMonth()];
@@ -275,13 +275,14 @@ export default {
 					return response[0].data;
 				})
 				.then(job_json => {
-					if (!job_json) { return; }
+					if (!job_json) {
+						return;
+					}
 					this.job = job_json;
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
 						this.job.finishedTime = 'now';
-					}
-					else {
+					} else {
 						this.job.finishedTime = this.job.testStop * 1000;
 					}
 					this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
@@ -297,23 +298,42 @@ export default {
 					return response[0].data;
 				})
 				.then(json => {
-					if (!json.aggregates) { return; }
+					if (!json.aggregates) {
+						return;
+					}
 					json.aggregates.forEach(
 						agg => {
 							if (agg.label === '__OVERALL__') {
 								this.overall_aggregates = agg;
-							}
-							else {
+							} else {
 								this.aggregates.push(agg);
 							}
 						}
 					);
 				});
+		},
+		sort_aggregates: function(s) {
+			if (s === this.currentSort) {
+				this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+			}
+			this.currentSort = s;
 		}
 	},
+	computed: {
+		sortedAggregates:function() {
+			return this.aggregates.slice().sort((a, b) => {
+				let modifier =1;
+
+				if (this.currentSortDir === 'desc') {modifier = -1;}
+				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
+				return 0;
+			});
+		}
+	}
+
 };
 </script>
-
 
 <style scoped>
 	.overload-fe {
