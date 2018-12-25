@@ -71,8 +71,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- net codes -->
@@ -85,8 +84,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 					</div>
 					<div class="row justify-content-between" style="height:300px;">
@@ -101,8 +99,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- tank threads -->
@@ -115,8 +112,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 					</div>
 				</div>
@@ -157,8 +153,46 @@
 									<td>{{ overall_aggregates.q99 }}</td>
 								</tr>
 							</tbody>
-							<tfoot>
-							</tfoot>
+							<tfoot/>
+							<tfoot/>
+						</table>
+					</div>
+				</div>
+				<h4
+					align="center"
+					@click="toggleVisibility"
+				>
+					Summary Details
+				</h4>
+				<div v-show="isSummaryVisible" class="col-md-12">
+					<div class="row justify-content-between">
+						<table id="StatsDetails" class="hover table table-bordered">
+							<thead>
+								<tr>
+									<th>label</th>
+									<th>ok</th>
+									<th>errors</th>
+									<th>q50, ms</th>
+									<th>q75, ms</th>
+									<th>q90, ms</th>
+									<th>q95, ms</th>
+									<th>q98, ms</th>
+									<th>q99, ms</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="aggregate in aggregates">
+									<td>{{ aggregate.label }}</td>
+									<td>{{ aggregate.okCount }}</td>
+									<td>{{ aggregate.errCount }}</td>
+									<td>{{ aggregate.q50 }}</td>
+									<td>{{ aggregate.q75 }}</td>
+									<td>{{ aggregate.q90 }}</td>
+									<td>{{ aggregate.q95 }}</td>
+									<td>{{ aggregate.q98 }}</td>
+									<td>{{ aggregate.q99 }}</td>
+								</tr>
+							</tbody>
 						</table>
 					</div>
 				</div>
