@@ -73,7 +73,15 @@ export const actions = {
 		} else {
 			commit('reset');
 		}
+	},
+	async deleteJob({commit}, id_) {
+		const [, error] = await this.$api.post('/delete_job', {'id': id_});
 
+		if (error) {
+			// TODO error handling
+		} else {
+			commit('reset');
+		}
 	}
 };
 
