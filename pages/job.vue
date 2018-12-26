@@ -337,7 +337,6 @@ export default {
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
-<<<<<<< pages/job.vue
 	components: {
 		Modal,
 		Button,
@@ -348,9 +347,6 @@ export default {
 		Column: column,
 		Container: container
 	},
-=======
-	components: {},
->>>>>>> pages/job.vue
 	created() {
 		this.test_id = this.$route.query.id;
 	},
@@ -410,12 +406,9 @@ export default {
 					return response[0].data.job;
 				})
 				.then(job_json => {
-<<<<<<< pages/job.vue
-=======
 					if (!job_json) {
 						return;
 					}
->>>>>>> pages/job.vue
 					this.job = job_json;
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
