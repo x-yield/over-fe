@@ -108,7 +108,7 @@
 						alt="edit"
 						width=30px
 						height=30px
-						:src="'/icons/edit.png'"
+						src="~/assets/icons/edit.png"
 						@click="toggleEditor"
 					/>
 				</h3>
