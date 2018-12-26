@@ -172,12 +172,12 @@
 									<th @click="sort_aggregates('label')">label</th>
 									<th @click="sort_aggregates('ok')">ok</th>
 									<th @click="sort_aggregates('errors')">errors</th>
-									<th @click="sort_aggregates('q50, ms')">q50, ms</th>
-									<th @click="sort_aggregates('q75, ms')">q75, ms</th>
-									<th @click="sort_aggregates('q90, ms')">q90, ms</th>
-									<th @click="sort_aggregates('q95, ms')">q95, ms</th>
-									<th @click="sort_aggregates('q98, ms')">q98, ms</th>
-									<th @click="sort_aggregates('q99, ms')">q99, ms</th>
+									<th @click="sort_aggregates('q50')">q50, ms</th>
+									<th @click="sort_aggregates('q75')">q75, ms</th>
+									<th @click="sort_aggregates('q90')">q90, ms</th>
+									<th @click="sort_aggregates('q95')">q95, ms</th>
+									<th @click="sort_aggregates('q98')">q98, ms</th>
+									<th @click="sort_aggregates('q99')">q99, ms</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -237,7 +237,7 @@ export default {
 		if (this.job.status === 'finished') {
 			// test finished, we dont need to update the page anymore
 		} else {
-			setInterval(function () {
+			setInterval(function() {
 				this.get_test_info(this.test_id);
 			}.bind(this), 5000);
 		}
