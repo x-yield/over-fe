@@ -71,8 +71,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- net codes -->
@@ -85,8 +84,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 					</div>
 					<div class="row justify-content-between" style="height:300px;">
@@ -101,8 +99,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- tank threads -->
@@ -115,8 +112,7 @@
 								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
-							>
-							</iframe>
+							/>
 						</div>
 					</div>
 				</div>
@@ -157,8 +153,46 @@
 									<td>{{ overall_aggregates.q99 }}</td>
 								</tr>
 							</tbody>
-							<tfoot>
-							</tfoot>
+							<tfoot/>
+							<tfoot/>
+						</table>
+					</div>
+				</div>
+				<h4
+					align="center"
+					@click="toggleVisibility"
+				>
+					Detailed stats
+				</h4>
+				<div v-show="isSummaryVisible" class="col-md-12">
+					<div class="row justify-content-between">
+						<table id="StatsDetails" class="hover table table-bordered">
+							<thead>
+								<tr>
+									<th @click="sort_aggregates('label')">label</th>
+									<th @click="sort_aggregates('ok')">ok</th>
+									<th @click="sort_aggregates('errors')">errors</th>
+									<th @click="sort_aggregates('q50')">q50, ms</th>
+									<th @click="sort_aggregates('q75')">q75, ms</th>
+									<th @click="sort_aggregates('q90')">q90, ms</th>
+									<th @click="sort_aggregates('q95')">q95, ms</th>
+									<th @click="sort_aggregates('q98')">q98, ms</th>
+									<th @click="sort_aggregates('q99')">q99, ms</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="aggregate in sortedAggregates" :key="aggregate.label">
+									<td>{{ aggregate.label }}</td>
+									<td>{{ aggregate.okCount }}</td>
+									<td>{{ aggregate.errCount }}</td>
+									<td>{{ aggregate.q50 }}</td>
+									<td>{{ aggregate.q75 }}</td>
+									<td>{{ aggregate.q90 }}</td>
+									<td>{{ aggregate.q95 }}</td>
+									<td>{{ aggregate.q98 }}</td>
+									<td>{{ aggregate.q99 }}</td>
+								</tr>
+							</tbody>
 						</table>
 					</div>
 				</div>
@@ -185,13 +219,14 @@ export default {
 			aggregates: [],
 			pods_data: {},
 			loading: true,
+			currentSort: 'label',
+			currentSortDir: 'asc'
 		};
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
-	components: {
-	},
+	components: {},
 	created() {
 		this.test_id = this.$route.query.id;
 	},
@@ -224,8 +259,7 @@ export default {
 
 			if (isNaN(from_ts.getDate())) {
 				return 'not yet received';
-			}
-			else {
+			} else {
 				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 				const month = months[from_ts.getMonth()];
@@ -241,13 +275,14 @@ export default {
 					return response[0].data;
 				})
 				.then(job_json => {
-					if (!job_json) { return; }
+					if (!job_json) {
+						return;
+					}
 					this.job = job_json;
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
 						this.job.finishedTime = 'now';
-					}
-					else {
+					} else {
 						this.job.finishedTime = this.job.testStop * 1000;
 					}
 					this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
@@ -263,23 +298,42 @@ export default {
 					return response[0].data;
 				})
 				.then(json => {
-					if (!json.aggregates) { return; }
+					if (!json.aggregates) {
+						return;
+					}
 					json.aggregates.forEach(
 						agg => {
 							if (agg.label === '__OVERALL__') {
 								this.overall_aggregates = agg;
-							}
-							else {
+							} else {
 								this.aggregates.push(agg);
 							}
 						}
 					);
 				});
+		},
+		sort_aggregates: function(s) {
+			if (s === this.currentSort) {
+				this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+			}
+			this.currentSort = s;
 		}
 	},
+	computed: {
+		sortedAggregates:function() {
+			return this.aggregates.slice().sort((a, b) => {
+				let modifier =1;
+
+				if (this.currentSortDir === 'desc') {modifier = -1;}
+				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
+				return 0;
+			});
+		}
+	}
+
 };
 </script>
-
 
 <style scoped>
 	.overload-fe {
