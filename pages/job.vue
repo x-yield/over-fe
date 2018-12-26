@@ -77,7 +77,7 @@
 							<Column>
 								<Button
 									theme="primary"
-									@click="save"
+									@click="updateJob"
 									:icon="loading ? 'actions-spinner' : ''"
 								>
 									Сохранить
@@ -103,15 +103,25 @@
 			</div>
 			<div v-else>
 				<!-- test id table -->
-				<h3 align="center">Test #{{ job.id }}
-					<img
-						alt="edit"
-						width=30px
-						height=30px
-						src="~/assets/icons/edit.png"
-						@click="toggleEditor"
-					/>
-				</h3>
+				<div>
+					<h4 align="center">Test #{{ job.id }}</h4>
+					<h4 align="right">
+						<img
+							alt="edit"
+							width="30px"
+							height="30px"
+							src="~/assets/icons/edit.png"
+							@click="toggleEditor"
+						/>
+						<img
+							alt="delete"
+							width="30px"
+							height="30px"
+							src="~/assets/icons/delete.png"
+							@click="deleteJob"
+						/>
+					</h4>
+				</div>
 				<div class="col-md-12">
 					<table class="table table-sm table-hover">
 						<tbody>
@@ -366,9 +376,13 @@ export default {
 		}
 	},
 	methods: {
-		save() {
+		updateJob() {
 			this.$store.dispatch('job/updateJob', this.job);
 			this.toggleEditor();
+		},
+		deleteJob() {
+			this.$store.dispatch('job/deleteJob', this.job.id);
+			this.$router.push('/');
 		},
 		toggleEditor: function() {
 			clearInterval(this.watcher);
