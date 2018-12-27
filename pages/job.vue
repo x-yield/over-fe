@@ -233,7 +233,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td>Overall</td>
+									<td @click="toggleResponseCodeVisibility">Overall</td>
 									<td>{{ overall_aggregates.okCount }}</td>
 									<td>{{ overall_aggregates.errCount }}</td>
 									<td>{{ overall_aggregates.q50 }}</td>
@@ -243,9 +243,16 @@
 									<td>{{ overall_aggregates.q98 }}</td>
 									<td>{{ overall_aggregates.q99 }}</td>
 								</tr>
-								<tr v-show="responseVisibility" v-for="responseCode in aggregates.responseCode" v-bind="overall_aggregates.responseCode">
-									<td>{{ responseCode }}</td>
-									<td>{{ responseCode }}</td>
+								<tr v-show="responseVisibility" v-for="aggregate in sorted_by_code" :key="aggregate.responseCode">
+									<td>{{ aggregate.responseCode }}</td>
+									<td>{{ aggregate.okCount }}</td>
+									<td>{{ aggregate.errCount }}</td>
+									<td>{{ aggregate.q50 }}</td>
+									<td>{{ aggregate.q75 }}</td>
+									<td>{{ aggregate.q90 }}</td>
+									<td>{{ aggregate.q95 }}</td>
+									<td>{{ aggregate.q98 }}</td>
+									<td>{{ aggregate.q99 }}</td>
 								</tr>
 							</tbody>
 							<tfoot/>
@@ -289,11 +296,6 @@
 								</tr>
 							</tbody>
 						</table>
-						responses: {{response_codes.keys()}}
-						<br/>
-						aggr: {{aggregates}}
-						<br/>
-						overall: {{overall_aggregates}}
 					</div>
 				</div>
 			</div>
@@ -332,10 +334,8 @@ export default {
 				status: null,
 			},
 			overall_aggregates: {},
-			response_codes: [],
 			isSummaryVisible: true,
 			aggregates: [],
-			count: [],
 			pods_data: {},
 			loading: true,
 			error: null,
@@ -343,7 +343,8 @@ export default {
 			editorVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			responseVisibility: true
+			responseVisibility: false,
+			sorted_by_code: []
 		};
 	},
 	head: {
@@ -450,42 +451,22 @@ export default {
 					json.aggregates.forEach(
 						agg => {
 							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.overall_aggregates = agg;
-								if (agg.errCount == null) {
-									agg.errCount = '0';
-								}
+								this.overall_aggregates = (agg);
 							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
 								this.aggregates.push(agg);
-								if (agg.errCount == null) {
-									agg.errCount = '0';
-								}
-							}
-						}
-					);
-					json.aggregates.forEach(
-						agg => {
-							if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
-								if (agg.errCount == null) {
-									agg.errCount = '0';
-								}
-								if (agg.okCount == null) {
-									agg.okCount = '0';
-								}
-								this.response_codes.push(agg.responseCode, parseInt(agg.errCount) + parseInt(agg.okCount));
+							} if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
+								this.sorted_by_code.push(agg);
 							}
 						}
 					);
 				});
-		},
-		sort_response_codes: function() {
-
 		},
 		sort_aggregates: function(s) {
 			if (s === this.currentSort) {
 				this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
 			}
 			this.currentSort = s;
-		}
+		},
 	},
 	computed: {
 		sortedAggregates:function() {
@@ -496,7 +477,7 @@ export default {
 				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
 				return 0;
 			});
-		}
+		},
 	}
 
 };
