@@ -1,4 +1,4 @@
 {
-  "endpoint": "overload-api.qa.prod.s.o3.ru",
+  "endpoint": "overload-api-load-68.qa.stg.s.o3.ru",
   "CASendpoint": "cas-auth.cas.prod.s.o3.ru"
 }
