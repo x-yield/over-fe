@@ -272,15 +272,15 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th @click="sort_aggregates('label')" class="arrow">label</th>
-									<th @click="sort_aggregates('ok')">ok</th>
-									<th @click="sort_aggregates('errors')">errors</th>
-									<th @click="sort_aggregates('q50')">q50</th>
-									<th @click="sort_aggregates('q75')">q75</th>
-									<th @click="sort_aggregates('q90')">q90</th>
-									<th @click="sort_aggregates('q95')">q95</th>
-									<th @click="sort_aggregates('q98')">q98</th>
-									<th @click="sort_aggregates('q99')">q99</th>
+									<th @click="sort_aggregates('label')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">label</th>
+									<th @click="sort_aggregates('ok')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">ok</th>
+									<th @click="sort_aggregates('errors')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">errors</th>
+									<th @click="sort_aggregates('q50')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q50</th>
+									<th @click="sort_aggregates('q75')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q75</th>
+									<th @click="sort_aggregates('q90')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q90</th>
+									<th @click="sort_aggregates('q95')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q95</th>
+									<th @click="sort_aggregates('q98')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q98</th>
+									<th @click="sort_aggregates('q99')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q99</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -296,8 +296,6 @@
 									<td>{{ aggregate.q99 }}</td>
 								</tr>
 							</tbody>
-							{{ currentSort }}
-							{{ currentSortDir }}
 						</table>
 					</div>
 				</div>
@@ -550,6 +548,7 @@ export default {
 	}
 
 	.arrow.asc:after {
+		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
 		border-right: 7px solid transparent;
@@ -558,6 +557,7 @@ export default {
 	}
 
 	.arrow.dsc:after {
+		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
 		border-right: 7px solid transparent;
