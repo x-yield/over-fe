@@ -272,15 +272,12 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th @click="sort_aggregates('label')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">label</th>
-									<th @click="sort_aggregates('ok')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">ok</th>
-									<th @click="sort_aggregates('errors')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">errors</th>
-									<th @click="sort_aggregates('q50')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q50</th>
-									<th @click="sort_aggregates('q75')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q75</th>
-									<th @click="sort_aggregates('q90')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q90</th>
-									<th @click="sort_aggregates('q95')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q95</th>
-									<th @click="sort_aggregates('q98')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q98</th>
-									<th @click="sort_aggregates('q99')" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'">q99</th>
+									<th
+										v-for="agg_header in agg_headers"
+										@click="sort_aggregates(agg_header)"
+										:key="agg_header">{{ agg_header }}
+										<div class="arrow" v-if="agg_header === currentSort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -345,7 +342,8 @@ export default {
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			responseVisibility: false,
-			sorted_by_code: []
+			sorted_by_code: [],
+			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
 		};
 	},
 	head: {
@@ -464,7 +462,7 @@ export default {
 		},
 		sort_aggregates: function(s) {
 			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
 			}
 			this.currentSort = s;
 		},
@@ -474,7 +472,7 @@ export default {
 			return this.aggregates.slice().sort((a, b) => {
 				let modifier =1;
 
-				if (this.currentSortDir === 'desc') {modifier = -1;}
+				if (this.currentSortDir === 'dsc') {modifier = -1;}
 				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
 				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
 				return 0;
@@ -547,22 +545,20 @@ export default {
 		content: '-';
 	}
 
-	.arrow.asc:after {
+	.arrow.asc{
 		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
 		border-right: 7px solid transparent;
-		border-bottom: 7px solid #31b131;
-		content: '';
+		border-bottom: 8px solid #31b131;
 	}
 
-	.arrow.dsc:after {
+	.arrow.dsc {
 		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
 		border-right: 7px solid transparent;
-		border-top: 7px solid #31b131;
-		content: '';
+		border-top: 8px solid #31b131;
 	}
 	.hidden {
 		background-color: #F0EDED;
