@@ -64,3 +64,4 @@ package-deps.json
 
 #idea
 .idea/**
+.DS_Store
