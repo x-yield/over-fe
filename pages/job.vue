@@ -243,7 +243,8 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td>Overall</td>
+									<td @click="toggleResponseCodeVisibility" class="plus" :class="responseVisibility === true ? 'collapsed' : ''">Overall
+									</td>
 									<td>{{ overall_aggregates.okCount }}</td>
 									<td>{{ overall_aggregates.errCount }}</td>
 									<td>{{ overall_aggregates.q50 }}</td>
@@ -252,6 +253,17 @@
 									<td>{{ overall_aggregates.q95 }}</td>
 									<td>{{ overall_aggregates.q98 }}</td>
 									<td>{{ overall_aggregates.q99 }}</td>
+								</tr>
+								<tr v-show="responseVisibility" v-for="aggregate in sorted_by_code" :key="aggregate.responseCode" class="hidden">
+									<td>{{ aggregate.responseCode }}</td>
+									<td>{{ aggregate.okCount }}</td>
+									<td>{{ aggregate.errCount }}</td>
+									<td>{{ aggregate.q50 }}</td>
+									<td>{{ aggregate.q75 }}</td>
+									<td>{{ aggregate.q90 }}</td>
+									<td>{{ aggregate.q95 }}</td>
+									<td>{{ aggregate.q98 }}</td>
+									<td>{{ aggregate.q99 }}</td>
 								</tr>
 							</tbody>
 							<tfoot/>
@@ -270,15 +282,12 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th @click="sort_aggregates('label')">label</th>
-									<th @click="sort_aggregates('ok')">ok</th>
-									<th @click="sort_aggregates('errors')">errors</th>
-									<th @click="sort_aggregates('q50')">q50, ms</th>
-									<th @click="sort_aggregates('q75')">q75, ms</th>
-									<th @click="sort_aggregates('q90')">q90, ms</th>
-									<th @click="sort_aggregates('q95')">q95, ms</th>
-									<th @click="sort_aggregates('q98')">q98, ms</th>
-									<th @click="sort_aggregates('q99')">q99, ms</th>
+									<th
+										v-for="agg_header in agg_headers"
+										@click="sort_aggregates(agg_header)"
+										:key="agg_header">{{ agg_header }}
+										<div class="arrow" v-if="agg_header === currentSort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -341,7 +350,10 @@ export default {
 			success: null,
 			editorVisibility: false,
 			currentSort: 'label',
-			currentSortDir: 'asc'
+			currentSortDir: 'asc',
+			responseVisibility: false,
+			sorted_by_code: [],
+			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
 		};
 	},
 	head: {
@@ -390,6 +402,9 @@ export default {
 		},
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
+		},
+		toggleResponseCodeVisibility: function() {
+			this.responseVisibility = !this.responseVisibility;
 		},
 		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
@@ -448,10 +463,12 @@ export default {
 					}
 					json.aggregates.forEach(
 						agg => {
-							if (agg.label === '__OVERALL__') {
-								this.overall_aggregates = agg;
-							} else {
+							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
+								this.overall_aggregates = (agg);
+							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
 								this.aggregates.push(agg);
+							} if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
+								this.sorted_by_code.push(agg);
 							}
 						}
 					);
@@ -459,22 +476,22 @@ export default {
 		},
 		sort_aggregates: function(s) {
 			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
 			}
 			this.currentSort = s;
-		}
+		},
 	},
 	computed: {
 		sortedAggregates:function() {
 			return this.aggregates.slice().sort((a, b) => {
 				let modifier =1;
 
-				if (this.currentSortDir === 'desc') {modifier = -1;}
+				if (this.currentSortDir === 'dsc') {modifier = -1;}
 				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
 				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
 				return 0;
 			});
-		}
+		},
 	}
 
 };
@@ -504,5 +521,60 @@ export default {
 
 	.job-editor * {
 		padding-top: 10px;
+	}
+
+	.plus:after {
+		height: 14px;
+		width: 14px;
+		box-sizing: content-box;
+		display: inline-block;
+		vertical-align: middle;
+		color: white;
+		border: 1px solid white;
+		border-radius: 18px;
+		box-shadow: 0 0 3px #444;
+		text-align: center;
+		text-indent: 0 !important;
+		font-family: 'Courier New', Courier, monospace;
+		line-height: 14px;
+		background-color: #31b131;
+		content: '+';
+	}
+
+	.plus.collapsed:after {
+		height: 14px;
+		width: 14px;
+		box-sizing: content-box;
+		display: inline-block;
+		vertical-align: middle;
+		color: white;
+		border: 1px solid white;
+		border-radius: 18px;
+		box-shadow: 0 0 3px #444;
+		text-align: center;
+		text-indent: 0 !important;
+		font-family: 'Courier New', Courier, monospace;
+		line-height: 14px;
+		background-color: #D85B5B;
+		content: '-';
+	}
+
+	.arrow.asc{
+		margin-left: 5px;
+		display: inline-block;
+		border-left: 7px solid transparent;
+		border-right: 7px solid transparent;
+		border-bottom: 8px solid #31b131;
+	}
+
+	.arrow.dsc {
+		margin-left: 5px;
+		display: inline-block;
+		border-left: 7px solid transparent;
+		border-right: 7px solid transparent;
+		border-top: 8px solid #31b131;
+	}
+	.hidden {
+		background-color: #F0EDED;
 	}
 </style>
