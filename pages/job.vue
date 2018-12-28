@@ -233,7 +233,8 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleResponseCodeVisibility">Overall</td>
+									<td @click="toggleResponseCodeVisibility" class="plus" :class="responseVisibility === true ? 'collapsed' : ''">Overall
+									</td>
 									<td>{{ overall_aggregates.okCount }}</td>
 									<td>{{ overall_aggregates.errCount }}</td>
 									<td>{{ overall_aggregates.q50 }}</td>
@@ -243,7 +244,7 @@
 									<td>{{ overall_aggregates.q98 }}</td>
 									<td>{{ overall_aggregates.q99 }}</td>
 								</tr>
-								<tr v-show="responseVisibility" v-for="aggregate in sorted_by_code" :key="aggregate.responseCode">
+								<tr v-show="responseVisibility" v-for="aggregate in sorted_by_code" :key="aggregate.responseCode" class="hidden">
 									<td>{{ aggregate.responseCode }}</td>
 									<td>{{ aggregate.okCount }}</td>
 									<td>{{ aggregate.errCount }}</td>
@@ -271,15 +272,15 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th @click="sort_aggregates('label')">label</th>
+									<th @click="sort_aggregates('label')" class="arrow">label</th>
 									<th @click="sort_aggregates('ok')">ok</th>
 									<th @click="sort_aggregates('errors')">errors</th>
-									<th @click="sort_aggregates('q50')">q50, ms</th>
-									<th @click="sort_aggregates('q75')">q75, ms</th>
-									<th @click="sort_aggregates('q90')">q90, ms</th>
-									<th @click="sort_aggregates('q95')">q95, ms</th>
-									<th @click="sort_aggregates('q98')">q98, ms</th>
-									<th @click="sort_aggregates('q99')">q99, ms</th>
+									<th @click="sort_aggregates('q50')">q50</th>
+									<th @click="sort_aggregates('q75')">q75</th>
+									<th @click="sort_aggregates('q90')">q90</th>
+									<th @click="sort_aggregates('q95')">q95</th>
+									<th @click="sort_aggregates('q98')">q98</th>
+									<th @click="sort_aggregates('q99')">q99</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -507,5 +508,60 @@ export default {
 
 	.job-editor * {
 		padding-top: 10px;
+	}
+
+	.plus:after {
+		height: 14px;
+		width: 14px;
+		box-sizing: content-box;
+		display: inline-block;
+		vertical-align: middle;
+		color: white;
+		border: 1px solid white;
+		border-radius: 18px;
+		box-shadow: 0 0 3px #444;
+		text-align: center;
+		text-indent: 0 !important;
+		font-family: 'Courier New', Courier, monospace;
+		line-height: 14px;
+		background-color: #31b131;
+		content: '+';
+	}
+
+	.plus.collapsed:after {
+		height: 14px;
+		width: 14px;
+		box-sizing: content-box;
+		display: inline-block;
+		vertical-align: middle;
+		color: white;
+		border: 1px solid white;
+		border-radius: 18px;
+		box-shadow: 0 0 3px #444;
+		text-align: center;
+		text-indent: 0 !important;
+		font-family: 'Courier New', Courier, monospace;
+		line-height: 14px;
+		background-color: #D85B5B;
+		content: '-';
+	}
+
+	.arrow.asc:after {
+		display: inline-block;
+		border-left: 7px solid transparent;
+		border-right: 7px solid transparent;
+		border-bottom: 7px solid #31b131;
+		content: '';
+	}
+
+	.arrow.dsc:after {
+		display: inline-block;
+		border-left: 7px solid transparent;
+		border-right: 7px solid transparent;
+		border-top: 7px solid #31b131;
+		content: '';
+	}
+	.hidden {
+		background-color: #F0EDED;
 	}
 </style>
