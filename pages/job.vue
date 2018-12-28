@@ -296,6 +296,8 @@
 									<td>{{ aggregate.q99 }}</td>
 								</tr>
 							</tbody>
+							{{ currentSort }}
+							{{ currentSortDir }}
 						</table>
 					</div>
 				</div>
@@ -476,6 +478,7 @@ export default {
 
 				if (this.currentSortDir === 'desc') {modifier = -1;}
 				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
 				return 0;
 			});
 		},
