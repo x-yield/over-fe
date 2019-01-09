@@ -49,7 +49,8 @@ export default {
 		align-items: center;
 	}
 	.modal {
-		padding-top: 20px;
+		padding-top: 5%;
+		padding-left: 5%;
 		width: 90%;
 		height: 90%;
 		margin: auto;
