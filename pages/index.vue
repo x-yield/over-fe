@@ -61,7 +61,7 @@
 							</tr>
 						</tbody>
 					</table>
-					<button class="btn-lg" @click="more_tests(last_jobs.length)">I need more tests</button>
+					<button class="btn-lg" @click="more_tests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
 				</div>
 			</div>
 		</div>
