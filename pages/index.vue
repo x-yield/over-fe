@@ -60,8 +60,8 @@
 									{{ job.target }}
 								</td>
 								<td align="center">
-+                                   {{ job.desc }}
-+                               </td>
+                                    {{ job.desc }}
+                                </td>
 							</tr>
 						</tbody>
 					</table>
