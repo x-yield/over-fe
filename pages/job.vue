@@ -36,8 +36,8 @@
 								<Column>
 									<Input
 										label="Description"
-										:value="job.desc"
-										v-model="job.desc"
+										:value="job.description"
+										v-model="job.description"
 									/>
 								</Column>
 							</Row>
@@ -151,7 +151,7 @@
 							</tr>
 							<tr>
 								<td align="center">Description</td>
-								<td align="center">{{ job.desc }}</td>
+								<td align="center">{{ job.description }}</td>
 							</tr>
 						</tbody>
 					</table>
