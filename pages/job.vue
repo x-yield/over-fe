@@ -293,7 +293,7 @@
 							<tbody>
 								<template v-for="tag in sortedAggregates" >
 									<tr :key="tag.label">
-										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus" :class="{ collapsed: openedTag.includes(tag.label) }" :id="1">{{ tag.label }}</td>
+										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus" :class="{ collapsed: openedTag.includes(tag.label) }">{{ tag.label }}</td>
 										<td>{{ tag.okCount }}</td>
 										<td>{{ tag.errCount }}</td>
 										<td>{{ tag.q50 }}</td>
@@ -304,7 +304,7 @@
 										<td>{{ tag.q99 }}</td>
 									</tr>
 									<template v-if="openedTag.includes(code.label)" v-for="code in taggedByCode">
-										<tr v-if="code.label === tag.label" :key="code.responseCode" class="hidden">
+										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden">
 											<td>{{ code.responseCode }}</td>
 											<td>{{ code.okCount }}</td>
 											<td>{{ code.errCount }}</td>
