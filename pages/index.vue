@@ -32,6 +32,7 @@
 								<th scope="col" class="text-center">Status</th>
 								<th scope="col" class="text-center">Start → Stop</th>
 								<th scope="col" class="text-center">Target</th>
+								<th scope="col" class="text-center">Description</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -57,6 +58,9 @@
 								</td>
 								<td align="center">
 									{{ job.target }}
+								</td>
+								<td align="center">
+									{{ job.desc }}
 								</td>
 							</tr>
 						</tbody>
