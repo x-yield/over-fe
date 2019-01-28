@@ -243,18 +243,18 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleResponseCodeVisibility" class="plus" :class="responseVisibility === true ? 'collapsed' : ''">Overall
+									<td @click="toggleOverallCodeVisibility" class="plus" :class="overallCodeVisibility === true ? 'collapsed' : ''">Overall
 									</td>
-									<td>{{ overall_aggregates.okCount }}</td>
-									<td>{{ overall_aggregates.errCount }}</td>
-									<td>{{ overall_aggregates.q50 }}</td>
-									<td>{{ overall_aggregates.q75 }}</td>
-									<td>{{ overall_aggregates.q90 }}</td>
-									<td>{{ overall_aggregates.q95 }}</td>
-									<td>{{ overall_aggregates.q98 }}</td>
-									<td>{{ overall_aggregates.q99 }}</td>
+									<td>{{ overall.okCount }}</td>
+									<td>{{ overall.errCount }}</td>
+									<td>{{ overall.q50 }}</td>
+									<td>{{ overall.q75 }}</td>
+									<td>{{ overall.q90 }}</td>
+									<td>{{ overall.q95 }}</td>
+									<td>{{ overall.q98 }}</td>
+									<td>{{ overall.q99 }}</td>
 								</tr>
-								<tr v-show="responseVisibility" v-for="aggregate in sorted_by_code" :key="aggregate.responseCode" class="hidden">
+								<tr v-show="overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden">
 									<td>{{ aggregate.responseCode }}</td>
 									<td>{{ aggregate.okCount }}</td>
 									<td>{{ aggregate.errCount }}</td>
@@ -291,17 +291,32 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr v-for="aggregate in sortedAggregates" :key="aggregate.label">
-									<td>{{ aggregate.label }}</td>
-									<td>{{ aggregate.okCount }}</td>
-									<td>{{ aggregate.errCount }}</td>
-									<td>{{ aggregate.q50 }}</td>
-									<td>{{ aggregate.q75 }}</td>
-									<td>{{ aggregate.q90 }}</td>
-									<td>{{ aggregate.q95 }}</td>
-									<td>{{ aggregate.q98 }}</td>
-									<td>{{ aggregate.q99 }}</td>
-								</tr>
+								<template v-for="tag in sortedAggregates" >
+									<tr :key="tag.label">
+										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus" :class="{ collapsed: openedTag.includes(tag.label) }">{{ tag.label }}</td>
+										<td>{{ tag.okCount }}</td>
+										<td>{{ tag.errCount }}</td>
+										<td>{{ tag.q50 }}</td>
+										<td>{{ tag.q75 }}</td>
+										<td>{{ tag.q90 }}</td>
+										<td>{{ tag.q95 }}</td>
+										<td>{{ tag.q98 }}</td>
+										<td>{{ tag.q99 }}</td>
+									</tr>
+									<template v-if="openedTag.includes(code.label)" v-for="code in taggedByCode">
+										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden">
+											<td>{{ code.responseCode }}</td>
+											<td>{{ code.okCount }}</td>
+											<td>{{ code.errCount }}</td>
+											<td>{{ code.q50 }}</td>
+											<td>{{ code.q75 }}</td>
+											<td>{{ code.q90 }}</td>
+											<td>{{ code.q95 }}</td>
+											<td>{{ code.q98 }}</td>
+											<td>{{ code.q99 }}</td>
+										</tr>
+									</template>
+								</template>
 							</tbody>
 						</table>
 					</div>
@@ -341,9 +356,13 @@ export default {
 				},
 				status: null,
 			},
-			overall_aggregates: {},
 			isSummaryVisible: true,
-			aggregates: [],
+			overall: {},
+			tagged: [],
+			overallByCode: [],
+			taggedByCode: [],
+			sortedTaggedByCode: [],
+			openedTag: [],
 			pods_data: {},
 			loading: true,
 			error: null,
@@ -351,8 +370,7 @@ export default {
 			editorVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			responseVisibility: false,
-			sorted_by_code: [],
+			overallCodeVisibility: false,
 			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
 		};
 	},
@@ -403,8 +421,17 @@ export default {
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
 		},
-		toggleResponseCodeVisibility: function() {
-			this.responseVisibility = !this.responseVisibility;
+		toggleResponseCodeVisibility(name) {
+			const index = this.openedTag.indexOf(name);
+
+			if (index > -1) {
+				this.openedTag.splice(index, 1);
+			} else {
+				this.openedTag.push(name);
+			}
+		},
+		toggleOverallCodeVisibility() {
+			this.overallCodeVisibility = !this.overallCodeVisibility;
 		},
 		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
@@ -464,11 +491,13 @@ export default {
 					json.aggregates.forEach(
 						agg => {
 							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.overall_aggregates = (agg);
+								this.overall = (agg);
 							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.aggregates.push(agg);
+								this.tagged.push(agg);
 							} if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
-								this.sorted_by_code.push(agg);
+								this.overallByCode.push(agg);
+							} if (agg.label !== '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
+								this.taggedByCode.push(agg);
 							}
 						}
 					);
@@ -483,7 +512,7 @@ export default {
 	},
 	computed: {
 		sortedAggregates:function() {
-			return this.aggregates.slice().sort((a, b) => {
+			return this.tagged.slice().sort((a, b) => {
 				let modifier =1;
 
 				if (this.currentSortDir === 'dsc') {modifier = -1;}
@@ -491,7 +520,7 @@ export default {
 				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
 				return 0;
 			});
-		},
+		}
 	}
 
 };
@@ -526,6 +555,7 @@ export default {
 	.plus:after {
 		height: 14px;
 		width: 14px;
+		margin-left: 3px;
 		box-sizing: content-box;
 		display: inline-block;
 		vertical-align: middle;
@@ -544,6 +574,7 @@ export default {
 	.plus.collapsed:after {
 		height: 14px;
 		width: 14px;
+		margin-left: 3px;
 		box-sizing: content-box;
 		display: inline-block;
 		vertical-align: middle;
