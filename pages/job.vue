@@ -417,7 +417,6 @@ export default {
 			}
 		},
 		toggleEditor: function() {
-			console.log('gggg')
 			clearInterval(this.watcher);
 			this.editorVisibility = !this.editorVisibility;
 		},
