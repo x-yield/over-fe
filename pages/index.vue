@@ -60,7 +60,7 @@
 									{{ job.target }}
 								</td>
 								<td align="center">
-									{{ job.desc }}
+									{{ job.description }}
 								</td>
 							</tr>
 						</tbody>
