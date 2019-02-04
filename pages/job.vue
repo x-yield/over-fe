@@ -411,8 +411,10 @@ export default {
 			this.toggleEditor();
 		},
 		deleteJob() {
-			this.$store.dispatch('job/deleteJob', this.job.id);
-			this.$router.push('/');
+			if (confirm('Удалить '+this.job.id+'?')) {
+				this.$store.dispatch('job/deleteJob', this.job.id);
+				this.$router.push('/');
+			}
 		},
 		toggleEditor: function() {
 			clearInterval(this.watcher);
