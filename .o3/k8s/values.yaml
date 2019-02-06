@@ -12,26 +12,26 @@ service:
 o3:
   metadata:
     # service description  (en)
-    description: overload frontend app
+    description: overload frontend app - performance analytics service
     # severity level
     severityLevel: LOW
     # business owner name (en)
-    businessOwnerName: na
+    businessOwnerName: Timur Torubarov
     # business owner email
-    businessOwnerEmail: na
+    businessOwnerEmail: ttorubarov@ozon.ru
     # technical owner name (en)
-    technicalOwnerName: na
+    technicalOwnerName: Timur Torubarov
     # technical owner email
-    technicalOwnerEmail: na
+    technicalOwnerEmail: ttorubarov@ozon.ru
     # project slack chanel name
-    slackChan: na
+    slackChan: qa
     # monitoring dashboard url (e.g. grafana)
-    monitoringDashboardUrl: na
+    monitoringDashboardUrl: http://grafana.o3.ru/d/BtgL8fHmz/service-overview?orgId=1
     # opsGenie url
     opsGenieUrl: na
     # project confluence url
-    confluenceUrl: na
+    confluenceUrl: https://confluence.ozon.ru/pages/viewpage.action?pageId=74427639
     # jira board url
-    jiraBoardUrl: na
+    jiraBoardUrl: https://jit.ozon.ru/secure/RapidBoard.jspa?projectKey=LOAD&rapidView=812
 
 
