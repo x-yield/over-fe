@@ -153,6 +153,18 @@
 								<td align="center">Description</td>
 								<td align="center">{{ job.description }}</td>
 							</tr>
+							<tr v-if="job.autostopTime">
+								<td align="center">Autostop time</td>
+								<td align="center">{{ ts_to_date(job.autostopTime) }}</td>
+							</tr>
+							<tr v-if="job.autostopMessage">
+								<td align="center">Autostop reason</td>
+								<td align="center">{{ job.autostopMessage }}</td>
+							</tr>
+							<tr v-if="job.imbalance">
+								<td align="center">Imbalance</td>
+								<td align="center">{{ job.imbalance }}</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
