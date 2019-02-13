@@ -108,6 +108,20 @@
 					<h4 align="right">
 						<img
 							alt="edit"
+							width="35px"
+							height="40px"
+							src="~/assets/icons/regression.png"
+							@click="toggleEditor"
+						/>
+						<img
+							alt="edit"
+							width="40px"
+							height="40px"
+							src="~/assets/icons/kubernetes.png"
+							@click="toggleKubernetesInfo"
+						/>
+						<img
+							alt="edit"
 							width="30px"
 							height="30px"
 							src="~/assets/icons/edit.png"
@@ -159,7 +173,7 @@
 							</tr>
 							<tr v-if="job.autostopMessage">
 								<td align="center">Autostop reason</td>
-								<td align="center">{{ job.autostopMessage }}</td>
+								<td align="center"><a :href='"/regression"'>{{ job.autostopMessage }}</a></td>
 							</tr>
 							<tr v-if="job.imbalance">
 								<td align="center">Imbalance</td>
@@ -380,6 +394,7 @@ export default {
 			error: null,
 			success: null,
 			editorVisibility: false,
+			kubernetesInfoVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -431,6 +446,10 @@ export default {
 		toggleEditor: function() {
 			clearInterval(this.watcher);
 			this.editorVisibility = !this.editorVisibility;
+		},
+		toggleKubernetesInfo: function() {
+			clearInterval(this.watcher);
+			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
 		},
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
