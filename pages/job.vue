@@ -97,6 +97,30 @@
 				</h3>
 			</modal>
 
+			<modal v-show="kubernetesInfoVisibility" @close="toggleKubernetesInfo">
+				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
+				<h3 slot="body">
+					<div class="overload-fe-container job-kubernetes-info">
+						<code class="json">{{ job.environmentDetails }}</code>
+					</div>
+				</h3>
+				<h3 slot="footer">
+					<div class="overload-fe-container buttons">
+						<Row>
+							<Column>
+								<Button
+									theme="secondary"
+									@click="toggleKubernetesInfo"
+								>
+									Закрыть
+								</Button>
+							</Column>
+						</Row>
+					</div>
+
+				</h3>
+			</modal>
+
 
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
@@ -107,13 +131,15 @@
 					<h4 align="center">Test #{{ job.id }}</h4>
 					<h4 align="right">
 						<img
+							v-if="job.collections"
 							alt="edit"
 							width="35px"
 							height="40px"
 							src="~/assets/icons/regression.png"
-							@click="toggleEditor"
+							@click="toggleCollectionChoice"
 						/>
 						<img
+							v-if="job.environmentDetails"
 							alt="edit"
 							width="40px"
 							height="40px"
@@ -135,6 +161,12 @@
 							@click="deleteJob"
 						/>
 					</h4>
+					<a :href='"/regression"'>{{ collection }}</a>
+					<select v-show="collectionChoice" v-model="selected">
+						<option v-for="collection in job.collections" :key="collection">
+							<a :href='"/regression"'>{{ collection }}</a>
+						</option>
+					</select>
 				</div>
 				<div class="col-md-12">
 					<table class="table table-sm table-hover">
@@ -173,7 +205,7 @@
 							</tr>
 							<tr v-if="job.autostopMessage">
 								<td align="center">Autostop reason</td>
-								<td align="center"><a :href='"/regression"'>{{ job.autostopMessage }}</a></td>
+								<td align="center">{{ job.autostopMessage }}</td>
 							</tr>
 							<tr v-if="job.imbalance">
 								<td align="center">Imbalance</td>
@@ -372,6 +404,7 @@ const {
 export default {
 	data() {
 		return {
+			selected: '',
 			test_id: null,
 			job: {
 				graphs: {
@@ -395,6 +428,7 @@ export default {
 			success: null,
 			editorVisibility: false,
 			kubernetesInfoVisibility: false,
+			collectionChoice: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -450,6 +484,9 @@ export default {
 		toggleKubernetesInfo: function() {
 			clearInterval(this.watcher);
 			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
+		},
+		toggleCollectionChoice: function() {
+			this.collectionChoice = !this.collectionChoice;
 		},
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
@@ -583,6 +620,12 @@ export default {
 
 	.job-editor * {
 		padding-top: 10px;
+	}
+
+	.job-kubernetes-info * {
+		padding-top: 10px;
+		font-size: 14px;
+		overflow-y: scroll;
 	}
 
 	.plus:after {

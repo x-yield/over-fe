@@ -9,20 +9,52 @@
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
 					</div>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="">Last tests</a></li>
-						</ul>
-					</div>
 				</div>
 			</nav>
+			<!-- grafana graphs -->
+			<div class="col-md-12">
+				<h3 align="center">Trends</h3>
+				<div class="row justify-content-between" style="height:300px;">
+					<div class="col-md-12 col-sm-12">
+						<!-- rps -->
+						<iframe
+							:src="regression.graphs.imbalance"
+							width="100%"
+							height="100%"
+							marginheight="0"
+							align="top"
+							scrolling="No"
+							frameborder="0"
+							style="overflow: hidden;"
+						/>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-
+export default {
+	data() {
+		return {
+			regression: {
+				graphs: {
+					imbalance: null
+				}
+			}
+		};
+	},
+	mounted() {
+		this.get_test_info();
+	},
+	methods: {
+		get_test_info: function() {
+			this.regression.graphs = {};
+			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/gM7Iqapik/trends?orgId=1&theme=light';
+		}
+	}
+};
 </script>
 
 
