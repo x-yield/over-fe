@@ -99,8 +99,8 @@
 
 			<modal v-show="kubernetesInfoVisibility" @close="toggleKubernetesInfo">
 				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
-				<h3 slot="body">
-					<div class="overload-fe-container job-kubernetes-info">
+				<h3 slot="body" class="job-kubernetes-info">
+					<div class="overload-fe-container">
 						<code class="json">{{ job.environmentDetails }}</code>
 					</div>
 				</h3>
@@ -608,6 +608,7 @@ export default {
 
 	.overload-fe-container {
 		flex: 1;
+		horiz-align: center;
 	}
 
 	td > * {
@@ -625,6 +626,7 @@ export default {
 	.job-kubernetes-info * {
 		padding-top: 10px;
 		font-size: 14px;
+		max-height: 350px;
 		overflow-y: scroll;
 	}
 
