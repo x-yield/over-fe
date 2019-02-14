@@ -101,7 +101,7 @@
 				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
 				<h3 slot="body" class="job-kubernetes-info">
 					<div class="overload-fe-container">
-						<code class="json">{{ job.environmentDetails }}</code>
+						<pre>{{ job.environmentDetails }}</pre>
 					</div>
 				</h3>
 				<h3 slot="footer">
@@ -628,6 +628,7 @@ export default {
 		font-size: 14px;
 		max-height: 350px;
 		overflow-y: scroll;
+		color: black;
 	}
 
 	.plus:after {
