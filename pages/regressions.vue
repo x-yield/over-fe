@@ -8,21 +8,23 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
+					</div>
+					<div align="right">
 						<a :href='"/job?id="+test_id'>Back to job {{ test_id }}</a>
+					</div>
+					<div>
+						<h4 align="right">
+							<select class="dropbtn" @change="get_collection_info(key)" v-model="key">
+								<option v-for="id in collection_ids" :key="id">
+									{{ id }}
+								</option>
+							</select>
+						</h4>
 					</div>
 				</div>
 			</nav>
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
-			</div>
-			<div>
-				<h4 align="right">
-					<select class="dropbtn">
-						<option v-for="collection in collections" :key="collection">
-							{{ collection }}
-						</option>
-					</select>
-				</h4>
 			</div>
 
 			<div class="col-md-12">
@@ -71,7 +73,6 @@
 				</div>
 			</div>
 		</div>
-		{{ collection_ids }}
 	</div>
 </template>
 
@@ -94,6 +95,7 @@ const {
 export default {
 	data() {
 		return {
+			key: '',
 			collection_ids: [],
 			regression: {
 				graphs: {
@@ -133,19 +135,20 @@ export default {
 	},
 	mounted() {
 		this.get_test_info(this.test_id);
-		this.get_test_aggregates(this.test_id);
-		this.get_graphs();
 	},
 	methods: {
-		// get_collection_info: function(id) {
-		// 	this.$api.get('/collections?collection_id=' + id)
-		// 		.then(response => {
-		// 			return response[0].collection;
-		// 		};
-		// },
-		get_graphs: function() {
-			this.regression.graphs = {};
-			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from=1542466873575&to=1550242873575&var-env=prod&var-service=site&var-collection=www.ozon.ru%20imbalance&theme=light';
+		get_collection_info: function(id) {
+			this.$api.get('/collections?collection_id=' + id)
+				.then(response => {
+					return response[0].data;
+				})
+				.then(json => {
+					if (!json.collections) {
+						return;
+					}
+					this.collection = json.collections[0];
+					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from=1542466873575&to=1550242873575&var-env='+this.collection.env+'&var-service='+this.collection.service+'&var-collection='+this.collection.name+'&theme=light';
+				});
 		},
 		get_test_info: function(id) {
 			this.$api.get('/job/' + id)
@@ -156,7 +159,7 @@ export default {
 					if (!job_json) {
 						return;
 					}
-					this.job = job_json
+					this.job = job_json;
 					job_json.collectionIds.forEach(
 						collection => {
 							this.collection_ids.push(collection);
@@ -170,36 +173,6 @@ export default {
 					}
 					this.loading = false;
 				});
-		},
-		get_test_aggregates: function(id) {
-			this.$api.get('/aggregates/' + id)
-				.then(response => {
-					return response[0].data;
-				})
-				.then(json => {
-					if (!json.aggregates) {
-						return;
-					}
-					json.aggregates.forEach(
-						agg => {
-							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.overall = (agg);
-							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.tagged.push(agg);
-							} if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
-								this.overallByCode.push(agg);
-							} if (agg.label !== '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
-								this.taggedByCode.push(agg);
-							}
-						}
-					);
-				});
-		},
-		sort_aggregates: function(s) {
-			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
-			}
-			this.currentSort = s;
 		},
 	},
 };
