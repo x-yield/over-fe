@@ -71,7 +71,7 @@
 				</div>
 			</div>
 		</div>
-		{{ job }}
+		{{ collection_ids }}
 	</div>
 </template>
 
@@ -94,7 +94,7 @@ const {
 export default {
 	data() {
 		return {
-			regression_ids: [],
+			collection_ids: [],
 			regression: {
 				graphs: {
 					imbalance: null
@@ -130,7 +130,6 @@ export default {
 	},
 	created() {
 		this.test_id = this.$route.query.id;
-		this.regression_ids.push(this.$route.query.id);
 	},
 	mounted() {
 		this.get_test_info(this.test_id);
@@ -157,7 +156,12 @@ export default {
 					if (!job_json) {
 						return;
 					}
-					this.job = job_json;
+					this.job = job_json
+					job_json.collectionIds.forEach(
+						collection => {
+							this.collection_ids.push(collection);
+						}
+					);
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
 						this.job.finishedTime = 'now';
