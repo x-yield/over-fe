@@ -130,14 +130,15 @@
 				<div>
 					<h4 align="center">Test #{{ job.id }}</h4>
 					<h4 align="right">
-						<img
-							v-if="job.collections"
-							alt="edit"
-							width="35px"
-							height="40px"
-							src="~/assets/icons/regression.png"
-							@click="toggleCollectionChoice"
-						/>
+						<a :href='"/regressions?id="+test_id'>
+							<img
+								v-if="job.collectionIds"
+								alt="edit"
+								width="35px"
+								height="40px"
+								src="~/assets/icons/regression.png"
+							/>
+						</a>
 						<img
 							v-if="job.environmentDetails"
 							alt="edit"
@@ -161,12 +162,6 @@
 							@click="deleteJob"
 						/>
 					</h4>
-					<a :href='"/regression"'>{{ collection }}</a>
-					<select v-show="collectionChoice" v-model="selected">
-						<option v-for="collection in job.collections" :key="collection">
-							<a :href='"/regression"'>{{ collection }}</a>
-						</option>
-					</select>
 				</div>
 				<div class="col-md-12">
 					<table class="table table-sm table-hover">
@@ -213,6 +208,56 @@
 							</tr>
 						</tbody>
 					</table>
+				</div>
+
+				<!-- grafana graphs for resources -->
+				<h4
+					v-if="job.environmentDetails"
+					align="center"
+					@click="get_resources_graphs"
+					class="resources-graphs"
+					:class="{ collapsed: resourcesVisibility }">
+					resources utilization
+				</h4>
+				<div v-show="resourcesVisibility" class="col-md-12">
+					<div class="row justify-content-between">
+						<div class="col-md-4 col-sm-12">
+							<img
+								src="resources.graphs.cpu"
+								width="100%"
+								height="100%"
+								align="top"
+								frameborder="0"
+								style="overflow: hidden;"
+							/>
+						</div>
+						<div class="col-md-4 col-sm-12">
+							<!-- Memory -->
+							<iframe
+								:src="resources.graphs.memory"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							/>
+						</div>
+						<div class="col-md-4 col-sm-12">
+							<!-- Network -->
+							<iframe
+								:src="resources.graphs.network"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							/>
+						</div>
+					</div>
 				</div>
 
 				<!-- grafana graphs -->
@@ -279,8 +324,7 @@
 				<!-- summary stats -->
 				<h3
 					align="center"
-					@click="toggleVisibility"
-				>
+					@click="toggleVisibility">
 					Summary stats
 				</h3>
 				<div v-show="isSummaryVisible" class="col-md-12">
@@ -404,7 +448,6 @@ const {
 export default {
 	data() {
 		return {
-			selected: '',
 			test_id: null,
 			job: {
 				graphs: {
@@ -415,6 +458,13 @@ export default {
 				},
 				status: null,
 			},
+			resources: {
+				graphs: {
+					cpu: null,
+					memory: null,
+					network: null,
+				},
+			},
 			isSummaryVisible: true,
 			overall: {},
 			tagged: [],
@@ -422,13 +472,12 @@ export default {
 			taggedByCode: [],
 			sortedTaggedByCode: [],
 			openedTag: [],
-			pods_data: {},
 			loading: true,
 			error: null,
 			success: null,
 			editorVisibility: false,
 			kubernetesInfoVisibility: false,
-			collectionChoice: false,
+			resourcesVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -485,8 +534,8 @@ export default {
 			clearInterval(this.watcher);
 			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
 		},
-		toggleCollectionChoice: function() {
-			this.collectionChoice = !this.collectionChoice;
+		toggleResourcesVisibility: function() {
+			this.resourcesVisibility = !this.resourcesVisibility;
 		},
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
@@ -548,6 +597,18 @@ export default {
 					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.loading = false;
 				});
+		},
+		get_resources_graphs: function() {
+			this.resources.graphs = {};
+			if (isNaN(this.job.testStop)) {
+				this.job.finishedTime = 'now';
+			} else {
+				this.job.finishedTime = this.job.testStop * 1000;
+			}
+			this.resources.graphs.cpu = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?refresh=5s&orgId=1&panelId=17&from=1550231733779&to=1550242533779&var-datasource=%5BPROD%5D%20K8S%20Prometheus&var-Pod=ab-controller-api-76979755cf-wmh5w&theme=light';
+			//this.resources.graphs.cpu = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=&' + this.env + '%5D%20K8S%20Prometheus&var-Pod=' + pods_data + '&var-phase=Failed&var-container=cpu&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			//this.resources.graphs.memory = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=&' + this.env + '%5D%20K8S%20Prometheus&var-Pod=' + pods_data + '&var-phase=Failed&var-container=cpu&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			//this.resources.graphs.network = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=&' + this.env + '%5D%20K8S%20Prometheus&var-Pod=' + pods_data + '&var-phase=Failed&var-container=cpu&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 		},
 		get_test_aggregates: function(id) {
 			this.$api.get('/aggregates/' + id)
@@ -683,6 +744,20 @@ export default {
 		border-left: 7px solid transparent;
 		border-right: 7px solid transparent;
 		border-top: 8px solid #31b131;
+	}
+
+	.resources-graphs.expanded :after {
+		display: inline-block;
+		border-left: 30px solid transparent;
+		border-right: 30px solid transparent;
+		border-bottom: 30px solid #000000;
+	}
+
+	.resources-graphs.collapsed :after {
+		display: inline-block;
+		border-left: 30px solid transparent;
+		border-right: 30px solid transparent;
+		border-top: 30px solid #000000;
 	}
 	.hidden {
 		background-color: #F0EDED;
