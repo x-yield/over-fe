@@ -14,9 +14,9 @@
 					</div>
 					<div>
 						<h4 align="right">
-							<select class="dropbtn" @change="get_collection_info(key)" v-model="key">
-								<option v-for="id in collection_ids" :key="id">
-									{{ id }}
+							<select class="dropbtn" @change="display_graphs(key)" v-model="key">
+								<option v-for="collection in collections" :key="collection">
+									{{ collection.env + ' -> ' + collection.service + ' -> ' + collection.name }}
 								</option>
 							</select>
 						</h4>
@@ -31,27 +31,27 @@
 				<table class="table table-sm table-hover">
 					<tbody>
 						<tr>
-							<td align="center">Service</td>
-							<td align="center">{{ collection.service }}</td>
-						</tr>
-						<tr>
 							<td align="center">Environment</td>
-							<td align="center">{{ collection.env }}</td>
+							<td align="center">{{ currentCollection.env }}</td>
 						</tr>
 						<tr>
-							<td align="center">Name of regression</td>
-							<td align="center">{{ collection.name }}</td>
+							<td align="center">Service</td>
+							<td align="center">{{ currentCollection.service }}</td>
 						</tr>
 						<tr>
-							<td align="center">Branch</td>
-							<td align="center">{{ collection.branch }}</td>
+							<td align="center">Name of collection</td>
+							<td align="center">{{ currentCollection.name }}</td>
 						</tr>
 						<tr>
 							<td align="center">Author</td>
-							<td align="center">{{ collection.author }}</td>
+							<td align="center">{{ currentCollection.author }}</td>
 						</tr>
 					</tbody>
 				</table>
+				{{ currentCollection }}
+				{{ key }}
+				{{ collection_ids }}
+				{{ mystring }}
 			</div>
 			<!-- grafana graphs -->
 			<div class="col-md-12">
@@ -95,6 +95,8 @@ const {
 export default {
 	data() {
 		return {
+			currentCollection: {},
+			mystring: null,
 			key: '',
 			collection_ids: [],
 			regression: {
@@ -102,7 +104,7 @@ export default {
 					imbalance: null
 				}
 			},
-			collection: {},
+			collections: [],
 			test_id: null,
 			job: {
 				graphs: {
@@ -135,10 +137,11 @@ export default {
 	},
 	mounted() {
 		this.get_test_info(this.test_id);
+		this.get_collections_info();
 	},
 	methods: {
-		get_collection_info: function(id) {
-			this.$api.get('/collections?collection_id=' + id)
+		get_collections_info: function() {
+			this.$api.get('/collections?collection_id=1')
 				.then(response => {
 					return response[0].data;
 				})
@@ -146,9 +149,18 @@ export default {
 					if (!json.collections) {
 						return;
 					}
-					this.collection = json.collections[0];
-					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from=1542466873575&to=1550242873575&var-env='+this.collection.env+'&var-service='+this.collection.service+'&var-collection='+this.collection.name+'&theme=light';
+					json.collections.forEach(
+						collection => {
+							this.collections.push(collection);
+						}
+					);
 				});
+		},
+		display_graphs: function() {
+			const intervalStart = new Date().getTime() - 90*24*60*60*1000;
+
+			this.currentCollection = this.collections[0];
+			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart+'&to=now&var-env='+this.currentCollection.env+'&var-service='+this.currentCollection.service+'&var-collection='+this.currentCollection.name+'&theme=light';
 		},
 		get_test_info: function(id) {
 			this.$api.get('/job/' + id)
@@ -161,16 +173,11 @@ export default {
 					}
 					this.job = job_json;
 					job_json.collectionIds.forEach(
-						collection => {
-							this.collection_ids.push(collection);
+						collection_id => {
+							this.collection_ids.push(collection_id);
+							this.mystring = ('collection_id='+collection_id+'&').slice(0, -1);
 						}
 					);
-					this.job.graphs = {};
-					if (isNaN(this.job.testStop)) {
-						this.job.finishedTime = 'now';
-					} else {
-						this.job.finishedTime = this.job.testStop * 1000;
-					}
 					this.loading = false;
 				});
 		},
