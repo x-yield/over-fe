@@ -8,8 +8,6 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-					</div>
-					<div align="right">
 						<a :href='"/job?id="+test_id'>Back to job {{ test_id }}</a>
 					</div>
 					<div>
@@ -48,13 +46,13 @@
 						</tr>
 					</tbody>
 				</table>
-				{{ queryString }}
-				{{ collections }}
-				<br>
-				{{ currentCollection }}
-				<br>
-				{{ selected }}
-				<br>
+				<!--{{ queryString }}-->
+				<!--{{ collections }}-->
+				<!--<br>-->
+				<!--{{ currentCollection }}-->
+				<!--<br>-->
+				<!--{{ selected }}-->
+				<!--<br>-->
 			</div>
 			<!-- grafana graphs -->
 			<div class="col-md-12">
@@ -208,11 +206,11 @@ export default {
 		vertical-align : middle;
 	}
 	.dropbtn {
-		background-color: #31b131;
-		color: white;
+		background-color: #d1e7bc;
+		color: black;
 		padding: 16px;
 		font-size: 16px;
-		border: none;
+		border: solid 1px grey;
 		width: auto;
 		cursor: pointer;
 	}
@@ -245,7 +243,7 @@ export default {
 	}
 
 	.dropdown:hover .dropbtn {
-		background-color: #3e8e41;
+		background-color: #d1e7bc;
 	}
 </style>
 
