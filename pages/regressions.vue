@@ -14,8 +14,8 @@
 					</div>
 					<div>
 						<h4 align="right">
-							<select class="dropbtn" @change="display_graphs(key)" v-model="key">
-								<option v-for="collection in collections" :key="collection">
+							<select class="dropbtn" @change="display_graphs(selected)" v-model="selected">
+								<option v-for="collection in collections" :value="collection.id" :key="collection.id">
 									{{ collection.env + ' -> ' + collection.service + ' -> ' + collection.name }}
 								</option>
 							</select>
@@ -48,10 +48,13 @@
 						</tr>
 					</tbody>
 				</table>
+				{{ queryString }}
+				{{ collections }}
+				<br>
 				{{ currentCollection }}
-				{{ key }}
-				{{ collection_ids }}
-				{{ mystring }}
+				<br>
+				{{ selected }}
+				<br>
 			</div>
 			<!-- grafana graphs -->
 			<div class="col-md-12">
@@ -96,8 +99,8 @@ export default {
 	data() {
 		return {
 			currentCollection: {},
-			mystring: null,
-			key: '',
+			queryString: null,
+			selected: '',
 			collection_ids: [],
 			regression: {
 				graphs: {
@@ -106,18 +109,10 @@ export default {
 			},
 			collections: [],
 			test_id: null,
-			job: {
-				graphs: {
-					rps: null,
-					netcodes: null,
-					quantiles: null,
-					threads: null,
-				},
-				status: null,
-			},
 			loading: true,
 			error: null,
 			success: null,
+			aaaa: false,
 		};
 	},
 	head: {
@@ -134,14 +129,14 @@ export default {
 	},
 	created() {
 		this.test_id = this.$route.query.id;
+		this.get_test_info(this.test_id);
 	},
 	mounted() {
-		this.get_test_info(this.test_id);
-		this.get_collections_info();
+		//this.display_graphs();
 	},
 	methods: {
-		get_collections_info: function() {
-			this.$api.get('/collections?collection_id=1')
+		get_collections_info: function(selected_id) {
+			this.$api.get('/collections?' + this.queryString)
 				.then(response => {
 					return response[0].data;
 				})
@@ -154,12 +149,20 @@ export default {
 							this.collections.push(collection);
 						}
 					);
+					this.display_graphs(selected_id);
 				});
 		},
-		display_graphs: function() {
+		display_graphs: function(selected_id) {
 			const intervalStart = new Date().getTime() - 90*24*60*60*1000;
 
-			this.currentCollection = this.collections[0];
+			this.collections.forEach(
+				collection => {
+					if (selected_id === collection.id) {
+						this.currentCollection = (collection);
+					}
+				}
+			);
+
 			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart+'&to=now&var-env='+this.currentCollection.env+'&var-service='+this.currentCollection.service+'&var-collection='+this.currentCollection.name+'&theme=light';
 		},
 		get_test_info: function(id) {
@@ -175,9 +178,11 @@ export default {
 					job_json.collectionIds.forEach(
 						collection_id => {
 							this.collection_ids.push(collection_id);
-							this.mystring = ('collection_id='+collection_id+'&').slice(0, -1);
+							this.queryString = ('collection_id='+collection_id+'&').slice(0, -1);
 						}
 					);
+					this.selected = this.collection_ids[0];
+					this.get_collections_info(this.selected);
 					this.loading = false;
 				});
 		},

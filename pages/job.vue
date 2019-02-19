@@ -210,55 +210,23 @@
 					</table>
 				</div>
 
+
+				{{ overall }}
 				<!-- grafana graphs for resources -->
 				<h4
 					v-if="job.environmentDetails"
 					align="center"
-					@click="get_resources_graphs"
+					@click="get_resources_graphs()"
 					class="resources-graphs"
 					:class="{ collapsed: resourcesVisibility }">
 					resources utilization
 				</h4>
 				<div v-show="resourcesVisibility" class="col-md-12">
 					<div class="row justify-content-between">
-						<div class="col-md-4 col-sm-12">
-							<img
-								src="resources.graphs.cpu"
-								width="100%"
-								height="100%"
-								align="top"
-								frameborder="0"
-								style="overflow: hidden;"
-							/>
-						</div>
-						<div class="col-md-4 col-sm-12">
-							<!-- Memory -->
-							<iframe
-								:src="resources.graphs.memory"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
-								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
-							/>
-						</div>
-						<div class="col-md-4 col-sm-12">
-							<!-- Network -->
-							<iframe
-								:src="resources.graphs.network"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
-								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
-							/>
-						</div>
+						{{ podsData }}
 					</div>
 				</div>
+
 
 				<!-- grafana graphs -->
 				<div class="col-md-12">
@@ -466,6 +434,7 @@ export default {
 				},
 			},
 			isSummaryVisible: true,
+			podsData: {},
 			overall: {},
 			tagged: [],
 			overallByCode: [],
@@ -477,7 +446,7 @@ export default {
 			success: null,
 			editorVisibility: false,
 			kubernetesInfoVisibility: false,
-			resourcesVisibility: false,
+			resourcesVisibility: true,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -595,6 +564,7 @@ export default {
 					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					this.podsData = this.job.environmentDetails;
 					this.loading = false;
 				});
 		},
