@@ -97,6 +97,30 @@
 				</h3>
 			</modal>
 
+			<modal v-show="kubernetesInfoVisibility" @close="toggleKubernetesInfo">
+				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
+				<h3 slot="body" class="job-kubernetes-info">
+					<div class="overload-fe-container">
+						<pre>{{ job.environmentDetails }}</pre>
+					</div>
+				</h3>
+				<h3 slot="footer">
+					<div class="overload-fe-container buttons">
+						<Row>
+							<Column>
+								<Button
+									theme="secondary"
+									@click="toggleKubernetesInfo"
+								>
+									Закрыть
+								</Button>
+							</Column>
+						</Row>
+					</div>
+
+				</h3>
+			</modal>
+
 
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
@@ -106,6 +130,23 @@
 				<div>
 					<h4 align="center">Test #{{ job.id }}</h4>
 					<h4 align="right">
+						<a :href='"/regressions?id="+test_id'>
+							<img
+								v-if="job.collectionIds"
+								alt="edit"
+								width="35px"
+								height="40px"
+								src="~/assets/icons/regression.png"
+							/>
+						</a>
+						<img
+							v-if="job.environmentDetails"
+							alt="edit"
+							width="40px"
+							height="40px"
+							src="~/assets/icons/kubernetes.png"
+							@click="toggleKubernetesInfo"
+						/>
 						<img
 							alt="edit"
 							width="30px"
@@ -233,8 +274,7 @@
 				<!-- summary stats -->
 				<h3
 					align="center"
-					@click="toggleVisibility"
-				>
+					@click="toggleVisibility">
 					Summary stats
 				</h3>
 				<div v-show="isSummaryVisible" class="col-md-12">
@@ -368,18 +408,26 @@ export default {
 				},
 				status: null,
 			},
+			resources: {
+				graphs: {
+					cpu: null,
+					memory: null,
+					network: null,
+				},
+			},
 			isSummaryVisible: true,
+			podsData: {},
 			overall: {},
 			tagged: [],
 			overallByCode: [],
 			taggedByCode: [],
 			sortedTaggedByCode: [],
 			openedTag: [],
-			pods_data: {},
 			loading: true,
 			error: null,
 			success: null,
 			editorVisibility: false,
+			kubernetesInfoVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -431,6 +479,13 @@ export default {
 		toggleEditor: function() {
 			clearInterval(this.watcher);
 			this.editorVisibility = !this.editorVisibility;
+		},
+		toggleKubernetesInfo: function() {
+			clearInterval(this.watcher);
+			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
+		},
+		toggleResourcesVisibility: function() {
+			this.resourcesVisibility = !this.resourcesVisibility;
 		},
 		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
@@ -490,6 +545,7 @@ export default {
 					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					//this.podsData = JSON.parse(this.job.environmentDetails);
 					this.loading = false;
 				});
 		},
@@ -552,6 +608,7 @@ export default {
 
 	.overload-fe-container {
 		flex: 1;
+		horiz-align: center;
 	}
 
 	td > * {
@@ -564,6 +621,14 @@ export default {
 
 	.job-editor * {
 		padding-top: 10px;
+	}
+
+	.job-kubernetes-info * {
+		padding-top: 10px;
+		font-size: 14px;
+		max-height: 350px;
+		overflow-y: scroll;
+		color: black;
 	}
 
 	.plus:after {
@@ -619,6 +684,7 @@ export default {
 		border-right: 7px solid transparent;
 		border-top: 8px solid #31b131;
 	}
+
 	.hidden {
 		background-color: #F0EDED;
 	}
