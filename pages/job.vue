@@ -210,68 +210,6 @@
 					</table>
 				</div>
 
-				<!-- grafana graphs for resources -->
-				<h4
-					v-if="job.environmentDetails"
-					align="center"
-					@click="toggleResourcesVisibility"
-					class="resources-graphs"
-					:class="{ collapsed: resourcesVisibility }">
-					resources utilization
-				</h4>
-				<div v-show="resourcesVisibility">
-					<div class="row justify-content-between">
-						<div class="col-md-4 col-sm-12">
-							<div v-for="value in podsData" :key=value style="margin-top: 5px; margin-right: 5px;">
-								<button @click=get_resources_graphs(value.name,value.labels.env) class="pods" :class="{ collapsed: podGraphsVisibility }">{{ value.name }}</button>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="row justify-content-between">
-					<div class="col-md-4 col-sm-12">
-						<!-- rps -->
-						<iframe
-							:src="resources.graphs.cpu"
-							width="100%"
-							height="100%"
-							marginheight="0"
-							align="top"
-							scrolling="No"
-							frameborder="0"
-							style="overflow: hidden;"
-						/>
-					</div>
-					<div class="col-md-4 col-sm-12">
-						<!-- net codes -->
-						<iframe
-							:src="resources.graphs.memory"
-							width="100%"
-							height="100%"
-							marginheight="0"
-							align="top"
-							scrolling="No"
-							frameborder="0"
-							style="overflow: hidden;"
-						/>
-					</div>
-					<div class="col-md-4 col-sm-12">
-						<!-- net codes -->
-						<iframe
-							:src="resources.graphs.network"
-							width="100%"
-							height="100%"
-							marginheight="0"
-							align="top"
-							scrolling="No"
-							frameborder="0"
-							style="overflow: hidden;"
-						/>
-					</div>
-				</div>
-
-
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">graphs</h3>
@@ -612,19 +550,6 @@ export default {
 					this.podsData = JSON.parse(this.job.environmentDetails);
 					this.loading = false;
 				});
-		},
-		get_resources_graphs: function(name, env) {
-			this.resources.graphs = {};
-			if (isNaN(this.job.testStop)) {
-				this.job.finishedTime = 'now';
-			} else {
-				this.job.finishedTime = this.job.testStop * 1000;
-			}
-			env = env.toUpperCase()
-			this.resources.graphs.cpu = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
-			this.resources.graphs.memory = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=25&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
-			this.resources.graphs.network = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=65&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
-			this.podGraphsVisibility = !this.podGraphsVisibility;
 		},
 		get_test_aggregates: function(id) {
 			this.$api.get('/aggregates/' + id)
