@@ -210,20 +210,64 @@
 					</table>
 				</div>
 
-
-				{{ overall }}
 				<!-- grafana graphs for resources -->
 				<h4
 					v-if="job.environmentDetails"
 					align="center"
-					@click="get_resources_graphs()"
+					@click="toggleResourcesVisibility"
 					class="resources-graphs"
 					:class="{ collapsed: resourcesVisibility }">
 					resources utilization
 				</h4>
-				<div v-show="resourcesVisibility" class="col-md-12">
+				<div v-show="resourcesVisibility">
 					<div class="row justify-content-between">
-						{{ podsData }}
+						<div class="col-md-4 col-sm-12">
+							<div v-for="value in podsData" :key=value style="margin-top: 5px; margin-right: 5px;">
+								<button @click=get_resources_graphs(value.name,value.labels.env) class="pods" :class="{ collapsed: podGraphsVisibility }">{{ value.name }}</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row justify-content-between">
+					<div class="col-md-4 col-sm-12">
+						<!-- rps -->
+						<iframe
+							:src="resources.graphs.cpu"
+							width="100%"
+							height="100%"
+							marginheight="0"
+							align="top"
+							scrolling="No"
+							frameborder="0"
+							style="overflow: hidden;"
+						/>
+					</div>
+					<div class="col-md-4 col-sm-12">
+						<!-- net codes -->
+						<iframe
+							:src="resources.graphs.memory"
+							width="100%"
+							height="100%"
+							marginheight="0"
+							align="top"
+							scrolling="No"
+							frameborder="0"
+							style="overflow: hidden;"
+						/>
+					</div>
+					<div class="col-md-4 col-sm-12">
+						<!-- net codes -->
+						<iframe
+							:src="resources.graphs.network"
+							width="100%"
+							height="100%"
+							marginheight="0"
+							align="top"
+							scrolling="No"
+							frameborder="0"
+							style="overflow: hidden;"
+						/>
 					</div>
 				</div>
 
@@ -446,7 +490,8 @@ export default {
 			success: null,
 			editorVisibility: false,
 			kubernetesInfoVisibility: false,
-			resourcesVisibility: true,
+			resourcesVisibility: false,
+			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -564,21 +609,22 @@ export default {
 					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.podsData = this.job.environmentDetails;
+					this.podsData = JSON.parse(this.job.environmentDetails);
 					this.loading = false;
 				});
 		},
-		get_resources_graphs: function() {
+		get_resources_graphs: function(name, env) {
 			this.resources.graphs = {};
 			if (isNaN(this.job.testStop)) {
 				this.job.finishedTime = 'now';
 			} else {
 				this.job.finishedTime = this.job.testStop * 1000;
 			}
-			this.resources.graphs.cpu = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?refresh=5s&orgId=1&panelId=17&from=1550231733779&to=1550242533779&var-datasource=%5BPROD%5D%20K8S%20Prometheus&var-Pod=ab-controller-api-76979755cf-wmh5w&theme=light';
-			//this.resources.graphs.cpu = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=&' + this.env + '%5D%20K8S%20Prometheus&var-Pod=' + pods_data + '&var-phase=Failed&var-container=cpu&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
-			//this.resources.graphs.memory = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=&' + this.env + '%5D%20K8S%20Prometheus&var-Pod=' + pods_data + '&var-phase=Failed&var-container=cpu&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
-			//this.resources.graphs.network = 'http://grafana.o3.ru/render/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=&' + this.env + '%5D%20K8S%20Prometheus&var-Pod=' + pods_data + '&var-phase=Failed&var-container=cpu&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			env = env.toUpperCase()
+			this.resources.graphs.cpu = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.resources.graphs.memory = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=25&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.resources.graphs.network = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=65&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.podGraphsVisibility = !this.podGraphsVisibility;
 		},
 		get_test_aggregates: function(id) {
 			this.$api.get('/aggregates/' + id)
@@ -698,6 +744,24 @@ export default {
 		line-height: 14px;
 		background-color: #D85B5B;
 		content: '-';
+	}
+
+	.pods {
+		background-color: #d1e7bc;
+		border-radius: 5px;
+		font-size: 13px;
+		text-align: center;
+		border: 1px solid black;
+		box-shadow: 0 0 1px #444;
+	}
+
+	.pods.collapsed {
+		background-color: #71875d;
+		border-radius: 5px;
+		font-size: 13px;
+		text-align: center;
+		border: 1px solid black;
+		box-shadow: 0 0 3px #444;
 	}
 
 	.arrow.asc{
