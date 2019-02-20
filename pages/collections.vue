@@ -8,8 +8,24 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
 					</div>
+					<h4 align="right">
+						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
+							<option v-for="collection in collections" :key="collection">
+								{{ collection.env }}
+							</option>
+						</select>
+						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
+							<option v-for="collection in collections" :key="collection">
+								{{ collection.service }}
+							</option>
+						</select>
+						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
+							<option v-for="collection in collections" :key="collection">
+								{{ collection.name }}
+							</option>
+						</select>
+					</h4>
 					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
 					<div class="collapse navbar-collapse" id="navbar-main">
 						<ul class="nav navbar-nav">
@@ -28,12 +44,12 @@
 						<caption>Last tests</caption>
 						<thead>
 							<tr>
-								<th scope="col" class="text-center">Test id</th>
+								<th scope="col" class="text-center">Collection id</th>
 								<th scope="col" class="text-center">Author</th>
-								<th scope="col" class="text-center">Status</th>
-								<th scope="col" class="text-center">Start → Stop</th>
-								<th scope="col" class="text-center">Target</th>
-								<th scope="col" class="text-center">Description</th>
+								<th scope="col" class="text-center">Environment</th>
+								<th scope="col" class="text-center">Service</th>
+								<th scope="col" class="text-center">Name</th>
+								<th scope="col" class="text-center">Branch</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -50,18 +66,17 @@
 								</td>
 								<td
 									align="center"
-									:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
 								>
-									{{ job.status }}
+									prod
 								</td>
 								<td align="center">
-									{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}
+									k8s imbalance
 								</td>
 								<td align="center">
 									{{ job.target }}
 								</td>
 								<td align="center">
-									{{ job.description }}
+									master
 								</td>
 							</tr>
 						</tbody>
@@ -73,20 +88,29 @@
 	</div>
 </template>
 
-<script>
 
+<script>
 export default {
 	data() {
 		return {
 			last_jobs: [],
 			loading: true,
+			collections: [{
+				env: 'prod',
+				service: 'item',
+				name: 'k8s imbalance'
+			}, {
+				env: 'stg',
+				service: 'pdp',
+				name: 'marketing imbalance'
+			}
+			]
 		};
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
-	components: {
-	},
+	components: {},
 	created() {
 		this.$api.get('/lastjobs/0')
 			.then(response => {
@@ -99,8 +123,6 @@ export default {
 				});
 				this.loading = false;
 			});
-	},
-	mounted() {
 	},
 	methods: {
 		more_tests: function(from_) {
@@ -115,58 +137,23 @@ export default {
 					});
 				});
 		},
-		ts_to_date: function(ts) {
-			const from_ts = new Date(ts * 1000);
+		get_filtered_collections(param) {
+			this.api.get('/collections?env=' + param)
+				.then(response => {
+					const collections = this.collections
+					const resp_data = response[0].data.collections;
 
-			const today = new Date();
-
-			const from_ts_hour = from_ts.getHours();
-
-			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-
-			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-
-			const from_ts_year = from_ts.getFullYear();
-
-			if (isNaN(from_ts.getDate())) {
-				return 'not yet';
-			}
-			else if (today.getDate() === from_ts.getDate()) {
-				return from_ts_hour + ':' + from_ts_min;
-			}
-			else if (today.getFullYear() === from_ts_year) {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-			else {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-		},
-		is_in_progress: function(status) {
-			if (status !== 'finished') {
-				return false;
-			}
-			else {
-				return true;
-			}
+					resp_data.forEach(function(item) {
+						collections.push(item);
+					});
+				});
 		}
 	},
 };
 </script>
 
-
 <style scoped>
+
 	.overload-fe {
 		padding-top: 20px;
 		width: 90%;
@@ -182,5 +169,14 @@ export default {
 	td > * {
 		vertical-align : middle;
 	}
-</style>
+	.dropbtn {
+		background-color: white;
+		color: black;
+		font-size: 16px;
+		border: solid 2px #007bff;
+		border-radius: 18px;
+		width: auto;
+		cursor: pointer;
+	}
 
+</style>
