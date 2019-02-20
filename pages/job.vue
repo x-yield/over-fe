@@ -428,8 +428,6 @@ export default {
 			success: null,
 			editorVisibility: false,
 			kubernetesInfoVisibility: false,
-			resourcesVisibility: false,
-			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			overallCodeVisibility: false,
@@ -547,7 +545,7 @@ export default {
 					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.podsData = JSON.parse(this.job.environmentDetails);
+					//this.podsData = JSON.parse(this.job.environmentDetails);
 					this.loading = false;
 				});
 		},
@@ -671,24 +669,6 @@ export default {
 		content: '-';
 	}
 
-	.pods {
-		background-color: #d1e7bc;
-		border-radius: 5px;
-		font-size: 13px;
-		text-align: center;
-		border: 1px solid black;
-		box-shadow: 0 0 1px #444;
-	}
-
-	.pods.collapsed {
-		background-color: #71875d;
-		border-radius: 5px;
-		font-size: 13px;
-		text-align: center;
-		border: 1px solid black;
-		box-shadow: 0 0 3px #444;
-	}
-
 	.arrow.asc{
 		margin-left: 5px;
 		display: inline-block;
@@ -705,19 +685,6 @@ export default {
 		border-top: 8px solid #31b131;
 	}
 
-	.resources-graphs.expanded :after {
-		display: inline-block;
-		border-left: 30px solid transparent;
-		border-right: 30px solid transparent;
-		border-bottom: 30px solid #000000;
-	}
-
-	.resources-graphs.collapsed :after {
-		display: inline-block;
-		border-left: 30px solid transparent;
-		border-right: 30px solid transparent;
-		border-top: 30px solid #000000;
-	}
 	.hidden {
 		background-color: #F0EDED;
 	}
