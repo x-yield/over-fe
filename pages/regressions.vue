@@ -46,13 +46,6 @@
 						</tr>
 					</tbody>
 				</table>
-				<!--{{ queryString }}-->
-				<!--{{ collections }}-->
-				<!--<br>-->
-				<!--{{ currentCollection }}-->
-				<!--<br>-->
-				<!--{{ selected }}-->
-				<!--<br>-->
 			</div>
 			<!-- grafana graphs -->
 			<div class="col-md-12">
@@ -110,7 +103,6 @@ export default {
 			loading: true,
 			error: null,
 			success: null,
-			aaaa: false,
 		};
 	},
 	head: {
@@ -129,11 +121,8 @@ export default {
 		this.test_id = this.$route.query.id;
 		this.get_test_info(this.test_id);
 	},
-	mounted() {
-		//this.display_graphs();
-	},
 	methods: {
-		get_collections_info: function(selected_id) {
+		get_collections_info: function() {
 			this.$api.get('/collections?' + this.queryString)
 				.then(response => {
 					return response[0].data;
@@ -147,7 +136,7 @@ export default {
 							this.collections.push(collection);
 						}
 					);
-					this.display_graphs(selected_id);
+					this.display_graphs(this.selected);
 				});
 		},
 		display_graphs: function(selected_id) {
@@ -180,7 +169,7 @@ export default {
 						}
 					);
 					this.selected = this.collection_ids[0];
-					this.get_collections_info(this.selected);
+					this.get_collections_info();
 					this.loading = false;
 				});
 		},
