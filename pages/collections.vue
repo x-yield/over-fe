@@ -112,7 +112,7 @@ export default {
 	},
 	components: {},
 	created() {
-		this.$api.get('/collections?collection_id=2&collection_id=3&collection_id=4&collection_id=5')
+		this.$api.get('/collections')
 			.then(response => {
 				const jobs = this.collections;
 

@@ -130,14 +130,12 @@ export default {
 						return;
 					}
 					this.collection = json;
-				})
-			this.loading = false;
-			this.display_graphs();
-		},
-		display_graphs: function() {
-			const intervalStart = new Date().getTime() - 90*24*60*60*1000;
+					const intervalStart = new Date().getTime() - 90*24*60*60*1000;
 
-			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart+'&to=now&var-env='+this.collection.env+'&var-service='+this.collection.service+'&var-collection='+this.collection.name+'&theme=light';
+					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart
+						+'&to=now&var-env='+this.collection.env+'&var-service='+this.collection.project+'&var-collection='+this.collection.name+'&theme=light';
+					this.loading = false;
+				});
 		},
 	},
 };
