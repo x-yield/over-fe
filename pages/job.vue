@@ -121,7 +121,6 @@
 				</h3>
 			</modal>
 
-
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
@@ -233,10 +232,10 @@
 							<iframe
 								:src="resources.graphs.cpu"
 								width="100%"
-								height="100%"
+								height="160%"
 								marginheight="0"
 								align="top"
-								scrolling="Yes"
+								scrolling="No"
 								frameborder="0"
 								style="overflow: hidden;"
 							/>
@@ -439,6 +438,15 @@
 		</div>
 	</div>
 </template>
+<div>
+	<h4 align="right">
+		<select class="dropbtn" @change="display_graphs(selected)" v-model="selected">
+			<option v-for="collection in collections" :value="collection.id" :key="collection.id">
+				{{ collection.env + ' -> ' + collection.service + ' -> ' + collection.name }}
+			</option>
+		</select>
+	</h4>
+</div>
 
 <script>
 import Modal from '../components/Modal';

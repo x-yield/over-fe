@@ -44,39 +44,49 @@
 						<caption>Last tests</caption>
 						<thead>
 							<tr>
-								<th scope="col" class="text-center">Collection id</th>
+								<th scope="col" class="text-center">Collection Id</th>
 								<th scope="col" class="text-center">Author</th>
 								<th scope="col" class="text-center">Environment</th>
+								<th scope="col" class="text-center">Project name</th>
 								<th scope="col" class="text-center">Service</th>
 								<th scope="col" class="text-center">Name</th>
 								<th scope="col" class="text-center">Branch</th>
+								<th scope="col" class="text-center">Latest jobs</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-for="job in last_jobs" :key="job.id">
+							<tr v-for="collection in collections" :key="collection.id">
 								<td
 									align="center"
 								>
-									<a :href='"/job?id="+job.id'>{{ job.id }}</a>
-								</td>
-								<td
-									align="center"
-								>
-									{{ job.author }}
+									<a :href='"/regressions?id="+collection.id'>{{ collection.id }}</a>
 								</td>
 								<td
 									align="center"
 								>
-									prod
+									{{ collection.author }}
+								</td>
+								<td
+									align="center"
+								>
+									{{ collection.env }}
 								</td>
 								<td align="center">
-									k8s imbalance
+									{{ collection.project }}
 								</td>
 								<td align="center">
-									{{ job.target }}
+									{{ collection.service }}
 								</td>
 								<td align="center">
-									master
+									{{ collection.name }}
+								</td>
+								<td align="center">
+									{{ collection.ref }}
+								</td>
+								<td align="center">
+									<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
+										{{ job.id }}
+									</a>
 								</td>
 							</tr>
 						</tbody>
@@ -93,18 +103,8 @@
 export default {
 	data() {
 		return {
-			last_jobs: [],
+			collections: [],
 			loading: true,
-			collections: [{
-				env: 'prod',
-				service: 'item',
-				name: 'k8s imbalance'
-			}, {
-				env: 'stg',
-				service: 'pdp',
-				name: 'marketing imbalance'
-			}
-			]
 		};
 	},
 	head: {
@@ -112,11 +112,11 @@ export default {
 	},
 	components: {},
 	created() {
-		this.$api.get('/lastjobs/0')
+		this.$api.get('/collections?collection_id=2&collection_id=3&collection_id=4&collection_id=5')
 			.then(response => {
-				const jobs = this.last_jobs;
+				const jobs = this.collections;
 
-				const resp_data = response[0].data.jobs;
+				const resp_data = response[0].data.collections;
 
 				resp_data.forEach(function(item) {
 					jobs.push(item);
@@ -126,7 +126,7 @@ export default {
 	},
 	methods: {
 		more_tests: function(from_) {
-			this.$api.get('/lastjobs/' + from_)
+			this.$api.get('/collections?collection_id=2&collection_id=3')
 				.then(response => {
 					const jobs = this.last_jobs;
 

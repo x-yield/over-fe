@@ -8,16 +8,6 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-						<a :href='"/job?id="+test_id'>Back to job {{ test_id }}</a>
-					</div>
-					<div>
-						<h4 align="right">
-							<select class="dropbtn" @change="display_graphs(selected)" v-model="selected">
-								<option v-for="collection in collections" :value="collection.id" :key="collection.id">
-									{{ collection.env + ' -> ' + collection.service + ' -> ' + collection.name }}
-								</option>
-							</select>
-						</h4>
 					</div>
 				</div>
 			</nav>
@@ -26,23 +16,36 @@
 			</div>
 
 			<div class="col-md-12">
+				<h4 align="center">Collection #{{ collection_id }}</h4>
 				<table class="table table-sm table-hover">
 					<tbody>
 						<tr>
 							<td align="center">Environment</td>
-							<td align="center">{{ currentCollection.env }}</td>
+							<td align="center">{{ collection.env }}</td>
+						</tr>
+						<tr>
+							<td align="center">Project name</td>
+							<td align="center">{{ collection.project }}</td>
 						</tr>
 						<tr>
 							<td align="center">Service</td>
-							<td align="center">{{ currentCollection.service }}</td>
+							<td align="center">{{ collection.service }}</td>
 						</tr>
 						<tr>
 							<td align="center">Name of collection</td>
-							<td align="center">{{ currentCollection.name }}</td>
+							<td align="center">{{ collection.name }}</td>
 						</tr>
 						<tr>
 							<td align="center">Author</td>
-							<td align="center">{{ currentCollection.author }}</td>
+							<td align="center">{{ collection.author }}</td>
+						</tr>
+						<tr>
+							<td align="center">Latest jobs for this collection</td>
+							<td align="center">
+								<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
+									{{ job.id }}
+								</a>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -89,17 +92,12 @@ const {
 export default {
 	data() {
 		return {
-			currentCollection: {},
-			queryString: null,
-			selected: '',
-			collection_ids: [],
 			regression: {
 				graphs: {
 					imbalance: null
 				}
 			},
-			collections: [],
-			test_id: null,
+			collection: {},
 			loading: true,
 			error: null,
 			success: null,
@@ -118,60 +116,28 @@ export default {
 		Container: container
 	},
 	created() {
-		this.test_id = this.$route.query.id;
-		this.get_test_info(this.test_id);
+		this.collection_id = this.$route.query.id;
+		this.get_collections_info(this.collection_id);
 	},
 	methods: {
-		get_collections_info: function() {
-			this.$api.get('/collections?' + this.queryString)
+		get_collections_info: function(id) {
+			this.$api.get('/collections?collection_id=' + id)
 				.then(response => {
-					return response[0].data;
+					return response[0].data.collections[0];
 				})
 				.then(json => {
-					if (!json.collections) {
+					if (!json) {
 						return;
 					}
-					json.collections.forEach(
-						collection => {
-							this.collections.push(collection);
-						}
-					);
-					this.display_graphs(this.selected);
-				});
+					this.collection = json;
+				})
+			this.loading = false;
+			this.display_graphs();
 		},
-		display_graphs: function(selected_id) {
+		display_graphs: function() {
 			const intervalStart = new Date().getTime() - 90*24*60*60*1000;
 
-			this.collections.forEach(
-				collection => {
-					if (selected_id === collection.id) {
-						this.currentCollection = (collection);
-					}
-				}
-			);
-
-			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart+'&to=now&var-env='+this.currentCollection.env+'&var-service='+this.currentCollection.service+'&var-collection='+this.currentCollection.name+'&theme=light';
-		},
-		get_test_info: function(id) {
-			this.$api.get('/job/' + id)
-				.then(response => {
-					return response[0].data.job;
-				})
-				.then(job_json => {
-					if (!job_json) {
-						return;
-					}
-					this.job = job_json;
-					job_json.collectionIds.forEach(
-						collection_id => {
-							this.collection_ids.push(collection_id);
-							this.queryString = ('collection_id='+collection_id+'&').slice(0, -1);
-						}
-					);
-					this.selected = this.collection_ids[0];
-					this.get_collections_info();
-					this.loading = false;
-				});
+			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart+'&to=now&var-env='+this.collection.env+'&var-service='+this.collection.service+'&var-collection='+this.collection.name+'&theme=light';
 		},
 	},
 };
