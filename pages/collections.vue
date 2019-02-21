@@ -59,7 +59,7 @@
 								<td
 									align="center"
 								>
-									<a :href='"/regressions?id="+collection.id'>{{ collection.id }}</a>
+									<a :href='"/collection?id="+collection.id'>{{ collection.id }}</a>
 								</td>
 								<td
 									align="center"

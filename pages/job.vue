@@ -121,6 +121,31 @@
 				</h3>
 			</modal>
 
+			<modal v-show="collectionsListVisibility" @close="toggleCollectionsVisibility">
+				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
+				<h3 slot="body" class="job-kubernetes-info">
+					<div v-for="collection in collections" :key="collection.id">
+						<a :href='"/collection?id="+collection.id'>{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+						</a>
+					</div>
+				</h3>
+				<h3 slot="footer">
+					<div class="overload-fe-container buttons">
+						<Row>
+							<Column>
+								<Button
+									theme="secondary"
+									@click="toggleKubernetesInfo"
+								>
+									Закрыть
+								</Button>
+							</Column>
+						</Row>
+					</div>
+
+				</h3>
+			</modal>
+
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
@@ -129,15 +154,14 @@
 				<div>
 					<h4 align="center">Test #{{ job.id }}</h4>
 					<h4 align="right">
-						<a :href='"/regressions?id="+test_id'>
-							<img
-								v-if="job.collectionIds"
-								alt="edit"
-								width="35px"
-								height="40px"
-								src="~/assets/icons/regression.png"
-							/>
-						</a>
+						<img
+							v-if="job.collections"
+							alt="edit"
+							width="35px"
+							height="40px"
+							src="~/assets/icons/regression.png"
+							@click="toggleCollectionsVisibility"
+						/>
 						<img
 							v-if="job.environmentDetails && job.environmentDetails !== 'null'"
 							alt="edit"
@@ -432,6 +456,7 @@
 								</template>
 							</tbody>
 						</table>
+						{{ collections }}
 					</div>
 				</div>
 			</div>
@@ -485,7 +510,7 @@ export default {
 					network: null,
 				},
 			},
-			isSummaryVisible: true,
+			collections: [],
 			podsData: {},
 			overall: {},
 			tagged: [],
@@ -496,13 +521,15 @@ export default {
 			loading: true,
 			error: null,
 			success: null,
+			isSummaryVisible: true,
 			editorVisibility: false,
+			overallCodeVisibility: false,
 			kubernetesInfoVisibility: false,
 			resourcesVisibility: false,
 			podGraphsVisibility: false,
+			collectionsListVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			overallCodeVisibility: false,
 			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
 		};
 	},
@@ -555,6 +582,9 @@ export default {
 		toggleKubernetesInfo: function() {
 			clearInterval(this.watcher);
 			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
+		},
+		toggleCollectionsVisibility: function() {
+			this.collectionsListVisibility = !this.collectionsListVisibility;
 		},
 		toggleResourcesVisibility: function() {
 			this.resourcesVisibility = !this.resourcesVisibility;
@@ -618,6 +648,7 @@ export default {
 					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+					this.collections = this.job.collections;
 					this.loading = false;
 				});
 		},
