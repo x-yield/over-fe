@@ -135,8 +135,7 @@
 							<Column>
 								<Button
 									theme="secondary"
-									@click="toggleKubernetesInfo"
-								>
+									@click="toggleCollectionsVisibility">
 									Закрыть
 								</Button>
 							</Column>
@@ -234,29 +233,30 @@
 				</div>
 
 				<!-- grafana graphs for resources -->
-				<h4
+				<div
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
 					align="center"
 					@click="toggleResourcesVisibility"
-					class="resources-graphs"
-					:class="{ collapsed: resourcesVisibility }">
+					style="font-size: 18px">
 					resources utilization
-				</h4>
+					<div class="resources-graphs" :class="{ collapsed: resourcesVisibility }"/>
+				</div>
+
 				<div v-show="resourcesVisibility">
 					<div class="row justify-content-between">
-						<div class="col-md-4 col-sm-12">
-							<div v-for="value in podsData" :key=value style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px">
-								<button @click=get_resources_graphs(value.name,value.labels.env) class="pods" :class="{ collapsed: podGraphsVisibility }">{{ value.name }}</button>
+						<div class="col-md-12 col-sm-12" >
+							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6" style="margin-top: 5px; margin-bottom: 5px; display: inline; float: left;">
+								<button @click=get_resources_graphs(value.name,value.labels.env) class="pods" :class="{ collapsed: openedGraphs.includes(value.name) }">{{ value.name }}</button>
 							</div>
 						</div>
 					</div>
-					<div v-show="podGraphsVisibility" class="row justify-content-between">
+					<div v-show="openedGraphs.length > 0" class="row justify-content-between" style="height: 250px;">
 						<div class="col-md-4 col-sm-12">
 							<!-- rps -->
 							<iframe
 								:src="resources.graphs.cpu"
 								width="100%"
-								height="160%"
+								height="100%"
 								marginheight="0"
 								align="top"
 								scrolling="No"
@@ -271,6 +271,7 @@
 								width="100%"
 								height="100%"
 								marginheight="0"
+								margin-bottom="100px"
 								align="top"
 								scrolling="No"
 								frameborder="0"
@@ -456,7 +457,6 @@
 								</template>
 							</tbody>
 						</table>
-						{{ collections }}
 					</div>
 				</div>
 			</div>
@@ -475,6 +475,7 @@
 
 <script>
 import Modal from '../components/Modal';
+import ModalCollection from '../components/ModalCollection';
 import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
@@ -518,6 +519,7 @@ export default {
 			taggedByCode: [],
 			sortedTaggedByCode: [],
 			openedTag: [],
+			openedGraphs: [],
 			loading: true,
 			error: null,
 			success: null,
@@ -538,6 +540,7 @@ export default {
 	},
 	components: {
 		Modal,
+		ModalCollection,
 		Button,
 		Input,
 		Select,
@@ -600,6 +603,17 @@ export default {
 				this.openedTag.splice(index, 1);
 			} else {
 				this.openedTag.push(name);
+			}
+		},
+		toggleGraphsVisibility(pod_button) {
+			console.log(this.openedGraphs);
+			if (this.openedGraphs.includes(pod_button)) {
+				this.openedGraphs.splice(pod_button);
+				console.log('after splice', this.openedGraphs);
+			} else {
+				this.openedGraphs = [];
+				this.openedGraphs.push(pod_button);
+				console.log('after push', this.openedGraphs);
 			}
 		},
 		toggleOverallCodeVisibility() {
@@ -688,7 +702,7 @@ export default {
 			this.resources.graphs.cpu = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.resources.graphs.memory = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=25&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.resources.graphs.network = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=65&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
-			this.podGraphsVisibility = !this.podGraphsVisibility;
+			this.toggleGraphsVisibility(name);
 		},
 		sort_aggregates: function(s) {
 			if (s === this.currentSort) {
@@ -802,18 +816,19 @@ export default {
 		border-top: 8px solid #31b131;
 	}
 
-	.resources-graphs.expanded :after {
-		display: inline-block;
-		border-left: 30px solid transparent;
-		border-right: 30px solid transparent;
-		border-bottom: 30px solid #000000;
+	.resources-graphs.collapsed {
+		border-width: 0 3px 3px 0;
 	}
 
-	.resources-graphs.collapsed :after {
+	.resources-graphs {
 		display: inline-block;
-		border-left: 30px solid transparent;
-		border-right: 30px solid transparent;
-		border-top: 30px solid #000000;
+		cursor: pointer;
+		border: solid #000;
+		border-width: 3px 0 0 3px;
+		width: 12px;
+		height: 12px;
+		margin-left: 5px;
+		transform: rotate(-135deg);
 	}
 
 	.pods {
@@ -823,6 +838,7 @@ export default {
 		text-align: center;
 		border: 1px solid black;
 		box-shadow: 0 0 1px #444;
+		cursor: pointer;
 	}
 
 	.pods.collapsed {
@@ -833,9 +849,11 @@ export default {
 		text-align: center;
 		border: 1px solid black;
 		box-shadow: 0 0 3px #444;
+		cursor: pointer;
 	}
 
 	.hidden {
 		background-color: #F0EDED;
 	}
+
 </style>

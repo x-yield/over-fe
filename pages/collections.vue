@@ -10,28 +10,29 @@
 						<a class="navbar-brand" href="/">Overload</a>
 					</div>
 					<h4 align="right">
-						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
-							<option v-for="collection in collections" :key="collection">
-								{{ collection.env }}
-							</option>
-						</select>
-						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
-							<option v-for="collection in collections" :key="collection">
-								{{ collection.service }}
-							</option>
-						</select>
-						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
-							<option v-for="collection in collections" :key="collection">
-								{{ collection.name }}
-							</option>
-						</select>
+						<form @change="get_filtered_collections(selected_env, selected_project, selected_name) " >
+							<select class="dropbtn" v-model="selected_env">
+								<option/>
+								<option v-for="parameter in envs" :key="parameter">
+									{{ parameter }}
+								</option>
+							</select>
+							<select class="dropbtn" v-model="selected_project">
+								<option/>
+								<option v-for="parameter in projects" :key="parameter">
+									{{ parameter }}
+								</option>
+							</select>
+							<select class="dropbtn" v-model="selected_name">
+								<option/>
+								<option v-for="parameter in names" :key="parameter">
+									{{ parameter }}
+								</option>
+							</select>
+							<button class="btn" @click="flush_all_filters()">Flush all filters</button>
+						</form>
+
 					</h4>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="">Last tests</a></li>
-						</ul>
-					</div>
 				</div>
 			</nav>
 
@@ -41,7 +42,7 @@
 				</div>
 				<div v-else>
 					<table class="table table-sm table-bordered" >
-						<caption>Last tests</caption>
+						<caption>Last collections</caption>
 						<thead>
 							<tr>
 								<th scope="col" class="text-center">Collection Id</th>
@@ -91,7 +92,6 @@
 							</tr>
 						</tbody>
 					</table>
-					<button class="btn-lg" @click="more_tests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
 				</div>
 			</div>
 		</div>
@@ -103,7 +103,14 @@
 export default {
 	data() {
 		return {
+			selected_env: '',
+			selected_project: '',
+			selected_name: '',
 			collections: [],
+			parameters: [],
+			envs: [],
+			projects: [],
+			names: [],
 			loading: true,
 		};
 	},
@@ -112,43 +119,58 @@ export default {
 	},
 	components: {},
 	created() {
-		this.$api.get('/collections')
-			.then(response => {
-				const jobs = this.collections;
 
-				const resp_data = response[0].data.collections;
-
-				resp_data.forEach(function(item) {
-					jobs.push(item);
-				});
-				this.loading = false;
-			});
+		this.get_filtered_collections('', '', '', '');
 	},
 	methods: {
-		more_tests: function(from_) {
-			this.$api.get('/collections?collection_id=2&collection_id=3')
-				.then(response => {
-					const jobs = this.last_jobs;
+		get_filtered_collections(env, project, name) {
 
-					const resp_data = response[0].data.jobs;
+			this.loading = true;
+			let params = {env, project, name};
 
-					resp_data.forEach(function(item) {
-						jobs.push(item);
-					});
-				});
-		},
-		get_filtered_collections(param) {
-			this.api.get('/collections?env=' + param)
+			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
+
+			this.collections = [];
+			this.envs = [];
+			this.projects = [];
+			this.names = [];
+
+			this.$api.get('/collections?'+ queryString)
 				.then(response => {
-					const collections = this.collections
+
 					const resp_data = response[0].data.collections;
 
-					resp_data.forEach(function(item) {
-						collections.push(item);
-					});
+					resp_data.forEach(
+						item => {
+							this.collections.push(item);
+						}
+					);
+
+					this.loading = false;
+
+					this.collections.forEach(
+						item => {
+							if (this.envs.indexOf(item.env) === -1) {
+								this.envs.push(item.env);
+							}
+							if (this.projects.indexOf(item.project) === -1) {
+								this.projects.push(item.project);
+							}
+							if (this.names.indexOf(item.name) === -1) {
+								this.names.push(item.name);
+							}
+
+						}
+					);
 				});
+
+		},
+		flush_all_filters() {
+			this.selected_env, this.selected_name, this.selected_project = '';
 		}
+
 	},
+
 };
 </script>
 
