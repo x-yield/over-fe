@@ -8,6 +8,8 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
+						<a class="navbar-brand" href="/collections">Collections</a>
+						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
 					<h4 align="right">
 						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">

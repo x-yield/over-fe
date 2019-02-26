@@ -8,6 +8,8 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
+						<a class="navbar-brand" href="/collections">Collections</a>
+						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
 					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
 					<div class="collapse navbar-collapse" id="navbar-main">
