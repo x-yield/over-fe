@@ -69,16 +69,9 @@
 </template>
 
 <script>
-import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
-
-const {
-	container,
-	row,
-	column,
-} = Layout;
 
 let ammoKeys = [];
 
@@ -93,11 +86,6 @@ export default {
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
-	},
-	components: {
-		Row: row,
-		Column: column,
-		Container: container
 	},
 	created() {
 		this.get_ammo_info();
@@ -142,7 +130,7 @@ export default {
 					let len_a = this.ammo.length;
 
 					// форматируем данные, чтобы красиво было.
-					// и заполняем массив наименований файлов
+					// и заполняем массив наименований существующих файлов
 					for (;i<len_a;i++) {
 						let a = this.ammo[i];
 
@@ -153,7 +141,6 @@ export default {
 				});
 			this.loading = false;
 		},
-		// TODO: Это все надо переписать, когда придумаем, как быть с авторизацией пользователей.
 		submit_form: function(event) {
 			let $form = document.getElementById('ammoUploadForm');
 			let ammoKey = $form.children[0]['value'];
