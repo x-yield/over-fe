@@ -15,7 +15,7 @@
 			</nav>
 
 			<div>
-				<form id="ammoUploadForm" enctype="multipart/form-data" method="post" action="http://localhost:7000/upload_ammo">
+				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
 					<input type="text" name="name" placeholder="Имя" required/>
 					<input type="file" name="file" required/>
 					<input type="submit" name="file" id="submitButton" hidden/>
@@ -116,6 +116,9 @@ export default {
 			}
 			return bytes + prefixMap[count];
 		},
+		set_from_action: function($form) {
+			$form.action = '//' + this.$env.endpoint + '/upload_ammo';
+		},
 		get_ammo_info: function() {
 			this.$api.get('/list_ammo')
 				.then(response => {
@@ -137,7 +140,6 @@ export default {
 						ammoKeys.push(a['key']);
 						a['size'] = this.sexy_bytes(a['size']);
 					}
-
 				});
 			this.loading = false;
 		},
@@ -151,6 +153,7 @@ export default {
 			// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
 			if (ammoKeys.indexOf(ammoKey) > -1) {
 				if (confirm('Файл с таким именем уже существует. Перезаписать?')) {
+					this.set_from_action($form);
 					$submitButton.click();
 				}
 			}
