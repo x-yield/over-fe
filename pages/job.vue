@@ -125,7 +125,7 @@
 				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
 				<h3 slot="body">
 					<div v-for="(collection) in collections" :key="collection.id">
-						<a :href='"/collection?id="+collection.id' style="text-decoration: underline">{{collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+						<a :href='"/collection?id="+collection.id' style="text-decoration: underline">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
 						</a>
 					</div>
 				</h3>
@@ -686,7 +686,7 @@ export default {
 			} else {
 				this.job.finishedTime = this.job.testStop * 1000;
 			}
-			env = env.toUpperCase()
+			env = env.toUpperCase();
 			this.resources.graphs.cpu = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.resources.graphs.memory = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=25&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.resources.graphs.network = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=65&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
