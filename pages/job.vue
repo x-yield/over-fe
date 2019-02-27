@@ -123,9 +123,9 @@
 
 			<modal v-show="collectionsListVisibility" @close="toggleCollectionsVisibility">
 				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
-				<h3 slot="body" class="job-kubernetes-info">
-					<div v-for="collection in collections" :key="collection.id">
-						<a :href='"/collection?id="+collection.id'>{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+				<h3 slot="body">
+					<div v-for="(collection) in collections" :key="collection.id">
+						<a :href='"/collection?id="+collection.id' style="text-decoration: underline">{{collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
 						</a>
 					</div>
 				</h3>
@@ -464,18 +464,10 @@
 	</div>
 </template>
 <div>
-	<h4 align="right">
-		<select class="dropbtn" @change="display_graphs(selected)" v-model="selected">
-			<option v-for="collection in collections" :value="collection.id" :key="collection.id">
-				{{ collection.env + ' -> ' + collection.service + ' -> ' + collection.name }}
-			</option>
-		</select>
-	</h4>
 </div>
 
 <script>
 import Modal from '../components/Modal';
-import ModalCollection from '../components/ModalCollection';
 import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
@@ -540,7 +532,6 @@ export default {
 	},
 	components: {
 		Modal,
-		ModalCollection,
 		Button,
 		Input,
 		Select,
@@ -593,7 +584,7 @@ export default {
 			this.resourcesVisibility = !this.resourcesVisibility;
 			this.podsData = JSON.parse(this.job.environmentDetails);
 		},
-		toggleVisibility: function() {
+		toggleVisibility: function(a) {
 			this.isSummaryVisible = !this.isSummaryVisible;
 		},
 		toggleResponseCodeVisibility(name) {
@@ -606,14 +597,11 @@ export default {
 			}
 		},
 		toggleGraphsVisibility(pod_button) {
-			console.log(this.openedGraphs);
 			if (this.openedGraphs.includes(pod_button)) {
 				this.openedGraphs.splice(pod_button);
-				console.log('after splice', this.openedGraphs);
 			} else {
 				this.openedGraphs = [];
 				this.openedGraphs.push(pod_button);
-				console.log('after push', this.openedGraphs);
 			}
 		},
 		toggleOverallCodeVisibility() {

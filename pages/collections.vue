@@ -29,7 +29,7 @@
 									{{ parameter }}
 								</option>
 							</select>
-							<button class="btn" @click="flush_all_filters()">Flush all filters</button>
+							<button class="dropbtn" @click="flush_all_filters()">Flush all filters</button>
 						</form>
 
 					</h4>
@@ -107,7 +107,6 @@ export default {
 			selected_project: '',
 			selected_name: '',
 			collections: [],
-			parameters: [],
 			envs: [],
 			projects: [],
 			names: [],
@@ -120,11 +119,10 @@ export default {
 	components: {},
 	created() {
 
-		this.get_filtered_collections('', '', '', '');
+		this.get_filtered_collections('', '', '');
 	},
 	methods: {
 		get_filtered_collections(env, project, name) {
-
 			this.loading = true;
 			let params = {env, project, name};
 
