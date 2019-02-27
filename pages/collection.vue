@@ -8,6 +8,7 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
+						<a class="navbar-brand" href="/collections">Collections</a>
 					</div>
 				</div>
 			</nav>
@@ -16,7 +17,7 @@
 			</div>
 
 			<div class="col-md-12">
-				<h4 align="center">Collection #{{ collection_id }}</h4>
+				<h4 align="center">Collection #{{ collectionId }}</h4>
 				<table class="table table-sm table-hover">
 					<tbody>
 						<tr>
@@ -97,6 +98,7 @@ export default {
 					imbalance: null
 				}
 			},
+			collectionId: '',
 			collection: {},
 			loading: true,
 			error: null,
@@ -116,11 +118,11 @@ export default {
 		Container: container
 	},
 	created() {
-		this.collection_id = this.$route.query.id;
-		this.get_collections_info(this.collection_id);
+		this.collectionId = this.$route.query.id;
+		this.getCollectionsInfo(this.collectionId);
 	},
 	methods: {
-		get_collections_info: function(id) {
+		getCollectionsInfo: function(id) {
 			this.$api.get('/collections?collection_id=' + id)
 				.then(response => {
 					return response[0].data.collections[0];
@@ -158,6 +160,5 @@ export default {
 	td > * {
 		vertical-align : middle;
 	}
-
 </style>
 

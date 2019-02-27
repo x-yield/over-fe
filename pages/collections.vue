@@ -10,26 +10,27 @@
 						<a class="navbar-brand" href="/">Overload</a>
 					</div>
 					<h4 align="right">
-						<form @change="get_filtered_collections(selected_env, selected_project, selected_name) " >
-							<select class="dropbtn" v-model="selected_env">
-								<option/>
+						<form @change="getFilteredCollections(selected={env, project, name}) " >
+							<select class="dropbtn" v-model="env">
+								<option value="" style="color: #adb5bd">All</option>
 								<option v-for="parameter in envs" :key="parameter">
 									{{ parameter }}
 								</option>
 							</select>
-							<select class="dropbtn" v-model="selected_project">
-								<option/>
+							<select class="dropbtn" v-model="project">
+								<option value="">All</option>
 								<option v-for="parameter in projects" :key="parameter">
-									{{ parameter }}
+									{{ parameter.projectId }}
+									<span v-if="parameter.projectName">({{ parameter.projectName }})</span>
 								</option>
 							</select>
-							<select class="dropbtn" v-model="selected_name">
-								<option/>
+							<select class="dropbtn" v-model="name">
+								<option value="">All</option>
 								<option v-for="parameter in names" :key="parameter">
 									{{ parameter }}
 								</option>
 							</select>
-							<button class="dropbtn" @click="flush_all_filters()">Flush all filters</button>
+							<button class="dropbtn flush" @click="flushAllFilters()">Flush all filters</button>
 						</form>
 
 					</h4>
@@ -45,11 +46,11 @@
 						<caption>Last collections</caption>
 						<thead>
 							<tr>
-								<th scope="col" class="text-center">Collection Id</th>
+								<th scope="col" class="text-center">Collection ID</th>
 								<th scope="col" class="text-center">Author</th>
 								<th scope="col" class="text-center">Environment</th>
+								<th scope="col" class="text-center">Project ID</th>
 								<th scope="col" class="text-center">Project name</th>
-								<th scope="col" class="text-center">Service</th>
 								<th scope="col" class="text-center">Name</th>
 								<th scope="col" class="text-center">Branch</th>
 								<th scope="col" class="text-center">Latest jobs</th>
@@ -92,6 +93,7 @@
 							</tr>
 						</tbody>
 					</table>
+					{{ projects }}
 				</div>
 			</div>
 		</div>
@@ -103,9 +105,10 @@
 export default {
 	data() {
 		return {
-			selected_env: '',
-			selected_project: '',
-			selected_name: '',
+			selected: {},
+			env: '',
+			project: '',
+			name: '',
 			collections: [],
 			envs: [],
 			projects: [],
@@ -118,14 +121,11 @@ export default {
 	},
 	components: {},
 	created() {
-
-		this.get_filtered_collections('', '', '');
+		this.getFilteredCollections(this.selected);
 	},
 	methods: {
-		get_filtered_collections(env, project, name) {
+		getFilteredCollections(params) {
 			this.loading = true;
-			let params = {env, project, name};
-
 			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
 			this.collections = [];
@@ -135,24 +135,21 @@ export default {
 
 			this.$api.get('/collections?'+ queryString)
 				.then(response => {
+					const respData = response[0].data.collections;
 
-					const resp_data = response[0].data.collections;
-
-					resp_data.forEach(
+					respData.forEach(
 						item => {
 							this.collections.push(item);
 						}
 					);
-
-					this.loading = false;
-
 					this.collections.forEach(
 						item => {
 							if (this.envs.indexOf(item.env) === -1) {
 								this.envs.push(item.env);
 							}
 							if (this.projects.indexOf(item.project) === -1) {
-								this.projects.push(item.project);
+
+								this.projects.push({projectId: item.project, projectName: item.service});
 							}
 							if (this.names.indexOf(item.name) === -1) {
 								this.names.push(item.name);
@@ -160,20 +157,18 @@ export default {
 
 						}
 					);
+					this.loading = false;
 				});
 
 		},
-		flush_all_filters() {
-			this.selected_env, this.selected_name, this.selected_project = '';
+		flushAllFilters() {
+			this.selected = {};
 		}
-
 	},
-
 };
 </script>
 
 <style scoped>
-
 	.overload-fe {
 		padding-top: 20px;
 		width: 90%;
@@ -189,14 +184,21 @@ export default {
 	td > * {
 		vertical-align : middle;
 	}
+
 	.dropbtn {
 		background-color: white;
 		color: black;
 		font-size: 16px;
 		border: solid 2px #007bff;
-		border-radius: 18px;
+		border-radius: 5px;
 		width: auto;
 		cursor: pointer;
 	}
 
+	.flush {
+		color: white;
+		background-color: #007bff;
+		box-shadow: 0 0 1px #444;
+		font-weight: bold;
+	}
 </style>
