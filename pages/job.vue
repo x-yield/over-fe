@@ -584,7 +584,7 @@ export default {
 			this.resourcesVisibility = !this.resourcesVisibility;
 			this.podsData = JSON.parse(this.job.environmentDetails);
 		},
-		toggleVisibility: function(a) {
+		toggleVisibility: function() {
 			this.isSummaryVisible = !this.isSummaryVisible;
 		},
 		toggleResponseCodeVisibility(name) {
