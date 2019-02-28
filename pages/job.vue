@@ -610,6 +610,7 @@ export default {
 					} else {
 						this.job.finishedTime = this.job.testStop * 1000;
 					}
+					this.collections = this.job.collections;
 					this.selectGraphs(this.selectedTag);
 					this.loading = false;
 				});
