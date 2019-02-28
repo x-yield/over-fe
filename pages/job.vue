@@ -271,7 +271,7 @@
 							/>
 						</div>
 					</div>
-					<div align="center" v-show="openedGraphs.length > 0" style="padding-bottom: 2em; padding-top: 1em">
+					<div align="center" v-show="openedGraphs.length > 0" style="padding: 1em 0 2em 0;">
 						<a :href="resources.link" class="text-link" target="_blank">More info in Grafana</a>
 					</div>
 				</div>
