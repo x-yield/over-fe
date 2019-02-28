@@ -280,6 +280,20 @@
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">graphs</h3>
+					<div v-if="sortedAggregates.length > 1">
+						<h4	align="left">
+							<form @change="selectGraphs(selectedTag) " >
+								<select v-model="selectedTag">
+									<option>
+										__OVERALL__
+									</option>
+									<option v-for="tag in sortedAggregates" :key="tag.label">
+										{{ tag.label }}
+									</option>
+								</select>
+							</form>
+						</h4>
+					</div>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- rps -->
@@ -487,7 +501,8 @@ export default {
 			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
+			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'],
+			selectedTag: '__OVERALL__'
 		};
 	},
 	head: {
@@ -595,13 +610,25 @@ export default {
 					} else {
 						this.job.finishedTime = this.job.testStop * 1000;
 					}
-					this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.collections = this.job.collections;
+					this.selectGraphs(this.selectedTag);
 					this.loading = false;
 				});
+		},
+		selectGraphs: function(tag) {
+			this.loading=true;
+			if (tag === '__OVERALL__') {
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+			} else {
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=11&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=12&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=13&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+			}
+			this.selectedTag=tag;
+			this.loading=false;
 		},
 		get_test_aggregates: function(id) {
 			this.$api.get('/aggregates/' + id)
@@ -807,7 +834,6 @@ export default {
 	.hidden-rows {
 		background-color: #F0EDED;
 	}
-
 	.iframe-graphs {
 		width: 100%;
 		height: 100%;
@@ -817,4 +843,30 @@ export default {
 	.text-link{
 		text-decoration: underline;
 	}
+
+	select {
+		background-color: white;
+		border: thin solid black;
+		display: inline-block;
+		font-size: 14px;
+		line-height: 1.5em;
+		padding: 0.5em 3.5em 0.5em 1em;
+}
+
+	/*select.minimal {*/
+		/*background-image:*/
+			/*linear-gradient(45deg, transparent 50%, gray 50%),*/
+			/*linear-gradient(135deg, gray 50%, transparent 50%),*/
+			/*linear-gradient(to right, #ccc, #ccc);*/
+		/*background-position:*/
+			/*calc(100% - 20px) calc(1em + 2px),*/
+			/*calc(100% - 15px) calc(1em + 2px),*/
+			/*calc(100% - 2.5em) 0.5em;*/
+		/*background-size:*/
+		/*5px 5px,*/
+		/*5px 5px,*/
+		/*1px 1.5em;*/
+		/*background-repeat: no-repeat;*/
+/*}*/
+
 </style>
