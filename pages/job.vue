@@ -18,7 +18,7 @@
 				</div>
 			</nav>
 
-			<modal v-show="editorVisibility" @close="toggleEditor">
+			<modal v-show="visibilities.editorVisibility" @close="toggleVisibility('editorVisibility')">
 				<h3 slot="header">Редактирование теста {{ job.id }}</h3>
 				<h3 slot="body">
 					<div class="overload-fe-container job-editor">
@@ -86,7 +86,7 @@
 							<Column>
 								<Button
 									theme="secondary"
-									@click="toggleEditor"
+									@click="toggleVisibility('editorVisibility')"
 								>
 									Отмена
 								</Button>
@@ -97,7 +97,7 @@
 				</h3>
 			</modal>
 
-			<modal v-show="kubernetesInfoVisibility" @close="toggleKubernetesInfo">
+			<modal v-show="visibilities.kubernetesInfoVisibility" @close="toggleVisibility('kubernetesInfoVisibility')">
 				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
 				<h3 slot="body" class="job-kubernetes-info">
 					<div class="overload-fe-container">
@@ -110,7 +110,7 @@
 							<Column>
 								<Button
 									theme="secondary"
-									@click="toggleKubernetesInfo"
+									@click="toggleVisibility('kubernetesInfoVisibility')"
 								>
 									Закрыть
 								</Button>
@@ -121,6 +121,29 @@
 				</h3>
 			</modal>
 
+			<modal v-show="visibilities.collectionsListVisibility" @close="toggleVisibility('collectionsListVisibility')">
+				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
+				<h3 slot="body">
+					<div v-for="(collection) in collections" :key="collection.id">
+						<a :href='"/collection?id="+collection.id' class="text-link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+						</a>
+					</div>
+				</h3>
+				<h3 slot="footer">
+					<div class="overload-fe-container buttons">
+						<Row>
+							<Column>
+								<Button
+									theme="secondary"
+									@click="toggleVisibility('collectionsListVisibility')">
+									Закрыть
+								</Button>
+							</Column>
+						</Row>
+					</div>
+
+				</h3>
+			</modal>
 
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
@@ -130,29 +153,28 @@
 				<div>
 					<h4 align="center">Test #{{ job.id }}</h4>
 					<h4 align="right">
-						<a :href='"/regressions?id="+test_id'>
-							<img
-								v-if="job.collectionIds"
-								alt="edit"
-								width="35px"
-								height="40px"
-								src="~/assets/icons/regression.png"
-							/>
-						</a>
 						<img
-							v-if="job.environmentDetails"
+							v-if="job.collections"
+							alt="edit"
+							width="35px"
+							height="40px"
+							src="~/assets/icons/regression.png"
+							@click="toggleVisibility('collectionsListVisibility')"
+						/>
+						<img
+							v-if="job.environmentDetails && job.environmentDetails !== 'null'"
 							alt="edit"
 							width="40px"
 							height="40px"
 							src="~/assets/icons/kubernetes.png"
-							@click="toggleKubernetesInfo"
+							@click="toggleVisibility('kubernetesInfoVisibility')"
 						/>
 						<img
 							alt="edit"
 							width="30px"
 							height="30px"
 							src="~/assets/icons/edit.png"
-							@click="toggleEditor"
+							@click="toggleVisibility('editorVisibility')"
 						/>
 						<img
 							alt="delete"
@@ -172,11 +194,7 @@
 							</tr>
 							<tr>
 								<td align="center">Status</td>
-								<td
-									align="center"
-								>
-									{{ job.status }}
-								</td>
+								<td align="center">{{ job.status }}</td>
 							</tr>
 							<tr>
 								<td align="center">Test start</td>
@@ -210,34 +228,87 @@
 					</table>
 				</div>
 
+				<!-- grafana graphs for resources -->
+				<div
+					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
+					align="left"
+					@click="toggleResourcesVisibility">
+					<span class="resources-util-link">resources utilization</span>
+					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.resourcesVisibility }"/>
+				</div>
+
+				<div v-show="visibilities.resourcesVisibility">
+					<div class="row justify-content-between">
+						<div class="col-md-12 col-sm-12" >
+							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6 pod-btns-location">
+								<button @click=get_resources_graphs(value.name,value.labels.env) class="pod-btn" :class="{ expanded: openedGraphs.includes(value.name) }">{{ value.name }}</button>
+							</div>
+						</div>
+					</div>
+					<div v-show="openedGraphs.length > 0" class="row justify-content-between" style="height: 250px;">
+						<div class="col-md-4 col-sm-12">
+							<!-- rps -->
+							<iframe
+								:src="resources.graphs.cpu"
+								class="iframe-graphs"
+								scrolling="No"
+							/>
+						</div>
+						<div class="col-md-4 col-sm-12">
+							<!-- memory -->
+							<iframe
+								:src="resources.graphs.memory"
+								class="iframe-graphs"
+								scrolling="No"
+							/>
+						</div>
+						<div class="col-md-4 col-sm-12">
+							<!-- net codes -->
+							<iframe
+								:src="resources.graphs.network"
+								class="iframe-graphs"
+								scrolling="No"
+							/>
+						</div>
+					</div>
+					<div align="center" v-show="openedGraphs.length > 0" style="padding: 1em 0 2em 0;">
+						<a :href="resources.link" class="text-link" target="_blank">More info in Grafana</a>
+					</div>
+				</div>
+
+
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">graphs</h3>
+					<div v-if="sortedAggregates.length > 1">
+						<h4	align="left">
+							<form @change="selectGraphs(selectedTag) " >
+								<select v-model="selectedTag">
+									<option>
+										__OVERALL__
+									</option>
+									<option v-for="tag in sortedAggregates" :key="tag.label">
+										{{ tag.label }}
+									</option>
+								</select>
+							</form>
+						</h4>
+					</div>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- rps -->
 							<iframe
 								:src="job.graphs.rps"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- net codes -->
 							<iframe
 								:src="job.graphs.quantiles"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 					</div>
@@ -246,26 +317,16 @@
 							<!-- quantiles -->
 							<iframe
 								:src="job.graphs.netcodes"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- tank threads -->
 							<iframe
 								:src="job.graphs.threads"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 					</div>
@@ -274,10 +335,10 @@
 				<!-- summary stats -->
 				<h3
 					align="center"
-					@click="toggleVisibility">
+					@click="toggleVisibility('isSummaryVisible')">
 					Summary stats
 				</h3>
-				<div v-show="isSummaryVisible" class="col-md-12">
+				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
 						<table id="StatsOverall" class="hover table table-bordered">
 							<thead>
@@ -295,7 +356,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleOverallCodeVisibility" class="plus" :class="overallCodeVisibility === true ? 'collapsed' : ''">Overall
+									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="visibilities.overallCodeVisibility === true ? 'expanded' : ''">Overall
 									</td>
 									<td>{{ overall.okCount }}</td>
 									<td>{{ overall.errCount }}</td>
@@ -306,7 +367,7 @@
 									<td>{{ overall.q98 }}</td>
 									<td>{{ overall.q99 }}</td>
 								</tr>
-								<tr v-show="overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden">
+								<tr v-show="visibilities.overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden-rows">
 									<td>{{ aggregate.responseCode }}</td>
 									<td>{{ aggregate.okCount }}</td>
 									<td>{{ aggregate.errCount }}</td>
@@ -325,11 +386,10 @@
 				</div>
 				<h4
 					align="center"
-					@click="toggleVisibility"
-				>
+					@click="toggleVisibility('isSummaryVisible')">
 					Detailed stats
 				</h4>
-				<div v-show="isSummaryVisible" class="col-md-12">
+				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
@@ -338,14 +398,14 @@
 										v-for="agg_header in agg_headers"
 										@click="sort_aggregates(agg_header)"
 										:key="agg_header">{{ agg_header }}
-										<div class="arrow" v-if="agg_header === currentSort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+										<div v-if="agg_header === currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
 								</tr>
 							</thead>
 							<tbody>
 								<template v-for="tag in sortedAggregates" >
 									<tr :key="tag.label">
-										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus" :class="{ collapsed: openedTag.includes(tag.label) }">{{ tag.label }}</td>
+										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus-table-label" :class="{ expanded: openedTag.includes(tag.label) }">{{ tag.label }}</td>
 										<td>{{ tag.okCount }}</td>
 										<td>{{ tag.errCount }}</td>
 										<td>{{ tag.q50 }}</td>
@@ -356,7 +416,7 @@
 										<td>{{ tag.q99 }}</td>
 									</tr>
 									<template v-if="openedTag.includes(code.label)" v-for="code in taggedByCode">
-										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden">
+										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden-rows">
 											<td>{{ code.responseCode }}</td>
 											<td>{{ code.okCount }}</td>
 											<td>{{ code.errCount }}</td>
@@ -377,6 +437,8 @@
 		</div>
 	</div>
 </template>
+<div>
+</div>
 
 <script>
 import Modal from '../components/Modal';
@@ -414,8 +476,9 @@ export default {
 					memory: null,
 					network: null,
 				},
+				link: null,
 			},
-			isSummaryVisible: true,
+			collections: [],
 			podsData: {},
 			overall: {},
 			tagged: [],
@@ -423,15 +486,23 @@ export default {
 			taggedByCode: [],
 			sortedTaggedByCode: [],
 			openedTag: [],
+			openedGraphs: [],
 			loading: true,
 			error: null,
 			success: null,
-			editorVisibility: false,
-			kubernetesInfoVisibility: false,
+			visibilities:{
+				isSummaryVisible: true,
+				editorVisibility: false,
+				overallCodeVisibility: false,
+				kubernetesInfoVisibility: false,
+				collectionsListVisibility: false,
+				resourcesVisibility: false,
+			},
+			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			overallCodeVisibility: false,
-			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
+			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'],
+			selectedTag: '__OVERALL__'
 		};
 	},
 	head: {
@@ -468,7 +539,7 @@ export default {
 	methods: {
 		updateJob() {
 			this.$store.dispatch('job/updateJob', this.job);
-			this.toggleEditor();
+			this.toggleVisibility('editorVisibility');
 		},
 		deleteJob() {
 			if (confirm('Удалить '+this.job.id+'?')) {
@@ -476,19 +547,12 @@ export default {
 				this.$router.push('/');
 			}
 		},
-		toggleEditor: function() {
-			clearInterval(this.watcher);
-			this.editorVisibility = !this.editorVisibility;
-		},
-		toggleKubernetesInfo: function() {
-			clearInterval(this.watcher);
-			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
+		toggleVisibility: function(param) {
+			this.visibilities[param] = !this.visibilities[param];
 		},
 		toggleResourcesVisibility: function() {
-			this.resourcesVisibility = !this.resourcesVisibility;
-		},
-		toggleVisibility: function() {
-			this.isSummaryVisible = !this.isSummaryVisible;
+			this.toggleVisibility('resourcesVisibility');
+			this.podsData = JSON.parse(this.job.environmentDetails);
 		},
 		toggleResponseCodeVisibility(name) {
 			const index = this.openedTag.indexOf(name);
@@ -499,8 +563,13 @@ export default {
 				this.openedTag.push(name);
 			}
 		},
-		toggleOverallCodeVisibility() {
-			this.overallCodeVisibility = !this.overallCodeVisibility;
+		toggleGraphsVisibility(pod_button) {
+			if (this.openedGraphs.includes(pod_button)) {
+				this.openedGraphs.splice(pod_button);
+			} else {
+				this.openedGraphs = [];
+				this.openedGraphs.push(pod_button);
+			}
 		},
 		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
@@ -541,13 +610,26 @@ export default {
 					} else {
 						this.job.finishedTime = this.job.testStop * 1000;
 					}
-					this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
-					//this.podsData = JSON.parse(this.job.environmentDetails);
+					this.collections = this.job.collections;
+					this.selectGraphs(this.selectedTag);
 					this.loading = false;
 				});
+		},
+		selectGraphs: function(tag) {
+			this.loading=true;
+			if (tag === '__OVERALL__') {
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+			} else {
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=11&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=12&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=13&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
+			}
+			this.selectedTag=tag;
+			this.loading=false;
 		},
 		get_test_aggregates: function(id) {
 			this.$api.get('/aggregates/' + id)
@@ -572,6 +654,21 @@ export default {
 						}
 					);
 				});
+		},
+
+		get_resources_graphs: function(name, env) {
+			this.resources.graphs = {};
+			if (isNaN(this.job.testStop)) {
+				this.job.finishedTime = 'now';
+			} else {
+				this.job.finishedTime = this.job.testStop * 1000;
+			}
+			env = env.toUpperCase();
+			this.resources.graphs.cpu = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.resources.graphs.memory = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=25&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.resources.graphs.network = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=65&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.resources.link = 'http://grafana.o3.ru/d/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.toggleGraphsVisibility(name);
 		},
 		sort_aggregates: function(s) {
 			if (s === this.currentSort) {
@@ -631,7 +728,7 @@ export default {
 		color: black;
 	}
 
-	.plus:after {
+	.plus-table-label:after {
 		height: 14px;
 		width: 14px;
 		margin-left: 3px;
@@ -650,7 +747,7 @@ export default {
 		content: '+';
 	}
 
-	.plus.collapsed:after {
+	.plus-table-label.expanded:after {
 		height: 14px;
 		width: 14px;
 		margin-left: 3px;
@@ -669,7 +766,7 @@ export default {
 		content: '-';
 	}
 
-	.arrow.asc{
+	.arrow-table-sort.asc{
 		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
@@ -677,7 +774,7 @@ export default {
 		border-bottom: 8px solid #31b131;
 	}
 
-	.arrow.dsc {
+	.arrow-table-sort.dsc {
 		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
@@ -685,7 +782,92 @@ export default {
 		border-top: 8px solid #31b131;
 	}
 
-	.hidden {
+	.resources-util-link {
+		font-size: 18px;
+		font-weight: bold;
+		border-bottom: 1px black dotted;
+		margin: 5px 0 0 18px;
+		cursor:pointer;
+	}
+
+	.resources-graphs-arrow {
+		display: inline-block;
+		cursor: pointer;
+		border: solid #000;
+		border-width: 3px 0 0 3px;
+		width: 12px;
+		height: 12px;
+		margin-left: 5px;
+		transform: rotate(-135deg);
+	}
+
+	.resources-graphs-arrow.expanded {
+		border-width: 0 3px 3px 0;
+	}
+
+	.pod-btn {
+		background-color: #d1e7bc;
+		border-radius: 5px;
+		font-size: 13px;
+		text-align: center;
+		border: 1px solid black;
+		box-shadow: 0 0 1px #444;
+		cursor: pointer;
+	}
+
+	.pod-btn.expanded {
+		background-color: #71875d;
+		color: white;
+		border-radius: 5px;
+		font-size: 13px;
+		text-align: center;
+		border: 1px solid black;
+		box-shadow: 0 0 3px #444;
+		cursor: pointer;
+	}
+
+	.pod-btns-location {
+		margin: 10px 0 15px 0;
+		display: inline;
+		float: left;
+	}
+
+	.hidden-rows {
 		background-color: #F0EDED;
 	}
+	.iframe-graphs {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		border: none;
+	}
+	.text-link{
+		text-decoration: underline;
+	}
+
+	select {
+		background-color: white;
+		border: thin solid black;
+		display: inline-block;
+		font-size: 14px;
+		line-height: 1.5em;
+		padding: 0.5em 3.5em 0.5em 1em;
+}
+
+	/*select.minimal {*/
+		/*background-image:*/
+			/*linear-gradient(45deg, transparent 50%, gray 50%),*/
+			/*linear-gradient(135deg, gray 50%, transparent 50%),*/
+			/*linear-gradient(to right, #ccc, #ccc);*/
+		/*background-position:*/
+			/*calc(100% - 20px) calc(1em + 2px),*/
+			/*calc(100% - 15px) calc(1em + 2px),*/
+			/*calc(100% - 2.5em) 0.5em;*/
+		/*background-size:*/
+		/*5px 5px,*/
+		/*5px 5px,*/
+		/*1px 1.5em;*/
+		/*background-repeat: no-repeat;*/
+/*}*/
+
 </style>
