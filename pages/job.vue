@@ -214,22 +214,18 @@
 				<div class="col-md-12">
 					<h3 align="center">graphs</h3>
 					<div v-if="sortedAggregates.length > 1">
-						<button
-							class="btn btn-sm"
-							:class="{'btn-primary': selectedTag === '__OVERALL__',
-								'btn-outline-secondary': selectedTag != '__OVERALL__' }"
-							@click="selectGraphs('__OVERALL__')">
-							OVERALL
-						</button>
-						<button
-							v-for="tag in sortedAggregates"
-							class="btn btn-sm"
-							:class="{'btn-primary': selectedTag === tag.label,
-								'btn-outline-secondary': selectedTag != tag.label }"
-							@click="selectGraphs(tag.label)"
-							:key="tag.label">
-							{{ tag.label }}
-						</button>
+						<h4	align="left">
+							<form @change="selectGraphs(selectedTag) " >
+								<select class="minimal" v-model="selectedTag">
+									<option>
+										__OVERALL__
+									</option>
+									<option v-for="tag in sortedAggregates" :key="tag.label">
+										{{ tag.label }}
+									</option>
+								</select>
+							</form>
+						</h4>
 					</div>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
@@ -720,4 +716,30 @@ export default {
 	.hidden {
 		background-color: #F0EDED;
 	}
+
+	select {
+		background-color: white;
+		border: thin solid black;
+		display: inline-block;
+		font-size: 14px;
+		line-height: 1.5em;
+		padding: 0.5em 3.5em 0.5em 1em;
+}
+
+	select.minimal {
+		background-image:
+			linear-gradient(45deg, transparent 50%, gray 50%),
+			linear-gradient(135deg, gray 50%, transparent 50%),
+			linear-gradient(to right, #ccc, #ccc);
+		background-position:
+			calc(100% - 20px) calc(1em + 2px),
+			calc(100% - 15px) calc(1em + 2px),
+			calc(100% - 2.5em) 0.5em;
+		background-size:
+		5px 5px,
+		5px 5px,
+		1px 1.5em;
+		background-repeat: no-repeat;
+}
+
 </style>
