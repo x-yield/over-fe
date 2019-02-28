@@ -147,15 +147,12 @@ export default {
 							if (projectId.indexOf(item.project) === -1) {
 								projectId.push(item.project);
 								this.projects.push({projectId: item.project, projectName: item.service});
-
 							}
-
 						}
 					);
 					projectId =[];
 					this.loading = false;
 				});
-
 		},
 		flushAllFilters() {
 			this.selected = {};

@@ -125,7 +125,7 @@
 				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
 				<h3 slot="body">
 					<div v-for="(collection) in collections" :key="collection.id">
-						<a :href='"/collection?id="+collection.id' class="link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+						<a :href='"/collection?id="+collection.id' class="text-link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
 						</a>
 					</div>
 				</h3>
@@ -231,18 +231,17 @@
 				<!-- grafana graphs for resources -->
 				<div
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
-					align="center"
-					@click="toggleResourcesVisibility"
-					style="font-size: 18px">
-					resources utilization
-					<div class="resources-graphs" :class="{ collapsed: visibilities.resourcesVisibility }"/>
+					align="left"
+					@click="toggleResourcesVisibility">
+					<span class="resources-util-link">resources utilization</span>
+					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.resourcesVisibility }"/>
 				</div>
 
 				<div v-show="visibilities.resourcesVisibility">
 					<div class="row justify-content-between">
 						<div class="col-md-12 col-sm-12" >
-							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6 pod-btn">
-								<button @click=get_resources_graphs(value.name,value.labels.env) class="pods" :class="{ collapsed: openedGraphs.includes(value.name) }">{{ value.name }}</button>
+							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6 pod-btns-location">
+								<button @click=get_resources_graphs(value.name,value.labels.env) class="pod-btn" :class="{ expanded: openedGraphs.includes(value.name) }">{{ value.name }}</button>
 							</div>
 						</div>
 					</div>
@@ -256,7 +255,7 @@
 							/>
 						</div>
 						<div class="col-md-4 col-sm-12">
-							<!-- net codes -->
+							<!-- memory -->
 							<iframe
 								:src="resources.graphs.memory"
 								class="iframe-graphs"
@@ -271,6 +270,9 @@
 								scrolling="No"
 							/>
 						</div>
+					</div>
+					<div align="center" v-show="openedGraphs.length > 0" style="padding-bottom: 2em; padding-top: 1em">
+						<a :href="resources.link" class="text-link" target="_blank">More info in Grafana</a>
 					</div>
 				</div>
 
@@ -340,7 +342,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleVisibility('overallCodeVisibility')" class="plus" :class="visibilities.overallCodeVisibility === true ? 'collapsed' : ''">Overall
+									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="visibilities.overallCodeVisibility === true ? 'expanded' : ''">Overall
 									</td>
 									<td>{{ overall.okCount }}</td>
 									<td>{{ overall.errCount }}</td>
@@ -351,7 +353,7 @@
 									<td>{{ overall.q98 }}</td>
 									<td>{{ overall.q99 }}</td>
 								</tr>
-								<tr v-show="visibilities.overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden">
+								<tr v-show="visibilities.overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden-rows">
 									<td>{{ aggregate.responseCode }}</td>
 									<td>{{ aggregate.okCount }}</td>
 									<td>{{ aggregate.errCount }}</td>
@@ -382,14 +384,14 @@
 										v-for="agg_header in agg_headers"
 										@click="sort_aggregates(agg_header)"
 										:key="agg_header">{{ agg_header }}
-										<div v-if="agg_header === currentSort" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+										<div v-if="agg_header === currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
 								</tr>
 							</thead>
 							<tbody>
 								<template v-for="tag in sortedAggregates" >
 									<tr :key="tag.label">
-										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus" :class="{ collapsed: openedTag.includes(tag.label) }">{{ tag.label }}</td>
+										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus-table-label" :class="{ expanded: openedTag.includes(tag.label) }">{{ tag.label }}</td>
 										<td>{{ tag.okCount }}</td>
 										<td>{{ tag.errCount }}</td>
 										<td>{{ tag.q50 }}</td>
@@ -400,7 +402,7 @@
 										<td>{{ tag.q99 }}</td>
 									</tr>
 									<template v-if="openedTag.includes(code.label)" v-for="code in taggedByCode">
-										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden">
+										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden-rows">
 											<td>{{ code.responseCode }}</td>
 											<td>{{ code.okCount }}</td>
 											<td>{{ code.errCount }}</td>
@@ -460,6 +462,7 @@ export default {
 					memory: null,
 					network: null,
 				},
+				link: null,
 			},
 			collections: [],
 			podsData: {},
@@ -636,6 +639,7 @@ export default {
 			this.resources.graphs.cpu = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=17&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.resources.graphs.memory = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=25&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.resources.graphs.network = 'http://grafana.o3.ru/d-solo/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&var-phase=Failed&theme=light&panelId=65&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
+			this.resources.link = 'http://grafana.o3.ru/d/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.toggleGraphsVisibility(name);
 		},
 		sort_aggregates: function(s) {
@@ -696,7 +700,7 @@ export default {
 		color: black;
 	}
 
-	.plus:after {
+	.plus-table-label:after {
 		height: 14px;
 		width: 14px;
 		margin-left: 3px;
@@ -715,7 +719,7 @@ export default {
 		content: '+';
 	}
 
-	.plus.collapsed:after {
+	.plus-table-label.expanded:after {
 		height: 14px;
 		width: 14px;
 		margin-left: 3px;
@@ -734,7 +738,7 @@ export default {
 		content: '-';
 	}
 
-	.arrow.asc{
+	.arrow-table-sort.asc{
 		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
@@ -742,7 +746,7 @@ export default {
 		border-bottom: 8px solid #31b131;
 	}
 
-	.arrow.dsc {
+	.arrow-table-sort.dsc {
 		margin-left: 5px;
 		display: inline-block;
 		border-left: 7px solid transparent;
@@ -750,11 +754,15 @@ export default {
 		border-top: 8px solid #31b131;
 	}
 
-	.resources-graphs.collapsed {
-		border-width: 0 3px 3px 0;
+	.resources-util-link {
+		font-size: 18px;
+		font-weight: bold;
+		border-bottom: 1px black dotted;
+		margin: 5px 0 0 18px;
+		cursor:pointer;
 	}
 
-	.resources-graphs {
+	.resources-graphs-arrow {
 		display: inline-block;
 		cursor: pointer;
 		border: solid #000;
@@ -765,7 +773,11 @@ export default {
 		transform: rotate(-135deg);
 	}
 
-	.pods {
+	.resources-graphs-arrow.expanded {
+		border-width: 0 3px 3px 0;
+	}
+
+	.pod-btn {
 		background-color: #d1e7bc;
 		border-radius: 5px;
 		font-size: 13px;
@@ -775,7 +787,7 @@ export default {
 		cursor: pointer;
 	}
 
-	.pods.collapsed {
+	.pod-btn.expanded {
 		background-color: #71875d;
 		color: white;
 		border-radius: 5px;
@@ -786,14 +798,13 @@ export default {
 		cursor: pointer;
 	}
 
-	.pod-btn {
-		margin-top: 5px;
-		margin-bottom: 5px;
+	.pod-btns-location {
+		margin: 10px 0 15px 0;
 		display: inline;
 		float: left;
 	}
 
-	.hidden {
+	.hidden-rows {
 		background-color: #F0EDED;
 	}
 
@@ -803,8 +814,7 @@ export default {
 		overflow: hidden;
 		border: none;
 	}
-	.link{
+	.text-link{
 		text-decoration: underline;
 	}
-
 </style>
