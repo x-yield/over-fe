@@ -12,22 +12,22 @@
 					<h4 align="right">
 						<form @change="getFilteredCollections(selected={env, project, name}) " >
 							<select class="dropbtn" v-model="env">
-								<option value="" style="color: #adb5bd">All</option>
-								<option v-for="parameter in envs" :key="parameter">
-									{{ parameter }}
+								<option value="">All</option>
+								<option v-for="(env, index) in envs" :key="index">
+									{{ env }}
 								</option>
 							</select>
 							<select class="dropbtn" v-model="project">
 								<option value="">All</option>
-								<option v-for="parameter in projects" :key="parameter">
-									{{ parameter.projectId }}
-									<span v-if="parameter.projectName">({{ parameter.projectName }})</span>
+								<option v-for="(project, index) in projects" :key="index" :value="project.projectId">
+									{{ project.projectId }}
+									<span v-if="project.projectName">({{ project.projectName }})</span>
 								</option>
 							</select>
 							<select class="dropbtn" v-model="name">
 								<option value="">All</option>
-								<option v-for="parameter in names" :key="parameter">
-									{{ parameter }}
+								<option v-for="(name, index) in names" :key="index">
+									{{ name }}
 								</option>
 							</select>
 							<button class="dropbtn flush" @click="flushAllFilters()">Flush all filters</button>
@@ -58,19 +58,13 @@
 						</thead>
 						<tbody>
 							<tr v-for="collection in collections" :key="collection.id">
-								<td
-									align="center"
-								>
+								<td align="center">
 									<a :href='"/collection?id="+collection.id'>{{ collection.id }}</a>
 								</td>
-								<td
-									align="center"
-								>
+								<td align="center">
 									{{ collection.author }}
 								</td>
-								<td
-									align="center"
-								>
+								<td align="center">
 									{{ collection.env }}
 								</td>
 								<td align="center">
@@ -93,7 +87,6 @@
 							</tr>
 						</tbody>
 					</table>
-					{{ projects }}
 				</div>
 			</div>
 		</div>
@@ -132,6 +125,7 @@ export default {
 			this.envs = [];
 			this.projects = [];
 			this.names = [];
+			let projectId =[];
 
 			this.$api.get('/collections?'+ queryString)
 				.then(response => {
@@ -147,16 +141,18 @@ export default {
 							if (this.envs.indexOf(item.env) === -1) {
 								this.envs.push(item.env);
 							}
-							if (this.projects.indexOf(item.project) === -1) {
-
-								this.projects.push({projectId: item.project, projectName: item.service});
-							}
 							if (this.names.indexOf(item.name) === -1) {
 								this.names.push(item.name);
+							}
+							if (projectId.indexOf(item.project) === -1) {
+								projectId.push(item.project);
+								this.projects.push({projectId: item.project, projectName: item.service});
+
 							}
 
 						}
 					);
+					projectId =[];
 					this.loading = false;
 				});
 

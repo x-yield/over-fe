@@ -18,7 +18,7 @@
 				</div>
 			</nav>
 
-			<modal v-show="editorVisibility" @close="toggleEditor">
+			<modal v-show="visibilities.editorVisibility" @close="toggleVisibility('editorVisibility')">
 				<h3 slot="header">Редактирование теста {{ job.id }}</h3>
 				<h3 slot="body">
 					<div class="overload-fe-container job-editor">
@@ -86,7 +86,7 @@
 							<Column>
 								<Button
 									theme="secondary"
-									@click="toggleEditor"
+									@click="toggleVisibility('editorVisibility')"
 								>
 									Отмена
 								</Button>
@@ -97,7 +97,7 @@
 				</h3>
 			</modal>
 
-			<modal v-show="kubernetesInfoVisibility" @close="toggleKubernetesInfo">
+			<modal v-show="visibilities.kubernetesInfoVisibility" @close="toggleVisibility('kubernetesInfoVisibility')">
 				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
 				<h3 slot="body" class="job-kubernetes-info">
 					<div class="overload-fe-container">
@@ -110,7 +110,7 @@
 							<Column>
 								<Button
 									theme="secondary"
-									@click="toggleKubernetesInfo"
+									@click="toggleVisibility('kubernetesInfoVisibility')"
 								>
 									Закрыть
 								</Button>
@@ -121,11 +121,11 @@
 				</h3>
 			</modal>
 
-			<modal v-show="collectionsListVisibility" @close="toggleCollectionsVisibility">
+			<modal v-show="visibilities.collectionsListVisibility" @close="toggleVisibility('collectionsListVisibility')">
 				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
 				<h3 slot="body">
 					<div v-for="(collection) in collections" :key="collection.id">
-						<a :href='"/collection?id="+collection.id' style="text-decoration: underline">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+						<a :href='"/collection?id="+collection.id' class="link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
 						</a>
 					</div>
 				</h3>
@@ -135,7 +135,7 @@
 							<Column>
 								<Button
 									theme="secondary"
-									@click="toggleCollectionsVisibility">
+									@click="toggleVisibility('collectionsListVisibility')">
 									Закрыть
 								</Button>
 							</Column>
@@ -159,7 +159,7 @@
 							width="35px"
 							height="40px"
 							src="~/assets/icons/regression.png"
-							@click="toggleCollectionsVisibility"
+							@click="toggleVisibility('collectionsListVisibility')"
 						/>
 						<img
 							v-if="job.environmentDetails && job.environmentDetails !== 'null'"
@@ -167,14 +167,14 @@
 							width="40px"
 							height="40px"
 							src="~/assets/icons/kubernetes.png"
-							@click="toggleKubernetesInfo"
+							@click="toggleVisibility('kubernetesInfoVisibility')"
 						/>
 						<img
 							alt="edit"
 							width="30px"
 							height="30px"
 							src="~/assets/icons/edit.png"
-							@click="toggleEditor"
+							@click="toggleVisibility('editorVisibility')"
 						/>
 						<img
 							alt="delete"
@@ -194,11 +194,7 @@
 							</tr>
 							<tr>
 								<td align="center">Status</td>
-								<td
-									align="center"
-								>
-									{{ job.status }}
-								</td>
+								<td align="center">{{ job.status }}</td>
 							</tr>
 							<tr>
 								<td align="center">Test start</td>
@@ -239,13 +235,13 @@
 					@click="toggleResourcesVisibility"
 					style="font-size: 18px">
 					resources utilization
-					<div class="resources-graphs" :class="{ collapsed: resourcesVisibility }"/>
+					<div class="resources-graphs" :class="{ collapsed: visibilities.resourcesVisibility }"/>
 				</div>
 
-				<div v-show="resourcesVisibility">
+				<div v-show="visibilities.resourcesVisibility">
 					<div class="row justify-content-between">
 						<div class="col-md-12 col-sm-12" >
-							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6" style="margin-top: 5px; margin-bottom: 5px; display: inline; float: left;">
+							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6 pod-btn">
 								<button @click=get_resources_graphs(value.name,value.labels.env) class="pods" :class="{ collapsed: openedGraphs.includes(value.name) }">{{ value.name }}</button>
 							</div>
 						</div>
@@ -255,44 +251,27 @@
 							<!-- rps -->
 							<iframe
 								:src="resources.graphs.cpu"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<!-- net codes -->
 							<iframe
 								:src="resources.graphs.memory"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								margin-bottom="100px"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<!-- net codes -->
 							<iframe
 								:src="resources.graphs.network"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 					</div>
-
 				</div>
 
 
@@ -304,26 +283,16 @@
 							<!-- rps -->
 							<iframe
 								:src="job.graphs.rps"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- net codes -->
 							<iframe
 								:src="job.graphs.quantiles"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 					</div>
@@ -332,26 +301,16 @@
 							<!-- quantiles -->
 							<iframe
 								:src="job.graphs.netcodes"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- tank threads -->
 							<iframe
 								:src="job.graphs.threads"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
+								class="iframe-graphs"
 								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
 							/>
 						</div>
 					</div>
@@ -360,10 +319,10 @@
 				<!-- summary stats -->
 				<h3
 					align="center"
-					@click="toggleVisibility">
+					@click="toggleVisibility('isSummaryVisible')">
 					Summary stats
 				</h3>
-				<div v-show="isSummaryVisible" class="col-md-12">
+				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
 						<table id="StatsOverall" class="hover table table-bordered">
 							<thead>
@@ -381,7 +340,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleOverallCodeVisibility" class="plus" :class="overallCodeVisibility === true ? 'collapsed' : ''">Overall
+									<td @click="toggleVisibility('overallCodeVisibility')" class="plus" :class="visibilities.overallCodeVisibility === true ? 'collapsed' : ''">Overall
 									</td>
 									<td>{{ overall.okCount }}</td>
 									<td>{{ overall.errCount }}</td>
@@ -392,7 +351,7 @@
 									<td>{{ overall.q98 }}</td>
 									<td>{{ overall.q99 }}</td>
 								</tr>
-								<tr v-show="overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden">
+								<tr v-show="visibilities.overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden">
 									<td>{{ aggregate.responseCode }}</td>
 									<td>{{ aggregate.okCount }}</td>
 									<td>{{ aggregate.errCount }}</td>
@@ -411,11 +370,10 @@
 				</div>
 				<h4
 					align="center"
-					@click="toggleVisibility"
-				>
+					@click="toggleVisibility('isSummaryVisible')">
 					Detailed stats
 				</h4>
-				<div v-show="isSummaryVisible" class="col-md-12">
+				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
@@ -424,7 +382,7 @@
 										v-for="agg_header in agg_headers"
 										@click="sort_aggregates(agg_header)"
 										:key="agg_header">{{ agg_header }}
-										<div class="arrow" v-if="agg_header === currentSort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+										<div v-if="agg_header === currentSort" class="arrow" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
 								</tr>
 							</thead>
@@ -515,13 +473,15 @@ export default {
 			loading: true,
 			error: null,
 			success: null,
-			isSummaryVisible: true,
-			editorVisibility: false,
-			overallCodeVisibility: false,
-			kubernetesInfoVisibility: false,
-			resourcesVisibility: false,
+			visibilities:{
+				isSummaryVisible: true,
+				editorVisibility: false,
+				overallCodeVisibility: false,
+				kubernetesInfoVisibility: false,
+				collectionsListVisibility: false,
+				resourcesVisibility: false,
+			},
 			podGraphsVisibility: false,
-			collectionsListVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
 			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99']
@@ -561,7 +521,7 @@ export default {
 	methods: {
 		updateJob() {
 			this.$store.dispatch('job/updateJob', this.job);
-			this.toggleEditor();
+			this.toggleVisibility('editorVisibility');
 		},
 		deleteJob() {
 			if (confirm('Удалить '+this.job.id+'?')) {
@@ -569,23 +529,12 @@ export default {
 				this.$router.push('/');
 			}
 		},
-		toggleEditor: function() {
-			clearInterval(this.watcher);
-			this.editorVisibility = !this.editorVisibility;
-		},
-		toggleKubernetesInfo: function() {
-			clearInterval(this.watcher);
-			this.kubernetesInfoVisibility = !this.kubernetesInfoVisibility;
-		},
-		toggleCollectionsVisibility: function() {
-			this.collectionsListVisibility = !this.collectionsListVisibility;
+		toggleVisibility: function(param) {
+			this.visibilities[param] = !this.visibilities[param];
 		},
 		toggleResourcesVisibility: function() {
-			this.resourcesVisibility = !this.resourcesVisibility;
+			this.toggleVisibility('resourcesVisibility');
 			this.podsData = JSON.parse(this.job.environmentDetails);
-		},
-		toggleVisibility: function() {
-			this.isSummaryVisible = !this.isSummaryVisible;
 		},
 		toggleResponseCodeVisibility(name) {
 			const index = this.openedTag.indexOf(name);
@@ -603,9 +552,6 @@ export default {
 				this.openedGraphs = [];
 				this.openedGraphs.push(pod_button);
 			}
-		},
-		toggleOverallCodeVisibility() {
-			this.overallCodeVisibility = !this.overallCodeVisibility;
 		},
 		ts_to_date: function(ts) {
 			const from_ts = new Date(ts * 1000);
@@ -840,8 +786,25 @@ export default {
 		cursor: pointer;
 	}
 
+	.pod-btn {
+		margin-top: 5px;
+		margin-bottom: 5px;
+		display: inline;
+		float: left;
+	}
+
 	.hidden {
 		background-color: #F0EDED;
+	}
+
+	.iframe-graphs {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		border: none;
+	}
+	.link{
+		text-decoration: underline;
 	}
 
 </style>
