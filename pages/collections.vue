@@ -12,28 +12,30 @@
 						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
 					<h4 align="right">
-						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
-							<option v-for="collection in collections" :key="collection">
-								{{ collection.env }}
-							</option>
-						</select>
-						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
-							<option v-for="collection in collections" :key="collection">
-								{{ collection.service }}
-							</option>
-						</select>
-						<select class="dropbtn" @change="get_filtered_collections(selected)" v-model="selected">
-							<option v-for="collection in collections" :key="collection">
-								{{ collection.name }}
-							</option>
-						</select>
+						<form @change="getFilteredCollections(selected={env, project, name}) " >
+							<select class="dropbtn" v-model="env">
+								<option value="">All</option>
+								<option v-for="(env, index) in envs" :key="index">
+									{{ env }}
+								</option>
+							</select>
+							<select class="dropbtn" v-model="project">
+								<option value="">All</option>
+								<option v-for="(project, index) in projects" :key="index" :value="project.projectId">
+									{{ project.projectId }}
+									<span v-if="project.projectName">({{ project.projectName }})</span>
+								</option>
+							</select>
+							<select class="dropbtn" v-model="name">
+								<option value="">All</option>
+								<option v-for="(name, index) in names" :key="index">
+									{{ name }}
+								</option>
+							</select>
+							<button class="dropbtn flush" @click="flushAllFilters()">Flush all filters</button>
+						</form>
+
 					</h4>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="">Last tests</a></li>
-						</ul>
-					</div>
 				</div>
 			</nav>
 
@@ -43,14 +45,14 @@
 				</div>
 				<div v-else>
 					<table class="table table-sm table-bordered" >
-						<caption>Last tests</caption>
+						<caption>Last collections</caption>
 						<thead>
 							<tr>
-								<th scope="col" class="text-center">Collection Id</th>
+								<th scope="col" class="text-center">Collection ID</th>
 								<th scope="col" class="text-center">Author</th>
 								<th scope="col" class="text-center">Environment</th>
+								<th scope="col" class="text-center">Project ID</th>
 								<th scope="col" class="text-center">Project name</th>
-								<th scope="col" class="text-center">Service</th>
 								<th scope="col" class="text-center">Name</th>
 								<th scope="col" class="text-center">Branch</th>
 								<th scope="col" class="text-center">Latest jobs</th>
@@ -58,19 +60,13 @@
 						</thead>
 						<tbody>
 							<tr v-for="collection in collections" :key="collection.id">
-								<td
-									align="center"
-								>
+								<td align="center">
 									<a :href='"/collection?id="+collection.id'>{{ collection.id }}</a>
 								</td>
-								<td
-									align="center"
-								>
+								<td align="center">
 									{{ collection.author }}
 								</td>
-								<td
-									align="center"
-								>
+								<td align="center">
 									{{ collection.env }}
 								</td>
 								<td align="center">
@@ -93,7 +89,6 @@
 							</tr>
 						</tbody>
 					</table>
-					<button class="btn-lg" @click="more_tests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
 				</div>
 			</div>
 		</div>
@@ -105,7 +100,14 @@
 export default {
 	data() {
 		return {
+			selected: {},
+			env: '',
+			project: '',
+			name: '',
 			collections: [],
+			envs: [],
+			projects: [],
+			names: [],
 			loading: true,
 		};
 	},
@@ -114,48 +116,54 @@ export default {
 	},
 	components: {},
 	created() {
-		this.$api.get('/collections?collection_id=2&collection_id=3&collection_id=4&collection_id=5')
-			.then(response => {
-				const jobs = this.collections;
-
-				const resp_data = response[0].data.collections;
-
-				resp_data.forEach(function(item) {
-					jobs.push(item);
-				});
-				this.loading = false;
-			});
+		this.getFilteredCollections(this.selected);
 	},
 	methods: {
-		more_tests: function(from_) {
-			this.$api.get('/collections?collection_id=2&collection_id=3')
+		getFilteredCollections(params) {
+			this.loading = true;
+			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
+
+			this.collections = [];
+			this.envs = [];
+			this.projects = [];
+			this.names = [];
+			let projectId =[];
+
+			this.$api.get('/collections?'+ queryString)
 				.then(response => {
-					const jobs = this.last_jobs;
+					const respData = response[0].data.collections;
 
-					const resp_data = response[0].data.jobs;
-
-					resp_data.forEach(function(item) {
-						jobs.push(item);
-					});
+					respData.forEach(
+						item => {
+							this.collections.push(item);
+						}
+					);
+					this.collections.forEach(
+						item => {
+							if (this.envs.indexOf(item.env) === -1) {
+								this.envs.push(item.env);
+							}
+							if (this.names.indexOf(item.name) === -1) {
+								this.names.push(item.name);
+							}
+							if (projectId.indexOf(item.project) === -1) {
+								projectId.push(item.project);
+								this.projects.push({projectId: item.project, projectName: item.service});
+							}
+						}
+					);
+					projectId =[];
+					this.loading = false;
 				});
 		},
-		get_filtered_collections(param) {
-			this.api.get('/collections?env=' + param)
-				.then(response => {
-					const collections = this.collections
-					const resp_data = response[0].data.collections;
-
-					resp_data.forEach(function(item) {
-						collections.push(item);
-					});
-				});
+		flushAllFilters() {
+			this.selected = {};
 		}
 	},
 };
 </script>
 
 <style scoped>
-
 	.overload-fe {
 		padding-top: 20px;
 		width: 90%;
@@ -171,14 +179,21 @@ export default {
 	td > * {
 		vertical-align : middle;
 	}
+
 	.dropbtn {
 		background-color: white;
 		color: black;
 		font-size: 16px;
 		border: solid 2px #007bff;
-		border-radius: 18px;
+		border-radius: 5px;
 		width: auto;
 		cursor: pointer;
 	}
 
+	.flush {
+		color: white;
+		background-color: #007bff;
+		box-shadow: 0 0 1px #444;
+		font-weight: bold;
+	}
 </style>

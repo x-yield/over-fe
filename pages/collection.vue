@@ -18,7 +18,7 @@
 			</div>
 
 			<div class="col-md-12">
-				<h4 align="center">Collection #{{ collection_id }}</h4>
+				<h4 align="center">Collection #{{ collectionId }}</h4>
 				<table class="table table-sm table-hover">
 					<tbody>
 						<tr>
@@ -99,6 +99,7 @@ export default {
 					imbalance: null
 				}
 			},
+			collectionId: '',
 			collection: {},
 			loading: true,
 			error: null,
@@ -118,11 +119,11 @@ export default {
 		Container: container
 	},
 	created() {
-		this.collection_id = this.$route.query.id;
-		this.get_collections_info(this.collection_id);
+		this.collectionId = this.$route.query.id;
+		this.getCollectionsInfo(this.collectionId);
 	},
 	methods: {
-		get_collections_info: function(id) {
+		getCollectionsInfo: function(id) {
 			this.$api.get('/collections?collection_id=' + id)
 				.then(response => {
 					return response[0].data.collections[0];
@@ -132,14 +133,12 @@ export default {
 						return;
 					}
 					this.collection = json;
-				})
-			this.loading = false;
-			this.display_graphs();
-		},
-		display_graphs: function() {
-			const intervalStart = new Date().getTime() - 90*24*60*60*1000;
+					const intervalStart = new Date().getTime() - 90*24*60*60*1000;
 
-			this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart+'&to=now&var-env='+this.collection.env+'&var-service='+this.collection.service+'&var-collection='+this.collection.name+'&theme=light';
+					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart
+						+'&to=now&var-env='+this.collection.env+'&var-service='+this.collection.project+'&var-collection='+this.collection.name+'&theme=light';
+					this.loading = false;
+				});
 		},
 	},
 };
@@ -161,46 +160,6 @@ export default {
 	}
 	td > * {
 		vertical-align : middle;
-	}
-	.dropbtn {
-		background-color: #d1e7bc;
-		color: black;
-		padding: 16px;
-		font-size: 16px;
-		border: solid 1px grey;
-		width: auto;
-		cursor: pointer;
-	}
-
-	.dropdown {
-		position: relative;
-		display: inline-block;
-	}
-
-	.dropdown-content {
-		display: none;
-		position: absolute;
-		background-color: #f9f9f9;
-		min-width: 160px;
-		box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-		z-index: 1;
-	}
-
-	.dropdown-content a {
-		color: black;
-		padding: 12px 16px;
-		text-decoration: none;
-		display: block;
-	}
-
-	.dropdown-content a:hover {background-color: #f1f1f1}
-
-	.dropdown:hover .dropdown-content {
-		display: block;
-	}
-
-	.dropdown:hover .dropbtn {
-		background-color: #d1e7bc;
 	}
 </style>
 
