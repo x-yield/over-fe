@@ -539,6 +539,9 @@ export default {
 		}
 	},
 	methods: {
+		getJob(){
+			this.$store.dispatch('job/getJob', this.job.id);
+		},
 		updateJob() {
 			this.$store.dispatch('job/updateJob', this.job);
 			this.toggleVisibility('editorVisibility');
@@ -598,6 +601,7 @@ export default {
 		},
 		get_test_info: function(id) {
 			this.$api.get('/job/' + id)
+			this.getJob()
 				.then(response => {
 					return response[0].data.job;
 				})
