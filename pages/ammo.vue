@@ -156,8 +156,10 @@ export default {
 					this.set_from_action($form);
 					$submitButton.click();
 				}
+			} else {
+				this.set_from_action($form);
+				$submitButton.click();
 			}
-
 		}
 	},
 };
