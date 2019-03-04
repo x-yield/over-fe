@@ -358,7 +358,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="visibilities.overallCodeVisibility === true ? 'expanded' : ''">Overall
+									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="{ expanded: visibilities.overallCodeVisibility }">Overall
 									</td>
 									<td>{{ overall.okCount }}</td>
 									<td>{{ overall.errCount }}</td>
@@ -396,11 +396,32 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th
-										v-for="agg_header in agg_headers"
-										@click="sort_aggregates(agg_header)"
-										:key="agg_header">{{ agg_header }}
-										<div v-if="agg_header === currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									<th @click="sort_aggregates('label')">label
+										<div v-if="'label'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('okCount')">ok
+										<div v-if="'okCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('errCount')">errors
+										<div v-if="'errCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q50')">q50, ms
+										<div v-if="'q50'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q75')">q75, ms
+										<div v-if="'q75'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q90')">q90, ms
+										<div v-if="'q90'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q95')">q95, ms
+										<div v-if="'q95'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q98')">q98, ms
+										<div v-if="'q98'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q99')">q99, ms
+										<div v-if="'q99'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
 								</tr>
 							</thead>
@@ -503,7 +524,6 @@ export default {
 			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'],
 			selectedTag: '__OVERALL__'
 		};
 	},
@@ -630,14 +650,16 @@ export default {
 				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 			} else {
 				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=11&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
-				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=12&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
-				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=13&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=12&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=13&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
 				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 			}
 			this.selectedTag=tag;
 			this.loading=false;
 		},
 		get_test_aggregates: function(id) {
+			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
+
 			this.$api.get('/aggregates/' + id)
 				.then(response => {
 					return response[0].data;
@@ -648,6 +670,15 @@ export default {
 					}
 					json.aggregates.forEach(
 						agg => {
+							aggregatesKeys.forEach(
+								aggKey => {
+									if (!(aggKey in agg)) {
+										agg[aggKey] = 0;
+									} else {
+										agg[aggKey] = parseInt(agg[aggKey]);
+									}
+								}
+							);
 							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
 								this.overall = (agg);
 							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
