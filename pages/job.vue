@@ -433,6 +433,7 @@
 								</template>
 							</tbody>
 						</table>
+						{{ overall }}
 					</div>
 				</div>
 			</div>
@@ -634,6 +635,8 @@ export default {
 			this.loading=false;
 		},
 		get_test_aggregates: function(id) {
+			let stats = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
+
 			this.$api.get('/aggregates/' + id)
 				.then(response => {
 					return response[0].data;
@@ -644,6 +647,13 @@ export default {
 					}
 					json.aggregates.forEach(
 						agg => {
+							stats.forEach(
+								header => {
+									if (!(header in agg)) {
+										agg[header] = '0';
+									}
+								}
+							);
 							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
 								this.overall = (agg);
 							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
