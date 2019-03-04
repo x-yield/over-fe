@@ -504,7 +504,7 @@ export default {
 			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			agg_headers: ['label', 'ok', 'errors', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'],
+			agg_headers: ['label', 'okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'],
 			selectedTag: '__OVERALL__'
 		};
 	},
@@ -650,7 +650,9 @@ export default {
 							stats.forEach(
 								header => {
 									if (!(header in agg)) {
-										agg[header] = '0';
+										agg[header] = 0;
+									} else {
+										agg[header] = parseInt(agg[header]);
 									}
 								}
 							);
@@ -694,9 +696,13 @@ export default {
 			return this.tagged.slice().sort((a, b) => {
 				let modifier =1;
 
+				console.log(this.currentSort);
+				console.log(this.currentSortDir);
+
+
 				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
+				if (a[this.currentSort] < b[this.currentSort]) {console.log('a is less b', a[this.currentSort], b[this.currentSort], -1 * modifier); return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {console.log('a is bigger b', a[this.currentSort], b[this.currentSort], 1 * modifier); return 1 * modifier;}
 				return 0;
 			});
 		}
