@@ -358,7 +358,7 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="visibilities.overallCodeVisibility === true ? 'expanded' : ''">Overall
+									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="{ expanded: visibilities.overallCodeVisibility }">Overall
 									</td>
 									<td>{{ overall.okCount }}</td>
 									<td>{{ overall.errCount }}</td>
@@ -396,11 +396,32 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th
-										v-for="agg_header in agg_headers"
-										@click="sort_aggregates(agg_header)"
-										:key="agg_header">{{ agg_header }}
-										<div v-if="agg_header === currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									<th @click="sort_aggregates('label')">label
+										<div v-if="'label'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('okCount')">ok
+										<div v-if="'okCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('errCount')">errors
+										<div v-if="'errCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q50')">q50, ms
+										<div v-if="'q50'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q75')">q75, ms
+										<div v-if="'q75'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q90')">q90, ms
+										<div v-if="'q90'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q95')">q95, ms
+										<div v-if="'q95'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q98')">q98, ms
+										<div v-if="'q98'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
+									</th>
+									<th @click="sort_aggregates('q99')">q99, ms
+										<div v-if="'q99'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
 								</tr>
 							</thead>
@@ -433,7 +454,6 @@
 								</template>
 							</tbody>
 						</table>
-						{{ overall }}
 					</div>
 				</div>
 			</div>
@@ -504,7 +524,6 @@ export default {
 			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			agg_headers: ['label', 'okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'],
 			selectedTag: '__OVERALL__'
 		};
 	},
@@ -635,7 +654,7 @@ export default {
 			this.loading=false;
 		},
 		get_test_aggregates: function(id) {
-			let stats = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
+			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
 
 			this.$api.get('/aggregates/' + id)
 				.then(response => {
@@ -647,12 +666,12 @@ export default {
 					}
 					json.aggregates.forEach(
 						agg => {
-							stats.forEach(
-								header => {
-									if (!(header in agg)) {
-										agg[header] = 0;
+							aggregatesKeys.forEach(
+								aggKey => {
+									if (!(aggKey in agg)) {
+										agg[aggKey] = 0;
 									} else {
-										agg[header] = parseInt(agg[header]);
+										agg[aggKey] = parseInt(agg[aggKey]);
 									}
 								}
 							);
@@ -696,13 +715,9 @@ export default {
 			return this.tagged.slice().sort((a, b) => {
 				let modifier =1;
 
-				console.log(this.currentSort);
-				console.log(this.currentSortDir);
-
-
 				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) {console.log('a is less b', a[this.currentSort], b[this.currentSort], -1 * modifier); return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {console.log('a is bigger b', a[this.currentSort], b[this.currentSort], 1 * modifier); return 1 * modifier;}
+				if (a[this.currentSort] < b[this.currentSort]) { return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) { return 1 * modifier;}
 				return 0;
 			});
 		}
