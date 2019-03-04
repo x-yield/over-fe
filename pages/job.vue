@@ -716,8 +716,8 @@ export default {
 				let modifier =1;
 
 				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) { return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) { return 1 * modifier;}
+				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
 				return 0;
 			});
 		}
