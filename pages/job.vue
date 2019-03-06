@@ -231,7 +231,14 @@
 				</div>
 
 				<!-- artifacts -->
-				<div>
+				<div
+					v-if="artifacts.length !== 0"
+					align="left"
+					@click="toggleArtifactsVisibility">
+					<span class="resources-util-link">artifacts</span>
+					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.artifactsVisibility }"/>
+				</div>
+				<div v-show="visibilities.artifactsVisibility">
 					<table class="table table-sm" id="artifactsTable">
 						<tbody>
 							<tr v-for="a in artifacts" :key="a.id">
@@ -533,6 +540,7 @@ export default {
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
 				resourcesVisibility: false,
+				artifactsVisibility: false,
 			},
 			podGraphsVisibility: false,
 			currentSort: 'label',
@@ -589,6 +597,9 @@ export default {
 		toggleResourcesVisibility: function() {
 			this.toggleVisibility('resourcesVisibility');
 			this.podsData = JSON.parse(this.job.environmentDetails);
+		},
+		toggleArtifactsVisibility: function() {
+			this.toggleVisibility('artifactsVisibility');
 		},
 		toggleResponseCodeVisibility(name) {
 			const index = this.openedTag.indexOf(name);
