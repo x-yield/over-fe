@@ -230,6 +230,19 @@
 					</table>
 				</div>
 
+				<!-- artifacts -->
+				<div>
+					<table class="table table-sm" id="artifactsTable">
+						<tbody>
+							<tr v-for="a in artifacts" :key="a.id">
+								<td align="left">
+									<a :href="a.path">{{ a.key }}</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
 				<!-- grafana graphs for resources -->
 				<div
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
@@ -479,7 +492,6 @@ const {
 	column,
 } = Layout;
 
-
 export default {
 	data() {
 		return {
@@ -501,6 +513,7 @@ export default {
 				},
 				link: null,
 			},
+			artifacts: {},
 			collections: [],
 			podsData: {},
 			overall: {},
@@ -552,6 +565,7 @@ export default {
 		} else {
 			this.watcher = setInterval(function() {
 				this.get_test_info(this.test_id);
+				this.get_artifacts(this.test_id);
 				if (this.job.status === 'finished') {
 					clearInterval(this.watcher);
 				}
@@ -709,6 +723,27 @@ export default {
 			}
 			this.currentSort = s;
 		},
+		get_artifacts: function(id) {
+			this.$api.get('/list_artifacts/' + id)
+				.then(response => {
+					return response[0].data.artifacts;
+				})
+				.then(json => {
+					if (!json) {
+						return;
+					}
+					this.artifacts = json;
+
+					// сортируем по имени
+					function compare(a, b) {
+						if (a.key < b.key) { return 1; }
+						if (a.key > b.key) { return -1; }
+						return 0;
+					}
+					this.artifacts.sort(compare);
+				});
+			this.loading = false;
+		}
 	},
 	computed: {
 		sortedAggregates:function() {
