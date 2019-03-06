@@ -142,14 +142,14 @@ export default {
 						ammoKeys.push(a['key']);
 						a['size'] = this.sexy_bytes(a['size']); // мегабайты, гигабайты и прочее
 						a['order'] = new Date(a['lastModified']); // поле для сортировки
-						let d = new Date(a['lastModified']); // локальная таймзона
+						let lm = new Date(a['lastModified']); // локальная таймзона
 
 						// форматируем дату 'YYYY-MM-DD HH:MM'
-						a['lastModified'] = d.getFullYear() + '-' +
-							this.zfill(d.getMonth()+1, 2) + '-' +
-							this.zfill(d.getDate(), 2) + ' ' +
-							this.zfill(d.getHours(), 2) + ':' +
-							this.zfill(d.getMinutes(), 2);
+						a['lastModified'] = lm.getFullYear() + '-' +
+							this.zfill(lm.getMonth()+1, 2) + '-' +
+							this.zfill(lm.getDate(), 2) + ' ' +
+							this.zfill(lm.getHours(), 2) + ':' +
+							this.zfill(lm.getMinutes(), 2);
 					}
 					// сортируем патроны по дате последней модификации в обратном порядке (новые наверху)
 					function compare(a, b) {
@@ -202,7 +202,6 @@ export default {
 			}, 100);
 		},
 		send_form_data: function($form) {
-
 			let request = new XMLHttpRequest();
 			let ammoUrl = '';
 
