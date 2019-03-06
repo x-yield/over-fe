@@ -18,7 +18,6 @@
 				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
 					<input type="text" name="name" placeholder="Имя" required/>
 					<input type="file" name="file" required/>
-					<input type="submit" name="file" id="submitButton" hidden/>
 					<button @click="submit_form" type="button">Загрузить</button>
 				</form>
 			</div>
@@ -28,7 +27,7 @@
 					<h3 align="center">Loading...</h3>
 				</div>
 				<div v-else>
-					<table class="table table-sm table-bordered" >
+					<table class="table table-sm table-bordered" id="ammoTable">
 						<thead>
 							<tr>
 								<th scope="col" class="text-center">Path</th>
@@ -116,6 +115,9 @@ export default {
 			}
 			return bytes + prefixMap[count];
 		},
+		zfill: function(num, len) { // заполняет строковое представление числа нулями, например zfill(5, 3) -> "005"
+			return (1e15+num+'').slice(-len);
+		},
 		set_from_action: function($form) {
 			$form.action = '//' + this.$env.endpoint + '/upload_ammo';
 		},
@@ -138,27 +140,93 @@ export default {
 						let a = this.ammo[i];
 
 						ammoKeys.push(a['key']);
-						a['size'] = this.sexy_bytes(a['size']);
+						a['size'] = this.sexy_bytes(a['size']); // мегабайты, гигабайты и прочее
+						a['order'] = new Date(a['lastModified']); // поле для сортировки
+						let d = new Date(a['lastModified']); // локальная таймзона
+
+						// форматируем дату 'YYYY-MM-DD HH:MM'
+						a['lastModified'] = d.getFullYear() + '-' +
+							this.zfill(d.getMonth()+1, 2) + '-' +
+							this.zfill(d.getDate(), 2) + ' ' +
+							this.zfill(d.getHours(), 2) + ':' +
+							this.zfill(d.getMinutes(), 2);
 					}
+					// сортируем патроны по дате последней модификации в обратном порядке (новые наверху)
+					function compare(a, b) {
+						if (a.order < b.order) {
+							return 1;
+						}
+						if (a.order > b.order) {
+							return -1;
+						}
+						return 0;
+					}
+					this.ammo.sort(compare);
+				}).then(_ => {
+					this.loading = false;
+					return new Promise((resolve, reject) => {
+						resolve();
+					});
 				});
-			this.loading = false;
+
+
 		},
-		submit_form: function(event) {
+		submit_form: function() {
 			let $form = document.getElementById('ammoUploadForm');
 			let ammoKey = $form.children[0]['value'];
-			let $submitButton = document.getElementById('submitButton');
 
 			$form.reportValidity();
+			this.set_from_action($form);
 
 			// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
 			if (ammoKeys.indexOf(ammoKey) > -1) {
 				if (confirm('Файл с таким именем уже существует. Перезаписать?')) {
-					this.set_from_action($form);
-					$submitButton.click();
+					this.send_form_data($form);
 				}
 			} else {
-				this.set_from_action($form);
-				$submitButton.click();
+				this.send_form_data($form);
+			}
+		},
+		highlight_new_ammo: function(scope, value) {
+			let highlightingColor = '#ffeb99'; // yellow-ish
+
+			// ждем пока обновится табличка
+			let waiter = setInterval(function() {
+				if (scope.loading === false) {
+					let $ammoTable = document.getElementById('ammoTable');
+
+					for (let i = 0; i < $ammoTable.rows.length; i++) {
+						let row = $ammoTable.rows[i];
+
+						if (row.cells[0].innerText === value) {
+							row.style.setProperty('background-color', highlightingColor);
+							break;
+						}
+					}
+					clearInterval(waiter);
+				}
+			}, 100);
+		},
+		send_form_data: function($form) {
+
+			let request = new XMLHttpRequest();
+			let ammoUrl = '';
+
+			request.open('POST', $form.action, false);
+			request.onload = function() {
+				ammoUrl = JSON.parse(request.responseText)['url'];
+			};
+			request.onerror = function() {
+				console.log(request.status + ': ' + request.statusText);
+			};
+
+			request.send(new FormData($form));
+
+			// обновляем таблицу и подсвечаваем обновленный файл
+			if (ammoUrl !== '') {
+				this.loading = true;
+				this.get_ammo_info();
+				this.highlight_new_ammo(this, ammoUrl);
 			}
 		}
 	},
