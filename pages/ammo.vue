@@ -162,14 +162,8 @@ export default {
 						return 0;
 					}
 					this.ammo.sort(compare);
-				}).then(_ => {
-					this.loading = false;
-					return new Promise((resolve, reject) => {
-						resolve();
-					});
 				});
-
-
+			this.loading = false;
 		},
 		submit_form: function() {
 			let $form = document.getElementById('ammoUploadForm');
