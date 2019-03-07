@@ -567,8 +567,8 @@ export default {
 		async refresh() {
 			await this.get_test_info(this.test_id);
 			if (this.job.status === 'finished') {
-				await this.get_test_aggregates(this.test_id);
 				await this.get_artifacts(this.test_id);
+				await this.get_test_aggregates(this.test_id);
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
 				}
