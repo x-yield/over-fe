@@ -550,7 +550,7 @@ export default {
 		async refresh() {
 			await this.get_test_info(this.test_id);
 			if (this.job.status === 'finished') {
-				this.get_test_aggregates(this.test_id);
+				await this.get_test_aggregates(this.test_id);
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
 				}
@@ -655,7 +655,7 @@ export default {
 		get_test_aggregates: function(id) {
 			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
 
-			this.$api.get('/aggregates/' + id)
+			return this.$api.get('/aggregates/' + id)
 				.then(response => {
 					return response[0].data;
 				})
