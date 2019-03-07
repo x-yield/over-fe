@@ -232,22 +232,24 @@
 
 				<!-- artifacts -->
 				<div
-					v-if="artifacts.length !== 0"
+					v-if="artifacts.length"
 					align="left"
 					@click="toggleArtifactsVisibility">
 					<span class="resources-util-link">artifacts</span>
 					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.artifactsVisibility }"/>
 				</div>
 				<div v-show="visibilities.artifactsVisibility">
-					<table class="table table-sm" id="artifactsTable">
-						<tbody>
-							<tr v-for="a in artifacts" :key="a.id">
-								<td align="left">
-									<a :href="a.path">{{ a.key }}</a>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="col-md-12 col-sm-12" >
+						<table class="table table-sm" id="artifactsTable">
+							<tbody>
+								<tr v-for="a in artifacts" :key="a.id">
+									<td align="left">
+										<a :href="a.path">{{ a.key }}</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 
 				<!-- grafana graphs for resources -->
@@ -566,10 +568,11 @@ export default {
 	},
 	mounted() {
 		this.get_test_info(this.test_id);
-		this.get_test_aggregates(this.test_id);
+		// this.get_test_aggregates(this.test_id);
+		this.get_artifacts(this.test_id);
 
 		if (this.job.status === 'finished') {
-			// test finished, we dont need to update the page anymore
+			this.get_test_aggregates(this.test_id);
 		} else {
 			this.watcher = setInterval(function() {
 				this.get_test_info(this.test_id);
