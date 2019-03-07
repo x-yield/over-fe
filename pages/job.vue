@@ -544,21 +544,20 @@ export default {
 		this.test_id = this.$route.query.id;
 	},
 	mounted() {
-		this.get_test_info(this.test_id);
-		this.get_test_aggregates(this.test_id);
-
-		if (this.job.status === 'finished') {
-			// test finished, we dont need to update the page anymore
-		} else {
-			this.watcher = setInterval(function() {
-				this.get_test_info(this.test_id);
-				if (this.job.status === 'finished') {
-					clearInterval(this.watcher);
-				}
-			}.bind(this), 5000);
-		}
+		this.refresh();
 	},
 	methods: {
+		async refresh() {
+			await this.get_test_info(this.test_id);
+			if (this.job.status === 'finished') {
+				await this.get_test_aggregates(this.test_id);
+				if (Object.keys(this.overall).length === 0) {
+					setTimeout(this.refresh, 5000);
+				}
+			} else {
+				setTimeout(this.refresh, 5000);
+			}
+		},
 		updateJob() {
 			this.$store.dispatch('job/updateJob', this.job);
 			this.toggleVisibility('editorVisibility');
@@ -617,7 +616,7 @@ export default {
 			}
 		},
 		get_test_info: function(id) {
-			this.$api.get('/job/' + id)
+			return this.$api.get('/job/' + id)
 				.then(response => {
 					return response[0].data.job;
 				})
@@ -656,7 +655,7 @@ export default {
 		get_test_aggregates: function(id) {
 			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
 
-			this.$api.get('/aggregates/' + id)
+			return this.$api.get('/aggregates/' + id)
 				.then(response => {
 					return response[0].data;
 				})
