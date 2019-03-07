@@ -239,15 +239,9 @@
 					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.artifactsVisibility }"/>
 				</div>
 				<div v-show="visibilities.artifactsVisibility">
-					<div class="col-md-12 col-sm-12" >
-						<table class="table table-sm" id="artifactsTable">
-							<tbody>
-								<tr v-for="a in artifacts" :key="a.id">
-									<td align="left">
-										<a :href="a.path">{{ a.key }}</a>
-									</td>
-								</tr>
-							</tbody>
+					<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
+						<table class="table table-sm" id="artifactsTable" v-for="a in artifacts" :key="a.id">
+							<span><a :href="a.path">{{ a.key }}</a></span><br/>
 						</table>
 					</div>
 				</div>
@@ -522,7 +516,7 @@ export default {
 				},
 				link: null,
 			},
-			artifacts: {},
+			artifacts: [],
 			collections: [],
 			podsData: {},
 			overall: {},
@@ -574,6 +568,7 @@ export default {
 			await this.get_test_info(this.test_id);
 			if (this.job.status === 'finished') {
 				await this.get_test_aggregates(this.test_id);
+				await this.get_artifacts(this.test_id);
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
 				}
@@ -713,7 +708,6 @@ export default {
 					);
 				});
 		},
-
 		get_resources_graphs: function(name, env) {
 			this.resources.graphs = {};
 			if (isNaN(this.job.testStop)) {
@@ -735,7 +729,7 @@ export default {
 			this.currentSort = s;
 		},
 		get_artifacts: function(id) {
-			this.$api.get('/list_artifacts/' + id)
+			return this.$api.get('/list_artifacts/' + id)
 				.then(response => {
 					return response[0].data.artifacts;
 				})
@@ -747,13 +741,12 @@ export default {
 
 					// сортируем по имени
 					function compare(a, b) {
-						if (a.key < b.key) { return 1; }
-						if (a.key > b.key) { return -1; }
+						if (a.key < b.key) { return -1; }
+						if (a.key > b.key) { return 1; }
 						return 0;
 					}
 					this.artifacts.sort(compare);
 				});
-			this.loading = false;
 		}
 	},
 	computed: {
