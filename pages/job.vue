@@ -230,6 +230,22 @@
 					</table>
 				</div>
 
+				<!-- artifacts -->
+				<div
+					v-if="artifacts.length"
+					align="left"
+					@click="toggleArtifactsVisibility">
+					<span class="resources-util-link">artifacts</span>
+					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.artifactsVisibility }"/>
+				</div>
+				<div v-show="visibilities.artifactsVisibility">
+					<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
+						<table class="table table-sm" id="artifactsTable" v-for="a in artifacts" :key="a.id">
+							<span><a :href="a.path">{{ a.key }}</a></span><br/>
+						</table>
+					</div>
+				</div>
+
 				<!-- grafana graphs for resources -->
 				<div
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
@@ -479,7 +495,6 @@ const {
 	column,
 } = Layout;
 
-
 export default {
 	data() {
 		return {
@@ -501,6 +516,7 @@ export default {
 				},
 				link: null,
 			},
+			artifacts: [],
 			collections: [],
 			podsData: {},
 			overall: {},
@@ -520,6 +536,7 @@ export default {
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
 				resourcesVisibility: false,
+				artifactsVisibility: false,
 			},
 			podGraphsVisibility: false,
 			currentSort: 'label',
@@ -550,6 +567,7 @@ export default {
 		async refresh() {
 			await this.get_test_info(this.test_id);
 			if (this.job.status === 'finished') {
+				await this.get_artifacts(this.test_id);
 				await this.get_test_aggregates(this.test_id);
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
@@ -574,6 +592,9 @@ export default {
 		toggleResourcesVisibility: function() {
 			this.toggleVisibility('resourcesVisibility');
 			this.podsData = JSON.parse(this.job.environmentDetails);
+		},
+		toggleArtifactsVisibility: function() {
+			this.toggleVisibility('artifactsVisibility');
 		},
 		toggleResponseCodeVisibility(name) {
 			const index = this.openedTag.indexOf(name);
@@ -687,7 +708,6 @@ export default {
 					);
 				});
 		},
-
 		get_resources_graphs: function(name, env) {
 			this.resources.graphs = {};
 			if (isNaN(this.job.testStop)) {
@@ -708,6 +728,26 @@ export default {
 			}
 			this.currentSort = s;
 		},
+		get_artifacts: function(id) {
+			return this.$api.get('/list_artifacts/' + id)
+				.then(response => {
+					return response[0].data.artifacts;
+				})
+				.then(json => {
+					if (!json) {
+						return;
+					}
+					this.artifacts = json;
+
+					// сортируем по имени
+					function compare(a, b) {
+						if (a.key < b.key) { return -1; }
+						if (a.key > b.key) { return 1; }
+						return 0;
+					}
+					this.artifacts.sort(compare);
+				});
+		}
 	},
 	computed: {
 		sortedAggregates:function() {
