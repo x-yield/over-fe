@@ -192,8 +192,8 @@ export default {
 
 	.flush {
 		color: white;
-		background-color: #007bff;
-		box-shadow: 0 0 1px #444;
+		background: linear-gradient(#6bbdff, #007bff);
+		border: solid 2px #007bff;
 		font-weight: bold;
 	}
 </style>

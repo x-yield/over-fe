@@ -155,6 +155,7 @@
 				<div>
 					<h4 align="center">Test #{{ job.id }}</h4>
 					<h4 align="right">
+						<button @click.once="stopTest" v-show="job.status !== 'finished'" class="btn-stop-test" :class="{ pressed: job.status === 'stopped' }">STOP TEST</button>
 						<img
 							v-if="job.collections"
 							alt="edit"
@@ -747,6 +748,10 @@ export default {
 					}
 					this.artifacts.sort(compare);
 				});
+		},
+		stopTest: function() {
+			this.job.status = 'stopped';
+			this.$store.dispatch('job/updateJob', this.job);
 		}
 	},
 	computed: {
@@ -877,25 +882,39 @@ export default {
 		border-width: 0 3px 3px 0;
 	}
 
+	.btn-stop-test {
+		background: linear-gradient(to bottom, rgb(240, 5, 45), rgb(134, 0, 46));
+		color: #ffffff;
+		padding: 5px 10px;
+		border: solid 1px rgb(134, 0, 46);
+		border-radius: 7px;
+		font-size: 16px;
+		font-weight: bold;
+		text-align: center;
+		cursor: pointer;
+	}
+
+	.btn-stop-test.pressed {
+		background: linear-gradient(to top, rgba(110, 110, 110, 0.36), #6e6e6e);
+		color: rgba(255, 255, 255, 0.25);
+		border: solid 1px rgba(110, 110, 110, 0.36);
+		cursor: not-allowed;
+	}
+
 	.pod-btn {
-		background-color: #d1e7bc;
-		border-radius: 5px;
+		background: linear-gradient(to bottom, #d3f8ab, #7d9f5e);
+		border-radius: 7px;
 		font-size: 13px;
 		text-align: center;
-		border: 1px solid black;
-		box-shadow: 0 0 1px #444;
+		border: 1px solid #7d9f5e;
 		cursor: pointer;
 	}
 
 	.pod-btn.expanded {
-		background-color: #71875d;
+		background: linear-gradient(to top, #7d9f5e, #486934);
+		border: 1px solid #486934;
 		color: white;
-		border-radius: 5px;
-		font-size: 13px;
-		text-align: center;
-		border: 1px solid black;
 		box-shadow: 0 0 3px #444;
-		cursor: pointer;
 	}
 
 	.pod-btns-location {
