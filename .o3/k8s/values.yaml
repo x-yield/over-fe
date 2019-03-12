@@ -28,7 +28,7 @@ o3:
     # monitoring dashboard url (e.g. grafana)
     monitoringDashboardUrl: http://grafana.o3.ru/d/BtgL8fHmz/service-overview?orgId=1
     # opsGenie url
-    opsGenieUrl: na
+    opsGenieUrl: https://app.opsgenie.com
     # project confluence url
     confluenceUrl: https://confluence.ozon.ru/pages/viewpage.action?pageId=74427639
     # jira board url
