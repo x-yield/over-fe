@@ -118,7 +118,7 @@ export default {
 		zfill: function(num, len) { // заполняет строковое представление числа нулями, например zfill(5, 3) -> "005"
 			return (1e15+num+'').slice(-len);
 		},
-		set_from_action: function($form) {
+		set_form_action: function($form) {
 			$form.action = '//' + this.$env.endpoint + '/upload_ammo';
 		},
 		get_ammo_info: function() {
@@ -166,7 +166,7 @@ export default {
 			let ammoKey = $form.children[0]['value'];
 
 			$form.reportValidity();
-			this.set_from_action($form);
+			this.set_form_action($form);
 
 			// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
 			if (ammoKeys.indexOf(ammoKey) > -1) {
