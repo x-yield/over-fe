@@ -29,8 +29,7 @@
 								<Column>
 									<Input
 										label="Author"
-										:value="job.author"
-										v-model="job.author"
+										v-model="jobUpdateBuffer.author"
 									/>
 								</Column>
 							</Row>
@@ -38,8 +37,7 @@
 								<Column>
 									<Input
 										label="Description"
-										:value="job.description"
-										v-model="job.description"
+										v-model="jobUpdateBuffer.description"
 									/>
 								</Column>
 							</Row>
@@ -47,8 +45,7 @@
 								<Column>
 									<Input
 										label="Status"
-										v-model="job.status"
-										:value="job.status"
+										v-model="jobUpdateBuffer.status"
 									/>
 								</Column>
 							</Row>
@@ -56,8 +53,7 @@
 								<Column>
 									<Input
 										label="Tank"
-										v-model="job.tank"
-										:value="job.tank"
+										v-model="jobUpdateBuffer.tank"
 									/>
 								</Column>
 							</Row>
@@ -65,8 +61,7 @@
 								<Column>
 									<Input
 										label="Target"
-										v-model="job.target"
-										:value="job.target"
+										v-model="jobUpdateBuffer.target"
 									/>
 								</Column>
 							</Row>
@@ -517,6 +512,7 @@ export default {
 				},
 				link: null,
 			},
+			jobUpdateBuffer: {},
 			artifacts: [],
 			collections: [],
 			podsData: {},
@@ -578,7 +574,7 @@ export default {
 			}
 		},
 		updateJob() {
-			this.$store.dispatch('job/updateJob', this.job);
+			this.$store.dispatch('job/updateJob', this._dataToUpdate());
 			this.toggleVisibility('editorVisibility');
 		},
 		deleteJob() {
@@ -647,6 +643,8 @@ export default {
 						return;
 					}
 					this.job = job_json;
+					// клонируем объект. jobUpdateBuffer нужен чтобы отслеживать изменения при редактировании
+					this.jobUpdateBuffer = JSON.parse(JSON.stringify(this.job));
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
 						this.job.finishedTime = 'now';
@@ -750,8 +748,22 @@ export default {
 				});
 		},
 		stopTest: function() {
-			this.job.status = 'stopped';
-			this.$store.dispatch('job/updateJob', this.job);
+			this.jobUpdateBuffer.status = 'stopped';
+			this.updateJob();
+		},
+		_dataToUpdate: function() {
+			// возвращает разницу между джобой и обновленными данными, которые хранятся в jobUpdateBuffer
+			let buffer = {id: this.job.id};
+
+			for (let k in this.jobUpdateBuffer) {
+				if (this.jobUpdateBuffer.hasOwnProperty(k)) {
+					if (JSON.stringify(this.job[k]) !== JSON.stringify(this.jobUpdateBuffer[k])) {
+						this.job[k] = this.jobUpdateBuffer[k];
+						buffer[k] = this.jobUpdateBuffer[k];
+					}
+				}
+			}
+			return buffer;
 		}
 	},
 	computed: {
@@ -761,7 +773,7 @@ export default {
 
 				if (this.currentSortDir === 'dsc') {modifier = -1;}
 				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {return 1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {return modifier;}
 				return 0;
 			});
 		}
