@@ -196,11 +196,11 @@
 							</tr>
 							<tr>
 								<td align="center">Test start</td>
-								<td align="center">{{ ts_to_date(job.testStart) }}</td>
+								<td align="center">{{ tsToDate(job.testStart) }}</td>
 							</tr>
 							<tr>
 								<td align="center">Test stop</td>
-								<td align="center">{{ ts_to_date(job.testStop) }}</td>
+								<td align="center">{{ tsToDate(job.testStop) }}</td>
 							</tr>
 							<tr>
 								<td align="center">Target</td>
@@ -212,7 +212,7 @@
 							</tr>
 							<tr v-if="job.autostopTime">
 								<td align="center">Autostop time</td>
-								<td align="center">{{ ts_to_date(job.autostopTime) }}</td>
+								<td align="center">{{ tsToDate(job.autostopTime) }}</td>
 							</tr>
 							<tr v-if="job.autostopMessage">
 								<td align="center">Autostop reason</td>
@@ -255,7 +255,7 @@
 					<div class="row justify-content-between">
 						<div class="col-md-12 col-sm-12" >
 							<div v-for="value in podsData" :key="value.name" class="col-md-3 col-sm-6 pod-btns-location">
-								<button @click=get_resources_graphs(value.name,value.labels.env) class="pod-btn" :class="{ expanded: openedGraphs.includes(value.name) }">{{ value.name }}</button>
+								<button @click=getResourcesGraphs(value.name,value.labels.env) class="pod-btn" :class="{ expanded: openedGraphs.includes(value.name) }">{{ value.name }}</button>
 							</div>
 						</div>
 					</div>
@@ -408,31 +408,31 @@
 						<table id="StatsDetails" class="hover table table-bordered">
 							<thead>
 								<tr>
-									<th @click="sort_aggregates('label')">label
+									<th @click="sortAggregates('label')">label
 										<div v-if="'label'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('okCount')">ok
+									<th @click="sortAggregates('okCount')">ok
 										<div v-if="'okCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('errCount')">errors
+									<th @click="sortAggregates('errCount')">errors
 										<div v-if="'errCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('q50')">q50, ms
+									<th @click="sortAggregates('q50')">q50, ms
 										<div v-if="'q50'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('q75')">q75, ms
+									<th @click="sortAggregates('q75')">q75, ms
 										<div v-if="'q75'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('q90')">q90, ms
+									<th @click="sortAggregates('q90')">q90, ms
 										<div v-if="'q90'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('q95')">q95, ms
+									<th @click="sortAggregates('q95')">q95, ms
 										<div v-if="'q95'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('q98')">q98, ms
+									<th @click="sortAggregates('q98')">q98, ms
 										<div v-if="'q98'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
-									<th @click="sort_aggregates('q99')">q99, ms
+									<th @click="sortAggregates('q99')">q99, ms
 										<div v-if="'q99'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
 									</th>
 								</tr>
@@ -562,10 +562,10 @@ export default {
 	},
 	methods: {
 		async refresh() {
-			await this.get_test_info(this.test_id);
+			await this.getTestInfo(this.test_id);
 			if (this.job.status === 'finished') {
-				await this.get_artifacts(this.test_id);
-				await this.get_test_aggregates(this.test_id);
+				await this.getArtifacts(this.test_id);
+				await this.getTestAggregates(this.test_id);
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
 				}
@@ -610,7 +610,7 @@ export default {
 				this.openedGraphs.push(pod_button);
 			}
 		},
-		ts_to_date: function(ts) {
+		tsToDate: function(ts) {
 			const from_ts = new Date(ts * 1000);
 
 			const from_ts_hour = from_ts.getHours();
@@ -633,7 +633,7 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		get_test_info: function(id) {
+		getTestInfo: function(id) {
 			return this.$api.get('/job/' + id)
 				.then(response => {
 					return response[0].data.job;
@@ -672,7 +672,7 @@ export default {
 			this.selectedTag=tag;
 			this.loading=false;
 		},
-		get_test_aggregates: function(id) {
+		getTestAggregates: function(id) {
 			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
 
 			return this.$api.get('/aggregates/' + id)
@@ -707,7 +707,7 @@ export default {
 					);
 				});
 		},
-		get_resources_graphs: function(name, env) {
+		getResourcesGraphs: function(name, env) {
 			this.resources.graphs = {};
 			if (isNaN(this.job.testStop)) {
 				this.job.finishedTime = 'now';
@@ -721,13 +721,13 @@ export default {
 			this.resources.link = 'http://grafana.o3.ru/d/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.toggleGraphsVisibility(name);
 		},
-		sort_aggregates: function(s) {
+		sortAggregates: function(s) {
 			if (s === this.currentSort) {
 				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
 			}
 			this.currentSort = s;
 		},
-		get_artifacts: function(id) {
+		getArtifacts: function(id) {
 			return this.$api.get('/list_artifacts/' + id)
 				.then(response => {
 					return response[0].data.artifacts;

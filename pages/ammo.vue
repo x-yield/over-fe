@@ -18,7 +18,7 @@
 				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
 					<input type="text" name="name" placeholder="Имя" required/>
 					<input type="file" name="file" required/>
-					<button @click="submit_form" type="button">Загрузить</button>
+					<button @click="submitForm" type="button">Загрузить</button>
 				</form>
 			</div>
 			<br/>
@@ -87,10 +87,10 @@ export default {
 		title: 'Overload - нагрузочные тесты',
 	},
 	created() {
-		this.get_ammo_info();
+		this.getAmmoInfo();
 	},
 	methods: {
-		sexy_bytes: function(bytes) {
+		sexyBytes: function(bytes) {
 			if (typeof bytes === 'string') {
 				bytes = parseInt(bytes);
 			}
@@ -118,10 +118,10 @@ export default {
 		zfill: function(num, len) { // заполняет строковое представление числа нулями, например zfill(5, 3) -> "005"
 			return (1e15+num+'').slice(-len);
 		},
-		set_form_action: function($form) {
+		setFormAction: function($form) {
 			$form.action = '//' + this.$env.endpoint + '/upload_ammo';
 		},
-		get_ammo_info: function() {
+		getAmmoInfo: function() {
 			this.$api.get('/list_ammo')
 				.then(response => {
 					return response[0].data.ammo;
@@ -140,7 +140,7 @@ export default {
 						let a = this.ammo[i];
 
 						ammoKeys.push(a['key']);
-						a['size'] = this.sexy_bytes(a['size']); // мегабайты, гигабайты и прочее
+						a['size'] = this.sexyBytes(a['size']); // мегабайты, гигабайты и прочее
 						a['order'] = new Date(a['lastModified']); // поле для сортировки
 						let lm = new Date(a['lastModified']); // локальная таймзона
 
@@ -161,23 +161,23 @@ export default {
 				});
 			this.loading = false;
 		},
-		submit_form: function() {
+		submitForm: function() {
 			let $form = document.getElementById('ammoUploadForm');
 			let ammoKey = $form.children[0]['value'];
 
 			$form.reportValidity();
-			this.set_form_action($form);
+			this.setFormAction($form);
 
 			// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
 			if (ammoKeys.indexOf(ammoKey) > -1) {
 				if (confirm('Файл с таким именем уже существует. Перезаписать?')) {
-					this.send_form_data($form);
+					this.sendFormData($form);
 				}
 			} else {
-				this.send_form_data($form);
+				this.sendFormData($form);
 			}
 		},
-		highlight_new_ammo: function(scope, value) {
+		highlightNewAmmo: function(scope, value) {
 			let highlightingColor = '#ffeb99'; // yellow-ish
 
 			// ждем пока обновится табличка
@@ -197,7 +197,7 @@ export default {
 				}
 			}, 100);
 		},
-		send_form_data: function($form) {
+		sendFormData: function($form) {
 			let request = new XMLHttpRequest();
 			let ammoUrl = '';
 
@@ -214,8 +214,8 @@ export default {
 			// обновляем таблицу и подсвечаваем обновленный файл
 			if (ammoUrl !== '') {
 				this.loading = true;
-				this.get_ammo_info();
-				this.highlight_new_ammo(this, ammoUrl);
+				this.getAmmoInfo();
+				this.highlightNewAmmo(this, ammoUrl);
 			}
 		}
 	},

@@ -39,24 +39,19 @@
 						</thead>
 						<tbody>
 							<tr v-for="job in last_jobs" :key="job.id">
-								<td
-									align="center"
-								>
+								<td align="center">
 									<a :href='"/job?id="+job.id'>{{ job.id }}</a>
 								</td>
-								<td
-									align="center"
-								>
+								<td align="center">
 									{{ job.author }}
 								</td>
 								<td
 									align="center"
-									:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
-								>
+									:class="{active: isInProgress(job.status), warning: !isInProgress(job.status)}">
 									{{ job.status }}
 								</td>
 								<td align="center">
-									{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}
+									{{ tsToDate(job.testStart) }} → {{ tsToDate(job.testStop) }}
 								</td>
 								<td align="center">
 									{{ job.target }}
@@ -67,7 +62,7 @@
 							</tr>
 						</tbody>
 					</table>
-					<button class="btn-lg" @click="more_tests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
+					<button class="btn-lg" @click="moreTests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
 				</div>
 			</div>
 		</div>
@@ -104,7 +99,7 @@ export default {
 	mounted() {
 	},
 	methods: {
-		more_tests: function(from_) {
+		moreTests: function(from_) {
 			this.$api.get('/lastjobs/' + from_)
 				.then(response => {
 					const jobs = this.last_jobs;
@@ -116,7 +111,7 @@ export default {
 					});
 				});
 		},
-		ts_to_date: function(ts) {
+		tsToDate: function(ts) {
 			const from_ts = new Date(ts * 1000);
 
 			const today = new Date();
@@ -154,7 +149,7 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		is_in_progress: function(status) {
+		isInProgress: function(status) {
 			if (status !== 'finished') {
 				return false;
 			}
