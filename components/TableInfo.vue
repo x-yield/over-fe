@@ -1,23 +1,22 @@
 <template>
-	<table class="table table-sm table-bordered" >
-		<caption>Last tests</caption>
-		<thead>
+	<table-info class="table table-sm table-bordered" >
+		<t-head>
 			<tr>
-				<th scope="col" class="text-center">Test id</th>
+				<th align="center">{{ title }}</th>
 			</tr>
-		</thead>
+		</t-head>
 		<tbody>
-			<tr>
-				<td align="center">mde
-				</td>
+			<tr v-for="header in headers" :key="header">
+				<td align="center">{{ header }}</td>
+				<td align="center">mde</td>
 			</tr>
 		</tbody>
-	</table>
+	</table-info>
 </template>
 
 <script>
 export default {
-	name: 'Table',
+	name: 'TableInfo',
 	props: {
 		title: {
 			type: String,
@@ -28,7 +27,7 @@ export default {
 			type: Array,
 			default: null,
 			required: true,
-		},
+		}
 	}
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
-	<div class="staff-layout-default">
-		<div class="staff-app">
+	<div class="overload-layout-default">
+		<div class="overload-app">
 			<nuxt/>
 		</div>
 	</div>
@@ -8,7 +8,7 @@
 
 <script>
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'vuetify/dist/vuetify.min.css';
 
 export default {
 	components: {
@@ -19,14 +19,14 @@ export default {
 <style scoped>
 @import "@ozonui/color-palette";
 
-.staff-layout-default {
+.overload-layout-default {
 	display: flex;
 	width: 100%;
 	height: 100%;
 	position: relative;
 }
 
-.staff-app {
+.overload-app {
 	flex: 1;
 	margin: 20px;
 }

@@ -17,57 +17,58 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 
-			<div class="col-md-12">
-				<h4 align="center">Collection #{{ collectionId }}</h4>
-				<table class="table table-sm table-hover">
-					<tbody>
-						<tr>
-							<td align="center">Environment</td>
-							<td align="center">{{ collection.env }}</td>
-						</tr>
-						<tr>
-							<td align="center">Project name</td>
-							<td align="center">{{ collection.project }}</td>
-						</tr>
-						<tr>
-							<td align="center">Service</td>
-							<td align="center">{{ collection.service }}</td>
-						</tr>
-						<tr>
-							<td align="center">Name of collection</td>
-							<td align="center">{{ collection.name }}</td>
-						</tr>
-						<tr>
-							<td align="center">Author</td>
-							<td align="center">{{ collection.author }}</td>
-						</tr>
-						<tr>
-							<td align="center">Latest jobs for this collection</td>
-							<td align="center">
-								<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
-									{{ job.id }}
-								</a>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<!-- grafana graphs -->
-			<div class="col-md-12">
-				<h3 align="center">Trends</h3>
-				<div class="row justify-content-between" style="height:300px;">
-					<div class="col-md-12 col-sm-12">
-						<!-- rps -->
-						<iframe
-							:src="regression.graphs.imbalance"
-							width="100%"
-							height="100%"
-							marginheight="0"
-							align="top"
-							scrolling="No"
-							frameborder="0"
-							style="overflow: hidden;"
-						/>
+			<div v-else>
+				<div class="col-md-12">
+					<table-info :title="'Collection #'+collectionId" :headers="['Environment', 'Project Name']">
+						<tbody>
+							<tr>
+								<td align="center">Environment</td>
+								<td align="center">{{ collection.env }}</td>
+							</tr>
+							<tr>
+								<td align="center">Project name</td>
+								<td align="center">{{ collection.project }}</td>
+							</tr>
+							<tr>
+								<td align="center">Service</td>
+								<td align="center">{{ collection.service }}</td>
+							</tr>
+							<tr>
+								<td align="center">Name of collection</td>
+								<td align="center">{{ collection.name }}</td>
+							</tr>
+							<tr>
+								<td align="center">Author</td>
+								<td align="center">{{ collection.author }}</td>
+							</tr>
+							<tr>
+								<td align="center">Latest jobs for this collection</td>
+								<td align="center">
+									<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
+										{{ job.id }}
+									</a>
+								</td>
+							</tr>
+						</tbody>
+					</table-info>
+				</div>
+				<!-- grafana graphs -->
+				<div class="col-md-12">
+					<h3 align="center">Trends</h3>
+					<div class="row justify-content-between" style="height:300px;">
+						<div class="col-md-12 col-sm-12">
+							<!-- rps -->
+							<iframe
+								:src="regression.graphs.imbalance"
+								width="100%"
+								height="100%"
+								marginheight="0"
+								align="top"
+								scrolling="No"
+								frameborder="0"
+								style="overflow: hidden;"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -81,6 +82,7 @@ import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
+import TableInfo from '../components/TableInfo';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -114,6 +116,7 @@ export default {
 		Input,
 		Select,
 		Option,
+		TableInfo,
 		Row: row,
 		Column: column,
 		Container: container
