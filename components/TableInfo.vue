@@ -1,17 +1,12 @@
 <template>
-	<table-info class="table table-sm table-bordered" >
-		<t-head>
-			<tr>
-				<th align="center">{{ title }}</th>
-			</tr>
-		</t-head>
+	<table class="table table-sm table-hover" >
 		<tbody>
 			<tr v-for="header in headers" :key="header">
 				<td align="center">{{ header }}</td>
-				<td align="center">mde</td>
+				<td align="center">{{ mde }}</td>
 			</tr>
 		</tbody>
-	</table-info>
+	</table>
 </template>
 
 <script>
@@ -21,12 +16,14 @@ export default {
 		title: {
 			type: String,
 			default: 'Title',
-			required: true,
 		},
 		headers: {
 			type: Array,
 			default: null,
-			required: true,
+		},
+		content: {
+			type: Object,
+			default: null,
 		}
 	}
 };

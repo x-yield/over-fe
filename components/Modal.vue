@@ -6,10 +6,7 @@
 					<button
 						type="button"
 						class="btn-close"
-						@click="close"
-					>
-						x
-					</button>
+						@click="close">x</button>
 				</slot>
 			</header>
 			<section class="modal-body">
@@ -27,6 +24,12 @@
 <script>
 export default {
 	name: 'Modal',
+	props: {
+		title : {
+			type: String,
+			default: 'Mde',
+		},
+	},
 	methods: {
 		close() {
 			this.$emit('close');

@@ -19,37 +19,37 @@
 
 			<div v-else>
 				<div class="col-md-12">
-					<table-info :title="'Collection #'+collectionId" :headers="['Environment', 'Project Name']">
-						<tbody>
-							<tr>
-								<td align="center">Environment</td>
-								<td align="center">{{ collection.env }}</td>
-							</tr>
-							<tr>
-								<td align="center">Project name</td>
-								<td align="center">{{ collection.project }}</td>
-							</tr>
-							<tr>
-								<td align="center">Service</td>
-								<td align="center">{{ collection.service }}</td>
-							</tr>
-							<tr>
-								<td align="center">Name of collection</td>
-								<td align="center">{{ collection.name }}</td>
-							</tr>
-							<tr>
-								<td align="center">Author</td>
-								<td align="center">{{ collection.author }}</td>
-							</tr>
-							<tr>
-								<td align="center">Latest jobs for this collection</td>
-								<td align="center">
-									<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
-										{{ job.id }}
-									</a>
-								</td>
-							</tr>
-						</tbody>
+					<table-info :title="'Collection #'+collectionId" :headers="collectionHeaders" :content="collection">
+						<!--<tbody>-->
+							<!--<tr>-->
+								<!--<td align="center">Environment</td>-->
+								<!--<td align="center">{{ collection.env }}</td>-->
+							<!--</tr>-->
+							<!--<tr>-->
+								<!--<td align="center">Project name</td>-->
+								<!--<td align="center">{{ collection.project }}</td>-->
+							<!--</tr>-->
+							<!--<tr>-->
+								<!--<td align="center">Service</td>-->
+								<!--<td align="center">{{ collection.service }}</td>-->
+							<!--</tr>-->
+							<!--<tr>-->
+								<!--<td align="center">Name of collection</td>-->
+								<!--<td align="center">{{ collection.name }}</td>-->
+							<!--</tr>-->
+							<!--<tr>-->
+								<!--<td align="center">Author</td>-->
+								<!--<td align="center">{{ collection.author }}</td>-->
+							<!--</tr>-->
+							<!--<tr>-->
+								<!--<td align="center">Latest jobs for this collection</td>-->
+								<!--<td align="center">-->
+									<!--<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">-->
+										<!--{{ job.id }}-->
+									<!--</a>-->
+								<!--</td>-->
+							<!--</tr>-->
+						<!--</tbody>-->
 					</table-info>
 				</div>
 				<!-- grafana graphs -->
@@ -103,6 +103,7 @@ export default {
 			},
 			collectionId: '',
 			collection: {},
+			collectionHeaders: ['Environment', 'Project name', 'Service', 'Name of collection', 'Author', 'Latest jobs for this collection'],
 			loading: true,
 			error: null,
 			success: null,

@@ -44,51 +44,7 @@
 					<h3 align="center">Loading...</h3>
 				</div>
 				<div v-else>
-					<table class="table table-sm table-bordered" >
-						<caption>Last collections</caption>
-						<thead>
-							<tr>
-								<th scope="col" class="text-center">Collection ID</th>
-								<th scope="col" class="text-center">Author</th>
-								<th scope="col" class="text-center">Environment</th>
-								<th scope="col" class="text-center">Project ID</th>
-								<th scope="col" class="text-center">Project name</th>
-								<th scope="col" class="text-center">Name</th>
-								<th scope="col" class="text-center">Branch</th>
-								<th scope="col" class="text-center">Latest jobs</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="collection in collections" :key="collection.id">
-								<td align="center">
-									<a :href='"/collection?id="+collection.id'>{{ collection.id }}</a>
-								</td>
-								<td align="center">
-									{{ collection.author }}
-								</td>
-								<td align="center">
-									{{ collection.env }}
-								</td>
-								<td align="center">
-									{{ collection.project }}
-								</td>
-								<td align="center">
-									{{ collection.service }}
-								</td>
-								<td align="center">
-									{{ collection.name }}
-								</td>
-								<td align="center">
-									{{ collection.ref }}
-								</td>
-								<td align="center">
-									<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
-										{{ job.id }}
-									</a>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<table-list caption="Last Collections" :headers="tableHeaders" :content="collections" :isJobs="false"/>
 				</div>
 			</div>
 		</div>
@@ -97,6 +53,8 @@
 
 
 <script>
+import TableList from '../components/TableList';
+
 export default {
 	data() {
 		return {
@@ -109,12 +67,15 @@ export default {
 			projects: [],
 			names: [],
 			loading: true,
+			tableHeaders: ['Collection ID', 'Author', 'Environment', 'Project ID', 'Project name', 'Name', 'Branch', 'Latest jobs']
 		};
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
-	components: {},
+	components: {
+		TableList,
+	},
 	created() {
 		this.getFilteredCollections(this.selected);
 	},

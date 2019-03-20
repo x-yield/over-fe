@@ -25,43 +25,7 @@
 					<h3 align="center">Loading...</h3>
 				</div>
 				<div v-else>
-					<table class="table table-sm table-bordered" >
-						<caption>Last tests</caption>
-						<thead>
-							<tr>
-								<th scope="col" class="text-center">Test id</th>
-								<th scope="col" class="text-center">Author</th>
-								<th scope="col" class="text-center">Status</th>
-								<th scope="col" class="text-center">Start → Stop</th>
-								<th scope="col" class="text-center">Target</th>
-								<th scope="col" class="text-center">Description</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="job in last_jobs" :key="job.id">
-								<td align="center">
-									<a :href='"/job?id="+job.id'>{{ job.id }}</a>
-								</td>
-								<td align="center">
-									{{ job.author }}
-								</td>
-								<td
-									align="center"
-									:class="{active: isInProgress(job.status), warning: !isInProgress(job.status)}">
-									{{ job.status }}
-								</td>
-								<td align="center">
-									{{ tsToDate(job.testStart) }} → {{ tsToDate(job.testStop) }}
-								</td>
-								<td align="center">
-									{{ job.target }}
-								</td>
-								<td align="center">
-									{{ job.description }}
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<table-list caption="Last Tests" :headers="tableHeaders" :content="last_jobs" :isJobs="true"/>
 					<button class="btn-lg" @click="moreTests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
 				</div>
 			</div>
@@ -71,10 +35,12 @@
 
 <script>
 
+import TableList from '../components/TableList';
 export default {
 	data() {
 		return {
 			last_jobs: [],
+			tableHeaders: ['Test id', 'Author', 'Status', 'Start → Stop', 'Target', 'Description'],
 			loading: true,
 		};
 	},
@@ -82,6 +48,7 @@ export default {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
+		TableList,
 	},
 	created() {
 		this.$api.get('/lastjobs/0')
@@ -111,52 +78,6 @@ export default {
 					});
 				});
 		},
-		tsToDate: function(ts) {
-			const from_ts = new Date(ts * 1000);
-
-			const today = new Date();
-
-			const from_ts_hour = from_ts.getHours();
-
-			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-
-			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-
-			const from_ts_year = from_ts.getFullYear();
-
-			if (isNaN(from_ts.getDate())) {
-				return 'not yet';
-			}
-			else if (today.getDate() === from_ts.getDate()) {
-				return from_ts_hour + ':' + from_ts_min;
-			}
-			else if (today.getFullYear() === from_ts_year) {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-			else {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-		},
-		isInProgress: function(status) {
-			if (status !== 'finished') {
-				return false;
-			}
-			else {
-				return true;
-			}
-		}
 	},
 };
 </script>

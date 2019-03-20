@@ -8,7 +8,8 @@
 
 <script>
 
-import 'vuetify/dist/vuetify.min.css';
+// import 'vuetify/dist/vuetify.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default {
 	components: {
