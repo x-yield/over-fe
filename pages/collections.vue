@@ -13,12 +13,8 @@
 					</div>
 					<h4 align="right">
 						<form @change="getFilteredCollections(selected={env, project, name}) " >
-							<select class="dropbtn" v-model="env">
-								<option value="">All</option>
-								<option v-for="(env, index) in envs" :key="index">
-									{{ env }}
-								</option>
-							</select>
+							<dropdown-menu :model="env" :array="envs"/>
+
 							<select class="dropbtn" v-model="project">
 								<option value="">All</option>
 								<option v-for="(project, index) in projects" :key="index" :value="project.projectId">
@@ -26,12 +22,8 @@
 									<span v-if="project.projectName">({{ project.projectName }})</span>
 								</option>
 							</select>
-							<select class="dropbtn" v-model="name">
-								<option value="">All</option>
-								<option v-for="(name, index) in names" :key="index">
-									{{ name }}
-								</option>
-							</select>
+
+							<dropdown-menu :model="name" :array="names"/>
 							<button class="dropbtn flush" @click="flushAllFilters()">Flush all filters</button>
 						</form>
 
@@ -54,6 +46,7 @@
 
 <script>
 import TableList from '../components/TableList';
+import DropdownMenu from '../components/DropdownMenu';
 
 export default {
 	data() {
@@ -75,6 +68,7 @@ export default {
 	},
 	components: {
 		TableList,
+		DropdownMenu
 	},
 	created() {
 		this.getFilteredCollections(this.selected);

@@ -184,46 +184,7 @@
 					</h4>
 				</div>
 				<div class="col-md-12">
-					<table class="table table-sm table-hover">
-						<tbody>
-							<tr>
-								<td align="center">Author</td>
-								<td align="center">{{ job.author }}</td>
-							</tr>
-							<tr>
-								<td align="center">Status</td>
-								<td align="center">{{ job.status }}</td>
-							</tr>
-							<tr>
-								<td align="center">Test start</td>
-								<td align="center">{{ tsToDate(job.testStart) }}</td>
-							</tr>
-							<tr>
-								<td align="center">Test stop</td>
-								<td align="center">{{ tsToDate(job.testStop) }}</td>
-							</tr>
-							<tr>
-								<td align="center">Target</td>
-								<td align="center">{{ job.target }}</td>
-							</tr>
-							<tr>
-								<td align="center">Description</td>
-								<td align="center">{{ job.description }}</td>
-							</tr>
-							<tr v-if="job.autostopTime">
-								<td align="center">Autostop time</td>
-								<td align="center">{{ tsToDate(job.autostopTime) }}</td>
-							</tr>
-							<tr v-if="job.autostopMessage">
-								<td align="center">Autostop reason</td>
-								<td align="center">{{ job.autostopMessage }}</td>
-							</tr>
-							<tr v-if="job.imbalance">
-								<td align="center">Imbalance</td>
-								<td align="center">{{ job.imbalance }}</td>
-							</tr>
-						</tbody>
-					</table>
+					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
 				</div>
 
 				<!-- artifacts -->
@@ -354,48 +315,7 @@
 				</h3>
 				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
-						<table id="StatsOverall" class="hover table table-bordered">
-							<thead>
-								<tr>
-									<th>label</th>
-									<th>ok</th>
-									<th>errors</th>
-									<th>q50, ms</th>
-									<th>q75, ms</th>
-									<th>q90, ms</th>
-									<th>q95, ms</th>
-									<th>q98, ms</th>
-									<th>q99, ms</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="{ expanded: visibilities.overallCodeVisibility }">Overall
-									</td>
-									<td>{{ overall.okCount }}</td>
-									<td>{{ overall.errCount }}</td>
-									<td>{{ overall.q50 }}</td>
-									<td>{{ overall.q75 }}</td>
-									<td>{{ overall.q90 }}</td>
-									<td>{{ overall.q95 }}</td>
-									<td>{{ overall.q98 }}</td>
-									<td>{{ overall.q99 }}</td>
-								</tr>
-								<tr v-show="visibilities.overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden-rows">
-									<td>{{ aggregate.responseCode }}</td>
-									<td>{{ aggregate.okCount }}</td>
-									<td>{{ aggregate.errCount }}</td>
-									<td>{{ aggregate.q50 }}</td>
-									<td>{{ aggregate.q75 }}</td>
-									<td>{{ aggregate.q90 }}</td>
-									<td>{{ aggregate.q95 }}</td>
-									<td>{{ aggregate.q98 }}</td>
-									<td>{{ aggregate.q99 }}</td>
-								</tr>
-							</tbody>
-							<tfoot/>
-							<tfoot/>
-						</table>
+						<table-aggregates title="StatsOverall" :headers="aggregatesTableHeaders" :commonAggregates="overall" :detailedAggregates="overallByCode"/>
 					</div>
 				</div>
 				<h4
@@ -477,6 +397,8 @@
 
 <script>
 import Modal from '../components/Modal';
+import TableInfo from '../components/TableInfo';
+import TableAggregates from '../components/TableAggregates';
 import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
@@ -516,7 +438,7 @@ export default {
 			artifacts: [],
 			collections: [],
 			podsData: {},
-			overall: {},
+			overall: [],
 			tagged: [],
 			overallByCode: [],
 			taggedByCode: [],
@@ -529,7 +451,6 @@ export default {
 			visibilities:{
 				isSummaryVisible: true,
 				editorVisibility: false,
-				overallCodeVisibility: false,
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
 				resourcesVisibility: false,
@@ -538,7 +459,9 @@ export default {
 			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			selectedTag: '__OVERALL__'
+			selectedTag: '__OVERALL__',
+			tableHeaders: {'Author': 'author', 'Status': 'status', 'Test start': 'testStart', 'Test stop': 'testStop', 'Target': 'target', 'Description': 'description', 'Autostop time': 'autostopTime', 'Autostop reason': 'autostopMessage', 'Imbalance': 'imbalance'},
+			aggregatesTableHeaders: ['label', 'ok', 'errors', 'q50, ms', 'q75, ms', 'q90, ms', 'q95, ms', 'q98, ms', 'q99, ms']
 		};
 	},
 	head: {
@@ -550,6 +473,8 @@ export default {
 		Input,
 		Select,
 		Option,
+		TableInfo,
+		TableAggregates,
 		Row: row,
 		Column: column,
 		Container: container
@@ -695,7 +620,7 @@ export default {
 								}
 							);
 							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.overall = (agg);
+								this.overall.push(agg);
 							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
 								this.tagged.push(agg);
 							} if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
