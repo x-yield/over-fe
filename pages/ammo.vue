@@ -207,7 +207,7 @@ export default {
 				ammoUrl = JSON.parse(request.responseText)['url'];
 			};
 			request.onerror = function() {
-				console.log(request.status + ': ' + request.statusText);
+				//console.log(request.status + ': ' + request.statusText);
 			};
 
 			request.send(new FormData($form));

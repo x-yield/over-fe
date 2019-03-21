@@ -238,11 +238,11 @@
 
 <script>
 import Modal from '../components/Modal';
-	import Layout from '@ozonui/layout';
-	import '@ozonui/layout/src/grid.css';
-	import Input from '@ozonui/form-input';
-	import FormSelect from '@ozonui/form-select';
-	import Button from '@ozonui/custom-button';
+import Layout from '@ozonui/layout';
+import '@ozonui/layout/src/grid.css';
+import Input from '@ozonui/form-input';
+import FormSelect from '@ozonui/form-select';
+import Button from '@ozonui/custom-button';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
