@@ -255,20 +255,20 @@
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">graphs</h3>
-					<div v-if="sortedAggregates.length > 1">
-						<h4	align="left">
-							<form @change="selectGraphs(selectedTag) " >
-								<select v-model="selectedTag">
-									<option>
-										__OVERALL__
-									</option>
-									<option v-for="tag in sortedAggregates" :key="tag.label">
-										{{ tag.label }}
-									</option>
-								</select>
-							</form>
-						</h4>
-					</div>
+					<!--<div v-if="sortedAggregates.length > 1">-->
+						<!--<h4	align="left">-->
+							<!--<form @change="selectGraphs(selectedTag) " >-->
+								<!--<select v-model="selectedTag">-->
+									<!--<option>-->
+										<!--__OVERALL__-->
+									<!--</option>-->
+									<!--<option v-for="tag in sortedAggregates" :key="tag.label">-->
+										<!--{{ tag.label }}-->
+									<!--</option>-->
+								<!--</select>-->
+							<!--</form>-->
+						<!--</h4>-->
+					<!--</div>-->
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- rps -->
@@ -315,7 +315,7 @@
 				</h3>
 				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
-						<table-aggregates title="StatsOverall" :headers="aggregatesTableHeaders" :commonAggregates="overall" :detailedAggregates="overallByCode"/>
+						<table-aggregates title="StatsOverall" :headers="aggregatesTableHeaders" :commonAggregates="overall" :detailedAggregates="overallByCode" :isOverall="true"/>
 					</div>
 				</div>
 				<h4
@@ -325,67 +325,7 @@
 				</h4>
 				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
 					<div class="row justify-content-between">
-						<table id="StatsDetails" class="hover table table-bordered">
-							<thead>
-								<tr>
-									<th @click="sortAggregates('label')">label
-										<div v-if="'label'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('okCount')">ok
-										<div v-if="'okCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('errCount')">errors
-										<div v-if="'errCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('q50')">q50, ms
-										<div v-if="'q50'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('q75')">q75, ms
-										<div v-if="'q75'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('q90')">q90, ms
-										<div v-if="'q90'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('q95')">q95, ms
-										<div v-if="'q95'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('q98')">q98, ms
-										<div v-if="'q98'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sortAggregates('q99')">q99, ms
-										<div v-if="'q99'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<template v-for="tag in sortedAggregates" >
-									<tr :key="tag.label">
-										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus-table-label" :class="{ expanded: openedTag.includes(tag.label) }">{{ tag.label }}</td>
-										<td>{{ tag.okCount }}</td>
-										<td>{{ tag.errCount }}</td>
-										<td>{{ tag.q50 }}</td>
-										<td>{{ tag.q75 }}</td>
-										<td>{{ tag.q90 }}</td>
-										<td>{{ tag.q95 }}</td>
-										<td>{{ tag.q98 }}</td>
-										<td>{{ tag.q99 }}</td>
-									</tr>
-									<template v-if="openedTag.includes(code.label)" v-for="code in taggedByCode">
-										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden-rows">
-											<td>{{ code.responseCode }}</td>
-											<td>{{ code.okCount }}</td>
-											<td>{{ code.errCount }}</td>
-											<td>{{ code.q50 }}</td>
-											<td>{{ code.q75 }}</td>
-											<td>{{ code.q90 }}</td>
-											<td>{{ code.q95 }}</td>
-											<td>{{ code.q98 }}</td>
-											<td>{{ code.q99 }}</td>
-										</tr>
-									</template>
-								</template>
-							</tbody>
-						</table>
+						<table-aggregates title="DetailedStats" :headers="aggregatesTableHeaders" :commonAggregates="tagged" :detailedAggregates="taggedByCode" :isOverall="false"/>
 					</div>
 				</div>
 			</div>
@@ -442,8 +382,6 @@ export default {
 			tagged: [],
 			overallByCode: [],
 			taggedByCode: [],
-			sortedTaggedByCode: [],
-			openedTag: [],
 			openedGraphs: [],
 			loading: true,
 			error: null,
@@ -456,12 +394,9 @@ export default {
 				resourcesVisibility: false,
 				artifactsVisibility: false,
 			},
-			podGraphsVisibility: false,
-			currentSort: 'label',
-			currentSortDir: 'asc',
 			selectedTag: '__OVERALL__',
 			tableHeaders: {'Author': 'author', 'Status': 'status', 'Test start': 'testStart', 'Test stop': 'testStop', 'Target': 'target', 'Description': 'description', 'Autostop time': 'autostopTime', 'Autostop reason': 'autostopMessage', 'Imbalance': 'imbalance'},
-			aggregatesTableHeaders: ['label', 'ok', 'errors', 'q50, ms', 'q75, ms', 'q90, ms', 'q95, ms', 'q98, ms', 'q99, ms']
+			aggregatesTableHeaders: {'label': 'label', 'ok':'okCount', 'errors':'errCount', 'q50, ms':'q50', 'q75, ms':'q75', 'q90, ms':'q90', 'q95, ms':'q95', 'q98, ms':'q98', 'q99, ms':'q99'}
 		};
 	},
 	head: {
@@ -517,15 +452,6 @@ export default {
 		},
 		toggleArtifactsVisibility: function() {
 			this.toggleVisibility('artifactsVisibility');
-		},
-		toggleResponseCodeVisibility(name) {
-			const index = this.openedTag.indexOf(name);
-
-			if (index > -1) {
-				this.openedTag.splice(index, 1);
-			} else {
-				this.openedTag.push(name);
-			}
 		},
 		toggleGraphsVisibility(pod_button) {
 			if (this.openedGraphs.includes(pod_button)) {
@@ -646,12 +572,6 @@ export default {
 			this.resources.link = 'http://grafana.o3.ru/d/WdGUX7vmk/pod?orgId=1&refresh=5s&var-datasource=%5B' + env + '%5D%20K8S%20Prometheus&var-Pod=' + name + '&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime;
 			this.toggleGraphsVisibility(name);
 		},
-		sortAggregates: function(s) {
-			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
-			}
-			this.currentSort = s;
-		},
 		getArtifacts: function(id) {
 			return this.$api.get('/list_artifacts/' + id)
 				.then(response => {
@@ -691,18 +611,6 @@ export default {
 			return buffer;
 		}
 	},
-	computed: {
-		sortedAggregates:function() {
-			return this.tagged.slice().sort((a, b) => {
-				let modifier =1;
-
-				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {return modifier;}
-				return 0;
-			});
-		}
-	}
 
 };
 </script>
@@ -740,60 +648,6 @@ export default {
 		max-height: 350px;
 		overflow-y: scroll;
 		color: black;
-	}
-
-	.plus-table-label:after {
-		height: 14px;
-		width: 14px;
-		margin-left: 3px;
-		box-sizing: content-box;
-		display: inline-block;
-		vertical-align: middle;
-		color: white;
-		border: 1px solid white;
-		border-radius: 18px;
-		box-shadow: 0 0 3px #444;
-		text-align: center;
-		text-indent: 0 !important;
-		font-family: 'Courier New', Courier, monospace;
-		line-height: 14px;
-		background-color: #31b131;
-		content: '+';
-	}
-
-	.plus-table-label.expanded:after {
-		height: 14px;
-		width: 14px;
-		margin-left: 3px;
-		box-sizing: content-box;
-		display: inline-block;
-		vertical-align: middle;
-		color: white;
-		border: 1px solid white;
-		border-radius: 18px;
-		box-shadow: 0 0 3px #444;
-		text-align: center;
-		text-indent: 0 !important;
-		font-family: 'Courier New', Courier, monospace;
-		line-height: 14px;
-		background-color: #D85B5B;
-		content: '-';
-	}
-
-	.arrow-table-sort.asc{
-		margin-left: 5px;
-		display: inline-block;
-		border-left: 7px solid transparent;
-		border-right: 7px solid transparent;
-		border-bottom: 8px solid #31b131;
-	}
-
-	.arrow-table-sort.dsc {
-		margin-left: 5px;
-		display: inline-block;
-		border-left: 7px solid transparent;
-		border-right: 7px solid transparent;
-		border-top: 8px solid #31b131;
 	}
 
 	.resources-util-link {
