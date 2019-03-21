@@ -14,30 +14,20 @@
 					<h4 align="right">
 						<form @change="getFilteredCollections(selected={env, project, name}) " >
 							<dropdown-menu :model="env" :array="envs"/>
-
-							<select class="dropbtn" v-model="project">
-								<option value="">All</option>
-								<option v-for="(project, index) in projects" :key="index" :value="project.projectId">
-									{{ project.projectId }}
-									<span v-if="project.projectName">({{ project.projectName }})</span>
-								</option>
-							</select>
-
+							<dropdown-menu :model="project" :array="projects"/>
 							<dropdown-menu :model="name" :array="names"/>
-							<button class="dropbtn flush" @click="flushAllFilters()">Flush all filters</button>
+							<button class="flush" @click="flushAllFilters()">Flush all filters</button>
 						</form>
 
 					</h4>
 				</div>
 			</nav>
 
-			<div class="table">
-				<div v-if="loading">
-					<h3 align="center">Loading...</h3>
-				</div>
-				<div v-else>
-					<table-list caption="Last Collections" :headers="tableHeaders" :content="collections" :isJobs="false"/>
-				</div>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
+			</div>
+			<div v-else>
+				<table-list caption="Last Collections" :headers="tableHeaders" :content="collections" :isJobs="false"/>
 			</div>
 		</div>
 	</div>
@@ -131,11 +121,12 @@ export default {
 	.overload-fe-container {
 		flex: 1;
 	}
-	td > * {
-		vertical-align : middle;
-	}
 
 	.flush {
+		font-size: 16px;
+		border-radius: 5px;
+		width: auto;
+		cursor: pointer;
 		color: white;
 		background: linear-gradient(#6bbdff, #007bff);
 		border: solid 2px #007bff;

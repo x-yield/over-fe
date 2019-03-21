@@ -1,10 +1,15 @@
 <template>
 	<select class="dropbtn" v-model="model">
 		<option value="">All</option>
-		<option v-for="(model, index) in array" :key="index">
+		<option v-if="model !== 'project'" v-for="(model, index) in array" :key="index">
 			{{ model }}
 		</option>
+		<option v-else v-for="(model, index) in array" :key="index" :value="model.projectId">
+			{{ model.projectId }}
+			<span v-if="model.projectName">({{ model.projectName }})</span>
+		</option>
 	</select>
+
 </template>
 
 <script>
@@ -34,10 +39,4 @@ export default {
 		cursor: pointer;
 	}
 
-	.flush {
-		color: white;
-		background: linear-gradient(#6bbdff, #007bff);
-		border: solid 2px #007bff;
-		font-weight: bold;
-	}
 </style>

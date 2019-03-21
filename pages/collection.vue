@@ -8,9 +8,11 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
+				</div>
+				<div>
+					<a href="/collections">Collections</a>
+					<a href="/ammo">Ammo</a>
 				</div>
 			</nav>
 			<div v-if="loading">
@@ -19,8 +21,7 @@
 
 			<div v-else>
 				<div class="col-md-12">
-					<h4 align="center">Collection #{{ collectionId }}</h4>
-					<table-info :title="'Collection #'+collectionId" :headers="collectionHeaders" :content="collection" :isCollection="true"/>
+					<table-info :title="'Collection #'+collectionId" :headers="collectionHeaders" :content="collection" isСollection/>
 				</div>
 				<!-- grafana graphs -->
 				<div class="col-md-12">
@@ -39,7 +40,6 @@
 
 <script>
 import '@ozonui/layout/src/grid.css';
-import Button from '@ozonui/custom-button';
 import TableInfo from '../components/TableInfo';
 import Graph from '../components/Graph';
 
@@ -53,7 +53,13 @@ export default {
 			},
 			collectionId: '',
 			collection: {},
-			collectionHeaders: {'Environment':'env', 'Project name':'project', 'Service':'service', 'Name of collection':'name', 'Author':'author'},
+			collectionHeaders: {
+				'Environment':'env',
+				'Project name':'project',
+				'Service':'service',
+				'Name of collection':'name',
+				'Author':'author'
+			},
 			loading: true,
 			error: null,
 			success: null,
@@ -63,7 +69,6 @@ export default {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
-		Button,
 		TableInfo,
 		Graph
 	},
@@ -84,8 +89,9 @@ export default {
 					this.collection = json;
 					const intervalStart = new Date().getTime() - 90*24*60*60*1000;
 
-					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2&from='+intervalStart
-						+'&to=now&var-env='+this.collection.env+'&var-service='+this.collection.project+'&var-collection='+this.collection.name+'&theme=light';
+					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2'+
+						'&from='+intervalStart+'&to=now&var-env='+this.collection.env+'&var-service='+
+						this.collection.project+'&var-collection='+this.collection.name+'&theme=light';
 					this.loading = false;
 				});
 		},
@@ -109,6 +115,9 @@ export default {
 	}
 	td > * {
 		vertical-align : middle;
+	}
+	.sub-menu {
+
 	}
 </style>
 

@@ -8,9 +8,11 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
+				</div>
+				<div>
+					<a href="/collections">Collections</a>
+					<a href="/ammo">Ammo</a>
 				</div>
 			</nav>
 
@@ -81,6 +83,13 @@ export default {
 			loading: true,
 			error: null,
 			success: null,
+			tableHeaders: {
+				'Path':'path',
+				'Size':'size',
+				'Modified':'lastModified',
+				'Last Used':'lastUsed',
+				'Author':'author'
+			}
 		};
 	},
 	head: {
