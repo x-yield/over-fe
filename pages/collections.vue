@@ -135,16 +135,6 @@ export default {
 		vertical-align : middle;
 	}
 
-	.dropbtn {
-		background-color: white;
-		color: black;
-		font-size: 16px;
-		border: solid 2px #007bff;
-		border-radius: 5px;
-		width: auto;
-		cursor: pointer;
-	}
-
 	.flush {
 		color: white;
 		background: linear-gradient(#6bbdff, #007bff);

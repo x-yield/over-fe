@@ -222,28 +222,16 @@
 					</div>
 					<div v-show="openedGraphs.length > 0" class="row justify-content-between" style="height: 250px;">
 						<div class="col-md-4 col-sm-12">
-							<!-- rps -->
-							<iframe
-								:src="resources.graphs.cpu"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<!-- cpu -->
+							<graph :content="resources.graphs.cpu"/>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<!-- memory -->
-							<iframe
-								:src="resources.graphs.memory"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<graph :content="resources.graphs.memory"/>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<!-- net codes -->
-							<iframe
-								:src="resources.graphs.network"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<graph :content="resources.graphs.network"/>
 						</div>
 					</div>
 					<div align="center" v-show="openedGraphs.length > 0" style="padding: 1em 0 2em 0;">
@@ -254,7 +242,7 @@
 
 				<!-- grafana graphs -->
 				<div class="col-md-12">
-					<h3 align="center">graphs</h3>
+					<h3 align="center">Graphs</h3>
 					<!--<div v-if="sortedAggregates.length > 1">-->
 						<!--<h4	align="left">-->
 							<!--<form @change="selectGraphs(selectedTag) " >-->
@@ -272,60 +260,38 @@
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- rps -->
-							<iframe
-								:src="job.graphs.rps"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<graph :content="job.graphs.rps"/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- net codes -->
-							<iframe
-								:src="job.graphs.quantiles"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<graph :content="job.graphs.netcodes"/>
 						</div>
 					</div>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- quantiles -->
-							<iframe
-								:src="job.graphs.netcodes"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<graph :content="job.graphs.quantiles"/>
 						</div>
 						<div class="col-md-6 col-sm-12">
 							<!-- tank threads -->
-							<iframe
-								:src="job.graphs.threads"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
+							<graph :content="job.graphs.threads"/>
 						</div>
 					</div>
 				</div>
 
 				<!-- summary stats -->
-				<h3
-					align="center"
-					@click="toggleVisibility('isSummaryVisible')">
-					Summary stats
-				</h3>
-				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
-					<div class="row justify-content-between">
-						<table-aggregates title="StatsOverall" :headers="aggregatesTableHeaders" :commonAggregates="overall" :detailedAggregates="overallByCode" :isOverall="true"/>
+				<div @click="toggleVisibility('isSummaryVisible')">
+					<h3 align="center">Summary stats</h3>
+					<div v-show="visibilities.isSummaryVisible" class="col-md-12">
+						<div class="row justify-content-between">
+							<table-aggregates title="StatsOverall" :headers="aggregatesTableHeaders" :commonAggregates="overall" :detailedAggregates="overallByCode" :isOverall="true"/>
+						</div>
 					</div>
-				</div>
-				<h4
-					align="center"
-					@click="toggleVisibility('isSummaryVisible')">
-					Detailed stats
-				</h4>
-				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
-					<div class="row justify-content-between">
-						<table-aggregates title="DetailedStats" :headers="aggregatesTableHeaders" :commonAggregates="tagged" :detailedAggregates="taggedByCode" :isOverall="false"/>
+					<h4 align="center">Detailed stats</h4>
+					<div v-show="visibilities.isSummaryVisible" class="col-md-12">
+						<div class="row justify-content-between">
+							<table-aggregates title="DetailedStats" :headers="aggregatesTableHeaders" :commonAggregates="tagged" :detailedAggregates="taggedByCode" :isOverall="false"/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -339,6 +305,7 @@
 import Modal from '../components/Modal';
 import TableInfo from '../components/TableInfo';
 import TableAggregates from '../components/TableAggregates';
+import Graph from '../components/Graph';
 import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
@@ -410,6 +377,7 @@ export default {
 		Option,
 		TableInfo,
 		TableAggregates,
+		Graph,
 		Row: row,
 		Column: column,
 		Container: container
@@ -714,15 +682,6 @@ export default {
 		float: left;
 	}
 
-	.hidden-rows {
-		background-color: #F0EDED;
-	}
-	.iframe-graphs {
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
-		border: none;
-	}
 	.text-link{
 		text-decoration: underline;
 	}

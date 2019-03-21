@@ -27,17 +27,8 @@
 					<h3 align="center">Trends</h3>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-12 col-sm-12">
-							<!-- rps -->
-							<iframe
-								:src="regression.graphs.imbalance"
-								width="100%"
-								height="100%"
-								marginheight="0"
-								align="top"
-								scrolling="No"
-								frameborder="0"
-								style="overflow: hidden;"
-							/>
+							<!-- Trends -->
+							<graph :content="regression.graphs.imbalance"/>
 						</div>
 					</div>
 				</div>
@@ -47,21 +38,10 @@
 </template>
 
 <script>
-import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
-import Input from '@ozonui/form-input';
-import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
 import TableInfo from '../components/TableInfo';
-
-const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
-
-const {
-	container,
-	row,
-	column,
-} = Layout;
-
+import Graph from '../components/Graph';
 
 export default {
 	data() {
@@ -84,13 +64,8 @@ export default {
 	},
 	components: {
 		Button,
-		Input,
-		Select,
-		Option,
 		TableInfo,
-		Row: row,
-		Column: column,
-		Container: container
+		Graph
 	},
 	created() {
 		this.collectionId = this.$route.query.id;
