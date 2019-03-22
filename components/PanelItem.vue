@@ -53,6 +53,24 @@ export default {
 			default: false,
 		},
 	},
+	data() {
+		return {
+			visibilities:{
+				editorVisibility: false,
+				kubernetesInfoVisibility: false,
+				collectionsListVisibility: false,
+			},
+		};
+	},
+	methods: {
+		toggleVisibility: function(param) {
+			this.visibilities[param] = !this.visibilities[param];
+		},
+		stopTest: function() {
+			this.jobUpdateBuffer.status = 'stopped';
+			this.updateJob();
+		},
+	}
 };
 </script>
 

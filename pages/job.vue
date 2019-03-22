@@ -149,7 +149,7 @@
 			</div>
 			<div v-else>
 				<!-- test id table -->
-				<panel-item :status="job.status" :hasCollections="{true: job.collections}" hasKubeInfo/>
+				<panel-item :status="job.status" :hasCollections="job.collections" hasKubeInfo/>
 				<div class="col-md-12">
 					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
 				</div>
@@ -190,14 +190,14 @@
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">Graphs</h3>
-					<div v-if="tagged.length > 1">
+					<div v-if="sortedAggregates.length > 1">
 						<h4	align="left">
 							<form @change="selectGraphs(selectedTag) " >
 								<select v-model="selectedTag">
 									<option>
 										__OVERALL__
 									</option>
-									<option v-for="tag in tagged" :key="tag.label">
+									<option v-for="tag in sortedAggregates" :key="tag.label">
 										{{ tag.label }}
 									</option>
 								</select>
@@ -227,20 +227,32 @@
 				</div>
 
 				<!-- summary stats -->
-				<div @click="toggleVisibility('isSummaryVisible')">
-					<h3 align="center">Summary stats</h3>
-					<div v-show="visibilities.isSummaryVisible" class="col-md-12">
-						<div class="row justify-content-between">
-							<table-aggregates title="StatsOverall" :headers="aggregatesTableHeaders" :commonAggregates="overall" :detailedAggregates="overallByCode" :isOverall="true"/>
-						</div>
-					</div>
-					<h4 align="center">Detailed stats</h4>
-					<div v-show="visibilities.isSummaryVisible" class="col-md-12">
-						<div class="row justify-content-between">
-							<table-aggregates title="DetailedStats" :headers="aggregatesTableHeaders" :commonAggregates="tagged" :detailedAggregates="taggedByCode" :isOverall="false"/>
-						</div>
+				<h3 align="center">Summary stats</h3>
+				<div class="col-md-12">
+					<div class="row justify-content-between">
+						<table-aggregates
+							title="StatsOverall"
+							:headers="aggregatesTableHeaders"
+							:commonAggregates="overall"
+							:detailedAggregates="overallByCode"
+							:isOverall="true"/>
 					</div>
 				</div>
+				<h4 align="center">Detailed stats</h4>
+				<div class="col-md-12">
+					<div class="row justify-content-between">
+						<table-aggregates
+							title="DetailedStats"
+							:headers="aggregatesTableHeaders"
+							:commonAggregates="sortedAggregates"
+							:detailedAggregates="taggedByCode"
+							@sortAggregates="sortAggregates($event)"
+							:currentSort="currentSort"
+							:currentSortDir="currentSortDir"
+							:isOverall="false"/>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</div>
@@ -301,8 +313,9 @@ export default {
 			loading: true,
 			error: null,
 			success: null,
+			currentSort: 'label',
+			currentSortDir: 'asc',
 			visibilities:{
-				isSummaryVisible: true,
 				editorVisibility: false,
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
@@ -399,29 +412,6 @@ export default {
 				this.openedGraphs.push(pod_button);
 			}
 		},
-		tsToDate: function(ts) {
-			const from_ts = new Date(ts * 1000);
-
-			const from_ts_hour = from_ts.getHours();
-
-			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-
-			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-
-			const from_ts_year = from_ts.getFullYear();
-
-			if (isNaN(from_ts.getDate())) {
-				return 'not yet received';
-			} else {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-		},
 		getTestInfo: function(id) {
 			return this.$api.get('/job/' + id)
 				.then(response => {
@@ -516,9 +506,11 @@ export default {
 					this.artifacts.sort(compare);
 				});
 		},
-		stopTest: function() {
-			this.jobUpdateBuffer.status = 'stopped';
-			this.updateJob();
+		sortAggregates: function(s) {
+			if (s === this.currentSort) {
+				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
+			}
+			this.currentSort = s;
 		},
 		_dataToUpdate: function() {
 			// возвращает разницу между джобой и обновленными данными, которые хранятся в jobUpdateBuffer
@@ -535,6 +527,18 @@ export default {
 			return buffer;
 		}
 	},
+	computed: {
+		sortedAggregates:function() {
+			return this.tagged.slice().sort((a, b) => {
+				let modifier =1;
+
+				if (this.currentSortDir === 'dsc') {modifier = -1;}
+				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
+				if (a[this.currentSort] > b[this.currentSort]) {return modifier;}
+				return 0;
+			});
+		}
+	}
 
 };
 </script>

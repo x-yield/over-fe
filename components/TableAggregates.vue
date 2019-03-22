@@ -3,14 +3,12 @@
 значение - ключ в джейсоне из бэка; объект с аккумулированными данными и объект с деталлизированными данными-->
 <template>
 	<table id="StatsOverall" class="hover table table-bordered">
-		{{ currentSort }}
-		{{ currentSortDir }}
 		<thead>
 			<tr v-if="isOverall">
 				<th v-for="(value, key) in headers" :key="value">{{ key }}</th>
 			</tr>
 			<tr v-else>
-				<th v-for="(value, key) in headers" :key="value" @click="sortAggregates('value')">{{ key }}
+				<th v-for="(value, key) in headers" :key="value" @click="sortAggregates(value)">{{ key }}
 					<div
 						v-if="value === currentSort"
 						class="arrow-table-sort"
@@ -49,7 +47,7 @@
 			</tr>
 		</tbody>
 		<tbody v-else>
-			<template v-for="tag in sortedAggregates" >
+			<template v-for="tag in commonAggregates" >
 				<tr :key="tag.label">
 					<td
 						@click.stop="toggleResponseCodeVisibility(tag.label)"
@@ -109,13 +107,19 @@ export default {
 		isOverall: {
 			type: Boolean,
 			default: true
+		},
+		currentSort: {
+			type: String,
+			default: ''
+		},
+		currentSortDir: {
+			type: String,
+			default: ''
 		}
 	},
 	data() {
 		return {
 			overallCodeVisibility: false,
-			currentSort: 'label',
-			currentSortDir: 'asc',
 			openedTag: [],
 		};
 	},
@@ -132,25 +136,10 @@ export default {
 				this.openedTag.push(name);
 			}
 		},
-		sortAggregates: function(s) {
-			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
-			}
-			this.currentSort = s;
-		},
-	},
-	computed: {
-		sortedAggregates:function() {
-			return this.commonAggregates.slice().sort((a, b) => {
-				let modifier =1;
-
-				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {return modifier;}
-				return 0;
-			});
+		sortAggregates(value) {
+			this.$emit('sortAggregates', value);
 		}
-	}
+	},
 };
 </script>
 
