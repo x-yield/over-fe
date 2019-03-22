@@ -32,9 +32,10 @@ export default {
 	},
 	watch: {
 		optionModel(val) {
+			console.log(val);
 			this.$emit('option', val);
 		}
-	}
+	},
 };
 </script>
 

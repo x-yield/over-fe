@@ -148,8 +148,9 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				<!-- test id table -->
+				<!-- panel with editor buttons -->
 				<panel-item :status="job.status" :hasCollections="job.collections" hasKubeInfo/>
+				<!-- test id table -->
 				<div class="col-md-12">
 					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
 				</div>
@@ -180,11 +181,10 @@
 				</div>
 
 				<div v-show="visibilities.resourcesVisibility">
-					<div class="row justify-content-between">
-						<div class="col-md-12 col-sm-12" >
-							<button-pod :content="podsData"/>
-						</div>
-					</div>
+					<resources-panel
+						:content="podsData"
+						:jobStart="job.testStart"
+						:jobStop="job.testStop"/>
 				</div>
 
 				<!-- grafana graphs -->
@@ -265,7 +265,7 @@ import Modal from '../components/Modal';
 import TableInfo from '../components/TableInfo';
 import TableAggregates from '../components/TableAggregates';
 import Graph from '../components/Graph';
-import ButtonPod from '../components/ButtonPod';
+import ResourcesPanel from '../components/ResourcesPanel';
 import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
@@ -359,7 +359,7 @@ export default {
 		TableInfo,
 		TableAggregates,
 		Graph,
-		ButtonPod,
+		ResourcesPanel,
 		PanelItem,
 		Row: row,
 		Column: column,
@@ -403,14 +403,6 @@ export default {
 		},
 		toggleArtifactsVisibility: function() {
 			this.toggleVisibility('artifactsVisibility');
-		},
-		toggleGraphsVisibility(pod_button) {
-			if (this.openedGraphs.includes(pod_button)) {
-				this.openedGraphs.splice(pod_button);
-			} else {
-				this.openedGraphs = [];
-				this.openedGraphs.push(pod_button);
-			}
 		},
 		getTestInfo: function(id) {
 			return this.$api.get('/job/' + id)

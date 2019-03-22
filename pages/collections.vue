@@ -10,7 +10,7 @@
 			</nav>
 			<h4 align="right">
 				<form @change="getFilteredCollections(selected={env, project, name}) " >
-					<dropdown-menu :array="envs" v-model="env"/>
+					<dropdown-menu :array="envs" v-model="env" @option="$event"/>
 					<dropdown-menu :array="projects" v-model="project"/>
 					<dropdown-menu :array="names" v-model="name"/>
 					<button class="flush" @click="flushAllFilters()">Flush all filters</button>
