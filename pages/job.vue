@@ -149,41 +149,7 @@
 			</div>
 			<div v-else>
 				<!-- test id table -->
-				<div>
-					<h4 align="right">
-						<button @click.once="stopTest" v-show="job.status !== 'finished'" class="btn-stop-test" :class="{ pressed: job.status === 'stopped' }">STOP TEST</button>
-						<img
-							v-if="job.collections"
-							alt="edit"
-							width="35px"
-							height="40px"
-							src="~/assets/icons/regression.png"
-							@click="toggleVisibility('collectionsListVisibility')"
-						/>
-						<img
-							v-if="job.environmentDetails && job.environmentDetails !== 'null'"
-							alt="edit"
-							width="40px"
-							height="40px"
-							src="~/assets/icons/kubernetes.png"
-							@click="toggleVisibility('kubernetesInfoVisibility')"
-						/>
-						<img
-							alt="edit"
-							width="30px"
-							height="30px"
-							src="~/assets/icons/edit.png"
-							@click="toggleVisibility('editorVisibility')"
-						/>
-						<img
-							alt="delete"
-							width="30px"
-							height="30px"
-							src="~/assets/icons/delete.png"
-							@click="deleteJob"
-						/>
-					</h4>
-				</div>
+				<panel-item :status="job.status" :hasCollections="{true: job.collections}" hasKubeInfo/>
 				<div class="col-md-12">
 					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
 				</div>
@@ -293,6 +259,7 @@ import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
+import PanelItem from '../components/PanelItem';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -380,6 +347,7 @@ export default {
 		TableAggregates,
 		Graph,
 		ButtonPod,
+		PanelItem,
 		Row: row,
 		Column: column,
 		Container: container
@@ -627,25 +595,6 @@ export default {
 
 	.resources-graphs-arrow.expanded {
 		border-width: 0 3px 3px 0;
-	}
-
-	.btn-stop-test {
-		background: linear-gradient(to bottom, rgb(240, 5, 45), rgb(134, 0, 46));
-		color: #ffffff;
-		padding: 5px 10px;
-		border: solid 1px rgb(134, 0, 46);
-		border-radius: 7px;
-		font-size: 16px;
-		font-weight: bold;
-		text-align: center;
-		cursor: pointer;
-	}
-
-	.btn-stop-test.pressed {
-		background: linear-gradient(to top, rgba(110, 110, 110, 0.36), #6e6e6e);
-		color: rgba(255, 255, 255, 0.25);
-		border: solid 1px rgba(110, 110, 110, 0.36);
-		cursor: not-allowed;
 	}
 
 	.text-link{

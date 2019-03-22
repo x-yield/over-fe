@@ -5,25 +5,17 @@
 				<!-- Контейнер (определяет ширину Navbar) -->
 				<div class="container-fluid">
 					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-					</div>
-					<h4 align="right">
-						<form @change="getFilteredCollections(selected={env, project, name}) " >
-							<dropdown-menu :array="envs" v-model="env"/>
-							<dropdown-menu :array="projects" v-model="project"/>
-							<dropdown-menu :array="names" v-model="name"/>
-							<button class="flush" @click="flushAllFilters()">Flush all filters</button>
-						</form>
-
-					</h4>
-				</div>
-				<div>
-					<a class="navbar-brand" href="/collections">Collections</a>
-					<a class="navbar-brand" href="/ammo">Ammo</a>
+					<app-header :navigationLinks="routes"/>
 				</div>
 			</nav>
+			<h4 align="right">
+				<form @change="getFilteredCollections(selected={env, project, name}) " >
+					<dropdown-menu :array="envs" v-model="env"/>
+					<dropdown-menu :array="projects" v-model="project"/>
+					<dropdown-menu :array="names" v-model="name"/>
+					<button class="flush" @click="flushAllFilters()">Flush all filters</button>
+				</form>
+			</h4>
 
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
@@ -39,6 +31,7 @@
 <script>
 import TableList from '../components/TableList';
 import DropdownMenu from '../components/DropdownMenu';
+import AppHeader from '../components/AppHeader';
 
 export default {
 	data() {
@@ -60,7 +53,8 @@ export default {
 	},
 	components: {
 		TableList,
-		DropdownMenu
+		DropdownMenu,
+		AppHeader
 	},
 	created() {
 		this.getFilteredCollections(this.selected);
@@ -107,6 +101,22 @@ export default {
 			this.selected = {};
 		}
 	},
+	computed: {
+		routes() {
+			return [
+				{
+					title: 'Collections',
+					to: '/collections',
+					isVisible: true
+				},
+				{
+					title: 'Ammo',
+					to: '/ammo',
+					isVisible: true
+				},
+			];
+		}
+	}
 };
 </script>
 

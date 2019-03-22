@@ -10,12 +10,10 @@
 				</slot>
 			</header>
 			<section class="modal-body">
-				<slot name="body">
-				</slot>
+				<slot name="body"/>
 			</section>
 			<footer class="modal-footer">
-				<slot name="footer">
-				</slot>
+				<slot name="footer"/>
 			</footer>
 		</div>
 	</div>
