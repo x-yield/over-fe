@@ -8,18 +8,20 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
 					<h4 align="right">
 						<form @change="getFilteredCollections(selected={env, project, name}) " >
-							<dropdown-menu :model="env" :array="envs"/>
-							<dropdown-menu :model="project" :array="projects"/>
-							<dropdown-menu :model="name" :array="names"/>
+							<dropdown-menu :array="envs" v-model="env"/>
+							<dropdown-menu :array="projects" v-model="project"/>
+							<dropdown-menu :array="names" v-model="name"/>
 							<button class="flush" @click="flushAllFilters()">Flush all filters</button>
 						</form>
 
 					</h4>
+				</div>
+				<div>
+					<a class="navbar-brand" href="/collections">Collections</a>
+					<a class="navbar-brand" href="/ammo">Ammo</a>
 				</div>
 			</nav>
 

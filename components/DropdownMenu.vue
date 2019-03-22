@@ -1,5 +1,5 @@
 <template>
-	<select class="dropbtn" v-model="model">
+	<select class="dropbtn" v-model="optionModel">
 		<option value="">All</option>
 		<option v-if="model !== 'project'" v-for="(model, index) in array" :key="index">
 			{{ model }}
@@ -15,6 +15,11 @@
 <script>
 export default {
 	name: 'DropdownMenu',
+	data() {
+		return {
+			optionModel: this.model
+		};
+	},
 	props: {
 		model: {
 			type: String,
@@ -23,6 +28,11 @@ export default {
 		array: {
 			type: Array,
 			default: null,
+		}
+	},
+	watch: {
+		optionModel(val) {
+			this.$emit('option', val);
 		}
 	}
 };

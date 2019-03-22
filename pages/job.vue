@@ -8,8 +8,6 @@
 					<div class="navbar-header">
 						<!-- Бренд или название сайта (отображается в левой части меню) -->
 						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
 					</div>
 					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
 					<div class="collapse navbar-collapse" id="navbar-main">
@@ -17,6 +15,10 @@
 							<li class="active"><a href="/">Last tests</a></li>
 						</ul>
 					</div>
+				</div>
+				<div>
+					<a class="navbar-brand" href="/collections">Collections</a>
+					<a class="navbar-brand" href="/ammo">Ammo</a>
 				</div>
 			</nav>
 
@@ -222,20 +224,20 @@
 				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">Graphs</h3>
-					<!--<div v-if="sortedAggregates.length > 1">-->
-						<!--<h4	align="left">-->
-							<!--<form @change="selectGraphs(selectedTag) " >-->
-								<!--<select v-model="selectedTag">-->
-									<!--<option>-->
-										<!--__OVERALL__-->
-									<!--</option>-->
-									<!--<option v-for="tag in sortedAggregates" :key="tag.label">-->
-										<!--{{ tag.label }}-->
-									<!--</option>-->
-								<!--</select>-->
-							<!--</form>-->
-						<!--</h4>-->
-					<!--</div>-->
+					<div v-if="tagged.length > 1">
+						<h4	align="left">
+							<form @change="selectGraphs(selectedTag) " >
+								<select v-model="selectedTag">
+									<option>
+										__OVERALL__
+									</option>
+									<option v-for="tag in tagged" :key="tag.label">
+										{{ tag.label }}
+									</option>
+								</select>
+							</form>
+						</h4>
+					</div>
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- rps -->
