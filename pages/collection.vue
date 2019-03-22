@@ -10,7 +10,6 @@
 						<a class="navbar-brand" href="/">Overload</a>
 						<a class="navbar-brand" href="/collections">Collections</a>
 						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/joints">Joints</a>
 					</div>
 				</div>
 			</nav>

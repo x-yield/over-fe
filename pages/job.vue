@@ -10,7 +10,6 @@
 						<a class="navbar-brand" href="/">Overload</a>
 						<a class="navbar-brand" href="/collections">Collections</a>
 						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/joints">Joints</a>
 					</div>
 					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
 					<div class="collapse navbar-collapse" id="navbar-main">
