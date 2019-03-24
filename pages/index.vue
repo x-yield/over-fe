@@ -84,7 +84,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 	.overload-fe {
 		padding-top: 20px;
@@ -102,4 +101,3 @@ export default {
 		vertical-align : middle;
 	}
 </style>
-

@@ -27,7 +27,6 @@
 	</div>
 </template>
 
-
 <script>
 import TableList from '../components/TableList';
 import DropdownMenu from '../components/DropdownMenu';

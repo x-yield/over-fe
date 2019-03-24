@@ -171,7 +171,6 @@
 					</div>
 				</div>
 
-				<!-- grafana graphs for resources -->
 				<div
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
 					align="left"
@@ -180,6 +179,7 @@
 					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.resourcesVisibility }"/>
 				</div>
 
+				<!-- grafana graphs for resources -->
 				<div v-show="visibilities.resourcesVisibility">
 					<resources-panel
 						:content="podsData"
@@ -187,16 +187,13 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-				<!-- grafana graphs -->
 				<div class="col-md-12">
 					<h3 align="center">Graphs</h3>
 					<div v-if="sortedAggregates.length > 1">
 						<h4	align="left">
 							<form @change="selectGraphs(selectedTag) " >
 								<select v-model="selectedTag">
-									<option>
-										__OVERALL__
-									</option>
+									<option>__OVERALL__</option>
 									<option v-for="tag in sortedAggregates" :key="tag.label">
 										{{ tag.label }}
 									</option>
@@ -204,6 +201,7 @@
 							</form>
 						</h4>
 					</div>
+					<!-- grafana graphs -->
 					<div class="row justify-content-between" style="height:300px;">
 						<div class="col-md-6 col-sm-12">
 							<!-- rps -->
@@ -293,14 +291,6 @@ export default {
 					threads: null,
 				},
 				status: null,
-			},
-			resources: {
-				graphs: {
-					cpu: null,
-					memory: null,
-					network: null,
-				},
-				link: null,
 			},
 			jobUpdateBuffer: {},
 			artifacts: [],
