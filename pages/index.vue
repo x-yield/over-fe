@@ -28,7 +28,7 @@
 				</div>
 				<div v-else>
 					<table-list caption="Last Tests" :headers="tableHeaders" :content="last_jobs" :isJobs="true"/>
-					<button class="btn-lg" @click="moreTests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
+					<v-btn @click="moreTests(last_jobs[last_jobs.length-1].id)">I need more tests</v-btn>
 				</div>
 			</div>
 		</div>

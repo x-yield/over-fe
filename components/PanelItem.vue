@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<h4 align="right">
-			<button @click.once="stopTest" v-show="status !== 'finished'" class="btn-stop-test" :class="{ pressed: status === 'stopped' }">STOP TEST</button>
+			<v-btn @click.once="stopTest" v-show="status !== 'finished'" :disabled="status === 'stopped'">STOP TEST</v-btn>
 			<img
 				v-if="hasCollections"
 				alt="edit"
@@ -75,7 +75,7 @@ export default {
 </script>
 
 <style scoped>
-@import "@ozonui/color-palette";
+@import '../node_modules/@ozonui/color-palette/index.css';
 
 .panel-item {
 	display: flex;
