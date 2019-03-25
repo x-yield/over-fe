@@ -149,7 +149,11 @@
 			</div>
 			<div v-else>
 				<!-- panel with editor buttons -->
-				<panel-item :status="job.status" :hasCollections="job.collections" hasKubeInfo/>
+				<panel-item
+					:status="job.status"
+					:hasCollections="job.collections !== null"
+					@toggleModalVisibility="toggleVisibility($event)"
+				/>
 				<!-- test id table -->
 				<div class="col-md-12">
 					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
@@ -223,31 +227,26 @@
 
 				<!-- summary stats -->
 				<h3 align="center">Summary stats</h3>
-				<div class="col-md-12">
-					<div class="row justify-content-between">
-						<table-aggregates
-							title="StatsOverall"
-							:headers="aggregatesTableHeaders"
-							:commonAggregates="overall"
-							:detailedAggregates="overallByCode"
-							:isOverall="true"/>
-					</div>
-				</div>
+				<v-layout class="align-center justify-space-between row fill-height">
+					<table-aggregates
+						title="StatsOverall"
+						:headers="aggregatesTableHeaders"
+						:commonAggregates="overall"
+						:detailedAggregates="overallByCode"
+						:isOverall="true"/>
+				</v-layout>
 				<h4 align="center">Detailed stats</h4>
-				<div class="col-md-12">
-					<div class="row justify-content-between">
-						<table-aggregates
-							title="DetailedStats"
-							:headers="aggregatesTableHeaders"
-							:commonAggregates="sortedAggregates"
-							:detailedAggregates="taggedByCode"
-							@sortAggregates="sortAggregates($event)"
-							:currentSort="currentSort"
-							:currentSortDir="currentSortDir"
-							:isOverall="false"/>
-					</div>
-				</div>
-
+				<v-layout class="align-center justify-space-between row fill-height">
+					<table-aggregates
+						title="DetailedStats"
+						:headers="aggregatesTableHeaders"
+						:commonAggregates="sortedAggregates"
+						:detailedAggregates="taggedByCode"
+						@sortAggregates="sortAggregates($event)"
+						:currentSort="currentSort"
+						:currentSortDir="currentSortDir"
+						:isOverall="false"/>
+				</v-layout>
 			</div>
 		</div>
 	</div>

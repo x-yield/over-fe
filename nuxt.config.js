@@ -43,7 +43,7 @@ module.exports = {
 		'~/plugins/authentication'
 	],
 	modules: [
-		['@ozon/environment-nuxt-module', {absolutePath: __dirname, defaultConfigPath: 'config.dev.json'}]
+		['@ozon/environment-nuxt-module', {absolutePath: __dirname, defaultConfigPath: 'config.dev.json'}, 'nuxt-vuetify']
 	],
 	module: {
 	},

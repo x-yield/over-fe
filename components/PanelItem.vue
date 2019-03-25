@@ -8,7 +8,7 @@
 				width="35px"
 				height="40px"
 				src="~/assets/icons/regression.png"
-				@click="toggleVisibility('collectionsListVisibility')"
+				@click="toggleModalVisibility('collectionsListVisibility')"
 			/>
 			<img
 				v-if="hasKubeInfo"
@@ -16,14 +16,14 @@
 				width="40px"
 				height="40px"
 				src="~/assets/icons/kubernetes.png"
-				@click="toggleVisibility('kubernetesInfoVisibility')"
+				@click="toggleModalVisibility('kubernetesInfoVisibility')"
 			/>
 			<img
 				alt="edit"
 				width="30px"
 				height="30px"
 				src="~/assets/icons/edit.png"
-				@click="toggleVisibility('editorVisibility')"
+				@click="toggleModalVisibility('editorVisibility')"
 			/>
 			<img
 				alt="delete"
@@ -63,8 +63,8 @@ export default {
 		};
 	},
 	methods: {
-		toggleVisibility: function(param) {
-			this.visibilities[param] = !this.visibilities[param];
+		toggleModalVisibility: function(param) {
+			this.$emit('toggleModalVisibility', param);
 		},
 		stopTest: function() {
 			this.jobUpdateBuffer.status = 'stopped';
