@@ -1,40 +1,28 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-					</div>
-				</div>
-				<div>
-					<a href="/collections">Collections</a>
-					<a href="/ammo">Ammo</a>
-				</div>
-			</nav>
-			<div v-if="loading">
-				<h3 align="center">Loading...</h3>
-			</div>
-
-			<div v-else>
-				<div class="col-md-12">
-					<table-info :title="'Collection #'+collectionId" :headers="collectionHeaders" :content="collection" isСollection/>
-				</div>
-				<!-- grafana graphs -->
-				<div class="col-md-12">
-					<h3 align="center">Trends</h3>
-					<div class="row justify-content-between" style="height:300px;">
-						<div class="col-md-12 col-sm-12">
-							<!-- Trends -->
-							<graph :content="regression.graphs.imbalance"/>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+	<div id="overload">
+		<v-app id="inspire">
+			<template>
+				<v-toolbar
+					class="mb-2"
+					color="cyan darken-2"
+					dark
+					flat>
+					<v-toolbar-title class="headline font-weight-bold">Overload</v-toolbar-title>
+					<v-spacer/>
+					<v-toolbar-items class="hidden-sm-and-down">
+						<v-btn flat href="/">Jobs</v-btn>
+						<v-btn flat href="/collections">Collections</v-btn>
+						<v-btn flat href="/ammo">Ammo</v-btn>
+					</v-toolbar-items>
+				</v-toolbar>
+			</template>
+			<v-card>
+				<table-info :title="'Collection #'+collectionId" :headers="collectionHeaders" :content="collection" isСollection/>
+				<h3 align="center">Trends</h3>
+				<!-- Trends -->
+				<graph :content="regression.graphs.imbalance"/>
+			</v-card>
+		</v-app>
 	</div>
 </template>
 

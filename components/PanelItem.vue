@@ -1,7 +1,12 @@
 <template>
 	<div>
 		<h4 align="right">
-			<v-btn @click.once="stopTest" v-show="status !== 'finished'" :disabled="status === 'stopped'">STOP TEST</v-btn>
+			<v-btn
+				@click.once="stopTest"
+				v-show="status !== 'finished'"
+				:disabled="status === 'stopped'">
+				STOP TEST
+			</v-btn>
 			<img
 				v-if="hasCollections"
 				alt="edit"
