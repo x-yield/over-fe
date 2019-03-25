@@ -464,10 +464,6 @@ export default {
 		vertical-align : middle;
 	}
 
-	.buttons {
-		padding-top: 10px;
-	}
-
 	.job-editor * {
 		padding-top: 10px;
 	}
@@ -518,86 +514,6 @@ export default {
 		content: '-';
 	}
 
-	.arrow-table-sort.asc{
-		margin-left: 5px;
-		display: inline-block;
-		border-left: 7px solid transparent;
-		border-right: 7px solid transparent;
-		border-bottom: 8px solid #31b131;
-	}
-
-	.arrow-table-sort.dsc {
-		margin-left: 5px;
-		display: inline-block;
-		border-left: 7px solid transparent;
-		border-right: 7px solid transparent;
-		border-top: 8px solid #31b131;
-	}
-
-	.resources-util-link {
-		font-size: 18px;
-		font-weight: bold;
-		border-bottom: 1px black dotted;
-		margin: 5px 0 0 18px;
-		cursor:pointer;
-	}
-
-	.resources-graphs-arrow {
-		display: inline-block;
-		cursor: pointer;
-		border: solid #000;
-		border-width: 3px 0 0 3px;
-		width: 12px;
-		height: 12px;
-		margin-left: 5px;
-		transform: rotate(-135deg);
-	}
-
-	.resources-graphs-arrow.expanded {
-		border-width: 0 3px 3px 0;
-	}
-
-	.btn-stop-test {
-		background: linear-gradient(to bottom, rgb(240, 5, 45), rgb(134, 0, 46));
-		color: #ffffff;
-		padding: 5px 10px;
-		border: solid 1px rgb(134, 0, 46);
-		border-radius: 7px;
-		font-size: 16px;
-		font-weight: bold;
-		text-align: center;
-		cursor: pointer;
-	}
-
-	.btn-stop-test.pressed {
-		background: linear-gradient(to top, rgba(110, 110, 110, 0.36), #6e6e6e);
-		color: rgba(255, 255, 255, 0.25);
-		border: solid 1px rgba(110, 110, 110, 0.36);
-		cursor: not-allowed;
-	}
-
-	.pod-btn {
-		background: linear-gradient(to bottom, #d3f8ab, #7d9f5e);
-		border-radius: 7px;
-		font-size: 13px;
-		text-align: center;
-		border: 1px solid #7d9f5e;
-		cursor: pointer;
-	}
-
-	.pod-btn.expanded {
-		background: linear-gradient(to top, #7d9f5e, #486934);
-		border: 1px solid #486934;
-		color: white;
-		box-shadow: 0 0 3px #444;
-	}
-
-	.pod-btns-location {
-		margin: 10px 0 15px 0;
-		display: inline;
-		float: left;
-	}
-
 	.hidden-rows {
 		background-color: #F0EDED;
 	}
@@ -606,9 +522,6 @@ export default {
 		height: 100%;
 		overflow: hidden;
 		border: none;
-	}
-	.text-link{
-		text-decoration: underline;
 	}
 
 	select {
