@@ -13,7 +13,6 @@
     "start": "nuxt start"
   },
   "dependencies": {
-    "@ozonui/color-palette": "^0.1.2",
     "@ozonui/custom-button": "^0.1.7",
     "@ozonui/form-input": "^0.1.6",
     "@ozonui/form-select": "^0.1.12",
@@ -27,8 +26,7 @@
     "postcss-import": "^12.0.1",
     "postcss-nested": "^4.1.0",
     "postcss-preset-env": "^6.4.0",
-    "postcss-url": "^8.0.0",
-    "vuetify": "^1.5.7"
+    "postcss-url": "^8.0.0"
   },
   "devDependencies": {
     "@ozon/environment-nuxt-module": "^1.0.3",

@@ -155,14 +155,13 @@
 					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
 				</div>
 
-				<!-- artifacts -->
-				<div
+				<!-- Artifacts accordeon-->
+				<accordeon
 					v-if="artifacts.length"
-					align="left"
-					@click="toggleArtifactsVisibility">
-					<span class="resources-util-link">artifacts</span>
-					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.artifactsVisibility }"/>
-				</div>
+					title="artifacts"
+					:isVisible="visibilities.artifactsVisibility"
+					@toggleAccordeonVisibility="toggleArtifactsVisibility"/>
+
 				<div v-show="visibilities.artifactsVisibility">
 					<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
 						<table class="table table-sm" id="artifactsTable" v-for="a in artifacts" :key="a.id">
@@ -170,14 +169,12 @@
 						</table>
 					</div>
 				</div>
-
-				<div
+				<!-- Resources accordeon -->
+				<accordeon
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
-					align="left"
-					@click="toggleResourcesVisibility">
-					<span class="resources-util-link">resources utilization</span>
-					<div class="resources-graphs-arrow" :class="{ expanded: visibilities.resourcesVisibility }"/>
-				</div>
+					title="resources utilization"
+					:isVisible="visibilities.resourcesVisibility"
+					@toggleAccordeonVisibility="toggleResourcesVisibility"/>
 
 				<!-- grafana graphs for resources -->
 				<div v-show="visibilities.resourcesVisibility">
@@ -270,6 +267,7 @@ import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
 import PanelItem from '../components/PanelItem';
+import Accordeon from '../components/Accordeon';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -341,6 +339,7 @@ export default {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
+		Accordeon,
 		Modal,
 		Button,
 		Input,
@@ -558,29 +557,6 @@ export default {
 		max-height: 350px;
 		overflow-y: scroll;
 		color: black;
-	}
-
-	.resources-util-link {
-		font-size: 18px;
-		font-weight: bold;
-		border-bottom: 1px black dotted;
-		margin: 5px 0 0 18px;
-		cursor:pointer;
-	}
-
-	.resources-graphs-arrow {
-		display: inline-block;
-		cursor: pointer;
-		border: solid #000;
-		border-width: 3px 0 0 3px;
-		width: 12px;
-		height: 12px;
-		margin-left: 5px;
-		transform: rotate(-135deg);
-	}
-
-	.resources-graphs-arrow.expanded {
-		border-width: 0 3px 3px 0;
 	}
 
 	.text-link{
