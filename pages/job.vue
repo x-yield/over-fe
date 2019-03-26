@@ -1,27 +1,9 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-					</div>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="/">Last tests</a></li>
-						</ul>
-					</div>
-				</div>
-				<div>
-					<a class="navbar-brand" href="/collections">Collections</a>
-					<a class="navbar-brand" href="/ammo">Ammo</a>
-				</div>
-			</nav>
-
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+		<v-container fluid>
 			<modal v-show="visibilities.editorVisibility" @close="toggleVisibility('editorVisibility')">
 				<h3 slot="header">Редактирование теста {{ job.id }}</h3>
 				<h3 slot="body">
@@ -248,7 +230,7 @@
 						:isOverall="false"/>
 				</v-layout>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 <div>
@@ -267,6 +249,7 @@ import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
 import PanelItem from '../components/PanelItem';
 import Accordeon from '../components/Accordeon';
+import AppHeader from '../components/AppHeader';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -347,6 +330,7 @@ export default {
 		TableInfo,
 		TableAggregates,
 		Graph,
+		AppHeader,
 		ResourcesPanel,
 		PanelItem,
 		Row: row,

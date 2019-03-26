@@ -2,22 +2,24 @@
 	<div id="overload">
 		<v-app id="inspire">
 			<template>
-				<v-toolbar
-					class="mb-2"
-					color="cyan darken-2"
-					dark
-					flat>
-					<v-toolbar-title class="headline font-weight-bold">Overload</v-toolbar-title>
-					<v-spacer/>
-					<v-toolbar-items class="hidden-sm-and-down">
-						<v-btn flat href="/">Jobs</v-btn>
-						<v-btn flat href="/collections">Collections</v-btn>
-						<v-btn flat href="/ammo">Ammo</v-btn>
-					</v-toolbar-items>
-				</v-toolbar>
+				<app-header/>
 			</template>
+			<v-sparkline
+				:value="value"
+				:smooth="radius || false"
+				:padding="padding"
+				autoDrawDuration="1000"
+				:lineWidth="width"
+				:strokeLinecap="lineCap"
+				autoDraw="true"
+				width="100"/>
 			<v-card>
-				<table-info :title="'Collection #'+collectionId" :headers="collectionHeaders" :content="collection" isСollection/>
+				<table-info
+					class="ml-4 mr-4"
+					:title="'Collection #'+collectionId"
+					:headers="collectionHeaders"
+					:content="collection"
+					isСollection/>
 				<h3 align="center">Trends</h3>
 				<!-- Trends -->
 				<graph :content="regression.graphs.imbalance"/>
@@ -30,6 +32,7 @@
 import '@ozonui/layout/src/grid.css';
 import TableInfo from '../components/TableInfo';
 import Graph from '../components/Graph';
+import AppHeader from '../components/AppHeader';
 
 export default {
 	data() {
@@ -39,6 +42,11 @@ export default {
 					imbalance: null
 				}
 			},
+			width: 1,
+			radius: 0,
+			padding: 20,
+			lineCap: 'round',
+			value: [0, 100, 0, 9, 26, 22, 40, 150, 50, 17, 26, 70, 5, 0],
 			collectionId: '',
 			collection: {},
 			collectionHeaders: {
@@ -58,7 +66,8 @@ export default {
 	},
 	components: {
 		TableInfo,
-		Graph
+		Graph,
+		AppHeader
 	},
 	created() {
 		this.collectionId = this.$route.query.id;

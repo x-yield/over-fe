@@ -1,15 +1,15 @@
 <template>
-	<div class="overload-layout-default">
-		<div class="overload-app">
+	<div id="overload-layout">
+		<v-app id="overload">
 			<nuxt/>
-		</div>
+		</v-app>
 	</div>
 </template>
 
 <script>
 
-//import 'vuetify/dist/vuetify.min.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'vuetify/dist/vuetify.min.css';
+//import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default {
 	components: {

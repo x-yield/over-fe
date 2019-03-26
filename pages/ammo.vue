@@ -1,21 +1,9 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-					</div>
-				</div>
-				<div>
-					<a href="/collections">Collections</a>
-					<a href="/ammo">Ammo</a>
-				</div>
-			</nav>
-
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+		<v-container>
 			<div>
 				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
 					<input type="text" name="name" placeholder="Имя" required/>
@@ -65,7 +53,7 @@
 					</table>
 				</div>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 
@@ -73,6 +61,7 @@
 import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
+import AppHeader from '../components/AppHeader';
 
 let ammoKeys = [];
 
@@ -94,6 +83,9 @@ export default {
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
+	},
+	components: {
+		AppHeader
 	},
 	created() {
 		this.getAmmoInfo();
@@ -232,20 +224,5 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
 
 </style>

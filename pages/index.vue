@@ -1,27 +1,9 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-					</div>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="">Last tests</a></li>
-						</ul>
-					</div>
-				</div>
-				<div>
-					<a class="navbar-brand" href="/collections">Collections</a>
-					<a class="navbar-brand" href="/ammo">Ammo</a>
-				</div>
-			</nav>
-
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+		<v-container>
 			<div class="table">
 				<div v-if="loading">
 					<h3 align="center">Loading...</h3>
@@ -31,13 +13,15 @@
 					<v-btn @click="moreTests(last_jobs[last_jobs.length-1].id)">I need more tests</v-btn>
 				</div>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 
 <script>
 
 import TableList from '../components/TableList';
+import AppHeader from '../components/AppHeader';
+
 export default {
 	data() {
 		return {
@@ -51,6 +35,7 @@ export default {
 	},
 	components: {
 		TableList,
+		AppHeader
 	},
 	created() {
 		this.$api.get('/lastjobs/0')

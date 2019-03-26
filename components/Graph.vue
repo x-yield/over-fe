@@ -21,7 +21,7 @@ export default {
 <style scoped>
 	.iframe-graphs {
 		width: 100%;
-		height: 100%;
+		height: 380px;
 		overflow: hidden;
 		border: none;
 	}

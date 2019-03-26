@@ -1,54 +1,42 @@
 <template>
 	<div id="overload">
-		<v-app id="inspire">
-			<template>
-				<v-toolbar
-					class="mb-2"
-					color="cyan darken-2"
-					dark
-					flat>
-					<v-toolbar-title class="headline font-weight-bold">Overload</v-toolbar-title>
-					<v-spacer/>
-					<v-toolbar-items class="hidden-sm-and-down">
-						<v-btn flat href="/">Jobs</v-btn>
-						<v-btn flat href="/collections">Collections</v-btn>
-						<v-btn flat href="/ammo">Ammo</v-btn>
-					</v-toolbar-items>
-				</v-toolbar>
-			</template>
-			<v-menu class="offset-y">
-				<template slot="activator">
-					<v-flex xs6 sm3>
-						<v-overflow-btn
-							class="ml-2"
-							v-on="on"
-							label="All envs"/>
+		<template>
+			<app-header/>
+		</template>
+		<v-container id="dropdown-collections" class="fluid">
+			<v-layout>
+				<v-select-list @change="getFilteredCollections(selected={env, project, name})">
+					<v-flex xs12 sm4>
+						<v-select
+							:items="envs"
+							label="All envs"
+							outline
+						/>
 					</v-flex>
-					<v-flex xs6 sm3>
-						<v-overflow-btn
-							class="ml-2"
-							v-on="on"
-							label="All projects"/>
+					<v-flex xs12 sm4>
+						<v-select
+							:items="projects"
+							label="All projects"
+							outline
+						/>
 					</v-flex>
-					<v-flex xs6 sm3>
-						<v-overflow-btn
-							class="ml-2"
-							v-on="on"
-							label="All names"/>
+					<v-flex xs12 sm4>
+						<v-select
+							:items="names"
+							label="All names"
+							outline
+						/>
 					</v-flex>
+				</v-select-list>
+				<v-flex xs12 sm3>
 					<v-btn @click="flushAllFilters()" color="primary" left>Flush all filters</v-btn>
-				</template>
-				<v-list>
-					<v-list-tile v-for="(model, index) in names" :key="index" @click="rew">
-						<v-list-tile-title>{{ model }}</v-list-tile-title>
-					</v-list-tile>
-				</v-list>
-			</v-menu>
-			<v-card>
+				</v-flex>
+			</v-layout>
+			<v-card class="justify-space-between">
 				<v-data-table
 					:headers="tableHeaders"
 					:items="collections"
-					rows-per-page="10">
+					:rowsPerPageItems="[10, 25, 50]">
 					<template slot="items" slot-scope="props">
 						<td class="text-md-right body-2">
 							<a :href='"/collection?id="+props.item.id'>{{ props.item.id }}</a>
@@ -57,14 +45,17 @@
 						<td class="text-lg-right body-2">{{ props.item.env }}</td>
 						<td class="text-lg-right body-2">{{ props.item.service }}</td>
 						<td class="text-lg-right body-2">{{ props.item.project }}</td>
+						<td class="text-lg-right body-2">{{ props.item.name }}</td>
 						<td class="text-lg-right body-2">{{ props.item.ref }}</td>
 						<td class="text-lg-right body-2">
-							<a :href='"/collection?id="+props.item.id'>{{ props.item.id }}</a>
+							<a :href='"/job?id="+job.id' v-for="job in props.item.latestJobs" :key="job.id">
+								{{ job.id }}
+							</a>
 						</td>
 					</template>
 				</v-data-table>
 			</v-card>
-		</v-app>
+		</v-container>
 	</div>
 	<!--<v-app>-->
 		<!--<v-container class="fluid grid-list-md">-->
