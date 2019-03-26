@@ -140,12 +140,13 @@
 				<!-- test id table -->
 				<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="myJob" :isCollection="false"/>
 
-				<!-- Artifacts accordeon-->
-				<accordeon
+				<!-- Artifacts btn-->
+				<v-btn
 					v-if="artifacts.length"
-					title="artifacts"
-					:isVisible="visibilities.artifactsVisibility"
-					@toggleAccordeonVisibility="toggleArtifactsVisibility"/>
+					@click="toggleArtifactsVisibility"
+					block
+					color="green">
+					artifacts</v-btn>
 
 				<div v-show="visibilities.artifactsVisibility">
 					<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
@@ -154,12 +155,13 @@
 						</table>
 					</div>
 				</div>
-				<!-- Resources accordeon -->
-				<accordeon
+				<!-- Resources btn -->
+				<v-btn
 					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
-					title="resources utilization"
-					:isVisible="visibilities.resourcesVisibility"
-					@toggleAccordeonVisibility="toggleResourcesVisibility"/>
+					@click="toggleResourcesVisibility"
+					block
+					color="green">
+					resources utilization</v-btn>
 
 				<!-- grafana graphs for resources -->
 				<div v-show="visibilities.resourcesVisibility">
@@ -169,44 +171,36 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-				<v-layout>
-					<h4 align="center">Graphs</h4>
-					<v-flex class="xs-12 sm-6">
-						<div v-if="sortedAggregates.length > 1">
-							<h4	align="left">
-								<form @change="selectGraphs(selectedTag) " >
-									<select v-model="selectedTag">
-										<option>__OVERALL__</option>
-										<option v-for="tag in sortedAggregates" :key="tag.label">
-											{{ tag.label }}
-										</option>
-									</select>
-								</form>
-							</h4>
-						</div>
-						<!-- grafana graphs -->
-						<div class="row justify-content-between" style="height:300px;">
-							<div class="col-md-6 col-sm-12">
-								<!-- rps -->
-								<graph :content="job.graphs.rps"/>
-							</div>
-							<div class="col-md-6 col-sm-12">
-								<!-- net codes -->
-								<graph :content="job.graphs.netcodes"/>
-							</div>
-						</div>
-						<div class="row justify-content-between" style="height:300px;">
-							<div class="col-md-6 col-sm-12">
-								<!-- quantiles -->
-								<graph :content="job.graphs.quantiles"/>
-							</div>
-							<div class="col-md-6 col-sm-12">
-								<!-- tank threads -->
-								<graph :content="job.graphs.threads"/>
-							</div>
-						</div>
+				<h3 align="center">Graphs</h3>
+				<div v-if="sortedAggregates.length > 1">
+					<h4	align="left">
+						<form @change="selectGraphs(selectedTag) " >
+							<select v-model="selectedTag">
+								<option>__OVERALL__</option>
+								<option v-for="tag in sortedAggregates" :key="tag.label">
+									{{ tag.label }}
+								</option>
+							</select>
+						</form>
+					</h4>
+				</div>
+				<v-flex class="justify-content-between">
+					<v-flex class="md-6 sm-12">
+						<!-- rps -->
+						<graph :content="job.graphs.rps"/>
 					</v-flex>
-				</v-layout>
+					<v-flex class="md-6 sm-12">
+						<!-- net codes -->
+						<graph :content="job.graphs.netcodes"/>
+					</v-flex>
+				</v-flex>
+				<v-flex class="md-6 sm-12">
+					<!-- quantiles -->
+					<graph :content="job.graphs.quantiles"/>
+					<!-- tank threads -->
+					<graph :content="job.graphs.threads"/>
+				</v-flex>
+
 
 				<v-layout>
 					<!-- summary stats -->
@@ -251,7 +245,6 @@ import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
 import PanelItem from '../components/PanelItem';
-import Accordeon from '../components/Accordeon';
 import AppHeader from '../components/AppHeader';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
@@ -325,7 +318,6 @@ export default {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
-		Accordeon,
 		Modal,
 		Button,
 		Input,
