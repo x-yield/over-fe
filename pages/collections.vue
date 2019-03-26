@@ -7,39 +7,35 @@
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
-			<v-layout class="row justify-space-between d-inline-flex">
-				<form class="d-inline-flex" @change="getFilteredCollections(selected={env, project, name})">
-					<v-flex class="xs12 sm3 mr-2">
-						<v-select
-							color="cyan darken-1"
-							:items="envs"
-							v-model="env"
-							label="All envs"
-							outline
-						/>
-					</v-flex>
-					<v-flex class="xs12 sm3 mr-2">
-						<v-select
-							color="cyan darken-1"
-							:items="projects"
-							label="All projects"
-							outline
-							class="dropdown-filter"
-						/>
-					</v-flex>
-					<v-flex class="xs12 sm3 mr-2">
-						<v-select
-							color="cyan darken-1"
-							:items="names"
-							@change="getFilteredCollections(selected={env, project, name})"
-							label="All names"
-							outline
-						/>
-					</v-flex>
-				</form>
-				<v-flex xs12 sm3>
+			{{ selected }}
+			{{ name }}
+			<v-layout class="row justify-content-end">
+				<v-form class="d-inline-flex" @change="getFilteredCollections(selected={env, project, name})">
+					<v-select
+						color="cyan darken-1"
+						:items="envs"
+						v-model="env"
+						label="All envs"
+						outline
+						class="mr-2"
+					/>
+					<v-select
+						color="cyan darken-1"
+						:items="projects.projectName"
+						label="All projects"
+						outline
+						class="mr-2"
+					/>
+					<v-select
+						color="cyan darken-1"
+						:items="names"
+						v-model="name"
+						label="All names"
+						outline
+						class="mr-2"
+					/>
 					<v-btn @click="flushAllFilters()" color="cyan darken-1" dark>Flush all filters</v-btn>
-				</v-flex>
+				</v-form>
 			</v-layout>
 			<v-card class="justify-space-between">
 				<v-data-table
@@ -68,34 +64,6 @@
 			</v-card>
 		</v-container>
 	</div>
-	<!--<v-app>-->
-		<!--<v-container class="fluid grid-list-md">-->
-			<!--<div class="overload-fe-container">-->
-				<!--<nav class="navbar navbar-default">-->
-					<!--&lt;!&ndash; Контейнер (определяет ширину Navbar) &ndash;&gt;-->
-					<!--<div class="container-fluid">-->
-						<!--&lt;!&ndash; Заголовок &ndash;&gt;-->
-						<!--<app-header :navigationLinks="routes"/>-->
-					<!--</div>-->
-				<!--</nav>-->
-				<!--<h4 align="right">-->
-					<!--<form @change="getFilteredCollections(selected={env, project, name}) " >-->
-						<!--<dropdown-menu :array="envs" v-model="env" @option="$event"/>-->
-						<!--<dropdown-menu :array="projects" v-model="project"/>-->
-						<!--<dropdown-menu :array="names" v-model="name"/>-->
-						<!--<v-btn @click="flushAllFilters()">Flush all filters</v-btn>-->
-					<!--</form>-->
-				<!--</h4>-->
-
-				<!--<div v-if="loading">-->
-					<!--<h3 align="center">Loading...</h3>-->
-				<!--</div>-->
-				<!--<div v-else>-->
-					<!--<table-list caption="Last Collections" :headers="tableHeaders" :content="collections" :isJobs="false"/>-->
-				<!--</div>-->
-			<!--</div>-->
-		<!--</v-container>-->
-	<!--</v-app>-->
 </template>
 
 <script>
@@ -123,9 +91,6 @@ export default {
 				{text:'Name', align: 'center'},
 				{text:'Branch', align: 'center'},
 				{text:'Latest jobs', align: 'center'}],
-			pagination: {
-				rowsPerPage: 10
-			},
 		};
 	},
 	head: {
@@ -179,6 +144,9 @@ export default {
 		},
 		flushAllFilters() {
 			this.selected = {};
+		},
+		rabotaiTvar(param) {
+			console.log('RABOTAI TVAR', param);
 		}
 	},
 };

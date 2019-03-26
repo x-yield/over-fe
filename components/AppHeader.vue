@@ -2,18 +2,18 @@
 	<v-toolbar class="mb-2">
 		<v-toolbar-title class="headline font-weight-bold">Overload</v-toolbar-title>
 		<v-sheet color="transparent">
-			<v-sparkline
-				:smooth="0"
-				:gradient="['#f72047', '#ffd200', '#62ea3f']"
-				:lineWidth="1"
-				:value="value"
-				autoDraw
-				:autoDrawDuration="500"
-				gradientDirection="top"
-				strokeLinecap="round"
-				height="40"
-				width="200"
-			/>
+			<!--<v-sparkline-->
+				<!--:smooth="0"-->
+				<!--:gradient="['#f72047', '#ffd200', '#62ea3f']"-->
+				<!--:lineWidth="1"-->
+				<!--:value="value"-->
+				<!--autoDraw-->
+				<!--:autoDrawDuration="500"-->
+				<!--gradientDirection="top"-->
+				<!--strokeLinecap="round"-->
+				<!--height="40"-->
+				<!--width="200"-->
+			<!--/>-->
 		</v-sheet>
 		<v-spacer/>
 		<v-toolbar-items class="hidden-sm-and-down">

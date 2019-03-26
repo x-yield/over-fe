@@ -1,9 +1,11 @@
 <template>
-	<iframe
-		:src="content"
-		class="iframe-graphs"
-		scrolling="No"
-	/>
+	<v-card>
+		<iframe
+			:src="content"
+			class="iframe-graphs"
+			scrolling="No"
+		/>
+	</v-card>
 </template>
 
 <script>

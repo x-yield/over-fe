@@ -138,7 +138,7 @@
 					/>
 				</v-layout>
 				<!-- test id table -->
-				<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
+				<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="myJob" :isCollection="false"/>
 
 				<!-- Artifacts accordeon-->
 				<accordeon
@@ -169,44 +169,44 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-				<!--<v-layout>-->
-					<!--<v-card-title>Graphs</v-card-title>-->
-					<!--<v-flex class="xs-12 sm-6">-->
-						<!--&lt;!&ndash;<div v-if="sortedAggregates.length > 1">&ndash;&gt;-->
-							<!--&lt;!&ndash;<h4	align="left">&ndash;&gt;-->
-								<!--&lt;!&ndash;<form @change="selectGraphs(selectedTag) " >&ndash;&gt;-->
-									<!--&lt;!&ndash;<select v-model="selectedTag">&ndash;&gt;-->
-										<!--&lt;!&ndash;<option>__OVERALL__</option>&ndash;&gt;-->
-										<!--&lt;!&ndash;<option v-for="tag in sortedAggregates" :key="tag.label">&ndash;&gt;-->
-											<!--&lt;!&ndash;{{ tag.label }}&ndash;&gt;-->
-										<!--&lt;!&ndash;</option>&ndash;&gt;-->
-									<!--&lt;!&ndash;</select>&ndash;&gt;-->
-								<!--&lt;!&ndash;</form>&ndash;&gt;-->
-							<!--&lt;!&ndash;</h4>&ndash;&gt;-->
-						<!--&lt;!&ndash;</div>&ndash;&gt;-->
-						<!--&lt;!&ndash; grafana graphs &ndash;&gt;-->
-						<!--<div class="row justify-content-between" style="height:300px;">-->
-							<!--<div class="col-md-6 col-sm-12">-->
-								<!--&lt;!&ndash; rps &ndash;&gt;-->
-								<!--<graph :content="job.graphs.rps"/>-->
-							<!--</div>-->
-							<!--<div class="col-md-6 col-sm-12">-->
-								<!--&lt;!&ndash; net codes &ndash;&gt;-->
-								<!--<graph :content="job.graphs.netcodes"/>-->
-							<!--</div>-->
-						<!--</div>-->
-						<!--<div class="row justify-content-between" style="height:300px;">-->
-							<!--<div class="col-md-6 col-sm-12">-->
-								<!--&lt;!&ndash; quantiles &ndash;&gt;-->
-								<!--<graph :content="job.graphs.quantiles"/>-->
-							<!--</div>-->
-							<!--<div class="col-md-6 col-sm-12">-->
-								<!--&lt;!&ndash; tank threads &ndash;&gt;-->
-								<!--<graph :content="job.graphs.threads"/>-->
-							<!--</div>-->
-						<!--</div>-->
-					<!--</v-flex>-->
-				<!--</v-layout>-->
+				<v-layout>
+					<h4 align="center">Graphs</h4>
+					<v-flex class="xs-12 sm-6">
+						<div v-if="sortedAggregates.length > 1">
+							<h4	align="left">
+								<form @change="selectGraphs(selectedTag) " >
+									<select v-model="selectedTag">
+										<option>__OVERALL__</option>
+										<option v-for="tag in sortedAggregates" :key="tag.label">
+											{{ tag.label }}
+										</option>
+									</select>
+								</form>
+							</h4>
+						</div>
+						<!-- grafana graphs -->
+						<div class="row justify-content-between" style="height:300px;">
+							<div class="col-md-6 col-sm-12">
+								<!-- rps -->
+								<graph :content="job.graphs.rps"/>
+							</div>
+							<div class="col-md-6 col-sm-12">
+								<!-- net codes -->
+								<graph :content="job.graphs.netcodes"/>
+							</div>
+						</div>
+						<div class="row justify-content-between" style="height:300px;">
+							<div class="col-md-6 col-sm-12">
+								<!-- quantiles -->
+								<graph :content="job.graphs.quantiles"/>
+							</div>
+							<div class="col-md-6 col-sm-12">
+								<!-- tank threads -->
+								<graph :content="job.graphs.threads"/>
+							</div>
+						</div>
+					</v-flex>
+				</v-layout>
 
 				<v-layout>
 					<!-- summary stats -->
@@ -275,6 +275,7 @@ export default {
 				},
 				status: null,
 			},
+			myJob: [],
 			jobUpdateBuffer: {},
 			artifacts: [],
 			collections: [],
@@ -389,6 +390,7 @@ export default {
 						return;
 					}
 					this.job = job_json;
+					this.myJob.push(this.job);
 					// клонируем объект. jobUpdateBuffer нужен чтобы отслеживать изменения при редактировании
 					this.jobUpdateBuffer = JSON.parse(JSON.stringify(this.job));
 					this.job.graphs = {};

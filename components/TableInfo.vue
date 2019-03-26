@@ -4,15 +4,23 @@
 Если это коллекция - в таблице добавляется дополнительный столбец, содержащий ссылку -->
 <template>
 	<v-card class="justify-space-between">
-		<v-card-title class="subheading font-weight-bold">{{ title }}</v-card-title>
+		<h3 align="center">{{ title }}</h3>
 		<v-data-table
 			:items="content"
 			hideActions
 			hideHeaders>
 			<template slot="items" slot-scope="props">
-				<tr v-for="(value, key) in headers" :key="key">
-					<td align="center">{{ key }}</td>-->
-					<td class="text-lg-right body-2">{{ props.item[value] }}</td>
+				<tr v-if="props.item[value]" v-for="(value, key) in headers" :key="key">
+					<td align=center class="body-2 font-weight-bold">{{ key }}</td>
+					<td align=center class="body-2">{{ props.item[value] }}</td>
+				</tr>
+				<tr v-if="isCollection">
+					<td align=center class="body-2 font-weight-bold">Latest jobs for this collection</td>
+					<td align=center class="body-2">
+						<a :href='"/job?id="+job.id' v-for="job in content[0].latestJobs" :key="job.id" class="mr-2">
+							{{ job.id }}
+						</a>
+					</td>
 				</tr>
 			</template>
 		</v-data-table>

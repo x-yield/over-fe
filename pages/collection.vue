@@ -6,11 +6,11 @@
 			</template>
 			<v-card>
 				<table-info
-					class="ml-4 mr-4"
+					class="mt-2 mr-2 ml-2"
 					:title="'Collection #'+collectionId"
 					:headers="collectionHeaders"
 					:content="collection"
-					isСollection/>
+					:isCollection="true"/>
 				<h3 align="center">Trends</h3>
 				<!-- Trends -->
 				<graph :content="regression.graphs.imbalance"/>
@@ -34,7 +34,7 @@ export default {
 				}
 			},
 			collectionId: '',
-			collection: {},
+			collection: [],
 			collectionHeaders: {
 				'Environment':'env',
 				'Project name':'project',
@@ -69,12 +69,12 @@ export default {
 					if (!json) {
 						return;
 					}
-					this.collection = json;
+					this.collection.push(json);
 					const intervalStart = new Date().getTime() - 90*24*60*60*1000;
 
 					this.regression.graphs.imbalance = 'http://grafana.o3.ru/d-solo/r8eyBMumz/trends?orgId=1&panelId=2'+
-						'&from='+intervalStart+'&to=now&var-env='+this.collection.env+'&var-service='+
-						this.collection.project+'&var-collection='+this.collection.name+'&theme=light';
+						'&from='+intervalStart+'&to=now&var-env='+this.collection[0].env+'&var-service='+
+						this.collection[0].project+'&var-collection='+this.collection[0].name+'&theme=light';
 					this.loading = false;
 				});
 		},
