@@ -3,12 +3,13 @@
 		<div class="row justify-content-between">
 			<div class="col-md-12 col-sm-12" >
 				<div v-for="value in content" :key="value.name" class="col-md-3 col-sm-6 pod-btns-location">
-					<button
+					<v-btn
 						@click=getResourcesGraphs(value.name,value.labels.env)
-						class="pod-btn"
-						:class="{ expanded: openedGraphs.includes(value.name) }">
+						color="teal lighten-2"
+						dark
+						:disabled="openedGraphs.includes(value.name)">
 						{{ value.name }}
-					</button>
+					</v-btn>
 				</div>
 			</div>
 		</div>

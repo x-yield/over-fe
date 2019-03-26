@@ -4,7 +4,6 @@
 Если это коллекция - в таблице добавляется дополнительный столбец, содержащий ссылку -->
 <template>
 	<table class="table table-sm table-bordered" >
-		<caption>{{ caption }}</caption>
 		<thead>
 			<tr>
 				<th v-for="header in headers" :key="header" scope="col" class="text-center">{{ header }}</th>

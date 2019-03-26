@@ -4,6 +4,7 @@
 			<v-btn
 				@click.once="stopTest"
 				v-show="status !== 'finished'"
+				color="red darken-1"
 				:disabled="status === 'stopped'">
 				STOP TEST
 			</v-btn>
@@ -90,26 +91,4 @@ export default {
 	padding: 10px 0;
 }
 
-.panel-item:hover {
-	background-color: var(--ui-color-active);
-	color:  var(--typography-white);
-}
-.btn-stop-test {
-	background: linear-gradient(to bottom, rgb(240, 5, 45), rgb(134, 0, 46));
-	color: #ffffff;
-	padding: 5px 10px;
-	border: solid 1px rgb(134, 0, 46);
-	border-radius: 7px;
-	font-size: 16px;
-	font-weight: bold;
-	text-align: center;
-	cursor: pointer;
-}
-
-.btn-stop-test.pressed {
-	background: linear-gradient(to top, rgba(110, 110, 110, 0.36), #6e6e6e);
-	color: rgba(255, 255, 255, 0.25);
-	border: solid 1px rgba(110, 110, 110, 0.36);
-	cursor: not-allowed;
-}
 </style>

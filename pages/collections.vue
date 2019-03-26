@@ -4,32 +4,40 @@
 			<app-header/>
 		</template>
 		<v-container id="dropdown-collections" class="fluid">
-			<v-layout>
-				<v-select-list @change="getFilteredCollections(selected={env, project, name})">
-					<v-flex xs12 sm4>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
+			</div>
+			<v-layout class="row justify-space-between">
+				<form class="d-inline-flex" @change="getFilteredCollections(selected={env, project, name})">
+					<v-flex xs12 sm3>
 						<v-select
+							color="cyan darken-1"
 							:items="envs"
+							v-model="env"
 							label="All envs"
 							outline
 						/>
 					</v-flex>
-					<v-flex xs12 sm4>
+					<v-flex xs12 sm3>
 						<v-select
+							color="cyan darken-1"
 							:items="projects"
 							label="All projects"
 							outline
 						/>
 					</v-flex>
-					<v-flex xs12 sm4>
+					<v-flex xs12 sm3>
 						<v-select
+							color="cyan darken-1"
 							:items="names"
+							v-model="name"
 							label="All names"
 							outline
 						/>
 					</v-flex>
-				</v-select-list>
+				</form>
 				<v-flex xs12 sm3>
-					<v-btn @click="flushAllFilters()" color="primary" left>Flush all filters</v-btn>
+					<v-btn @click="flushAllFilters()" color="cyan darken-1" dark>Flush all filters</v-btn>
 				</v-flex>
 			</v-layout>
 			<v-card class="justify-space-between">
@@ -48,7 +56,7 @@
 						<td class="text-lg-right body-2">{{ props.item.name }}</td>
 						<td class="text-lg-right body-2">{{ props.item.ref }}</td>
 						<td class="text-lg-right body-2">
-							<a :href='"/job?id="+job.id' v-for="job in props.item.latestJobs" :key="job.id">
+							<a :href='"/job?id="+job.id' v-for="job in props.item.latestJobs" :key="job.id" class="mr-2">
 								{{ job.id }}
 							</a>
 						</td>
@@ -89,7 +97,6 @@
 
 <script>
 import TableList from '../components/TableList';
-import DropdownMenu from '../components/DropdownMenu';
 import AppHeader from '../components/AppHeader';
 
 export default {
@@ -123,7 +130,6 @@ export default {
 	},
 	components: {
 		TableList,
-		DropdownMenu,
 		AppHeader
 	},
 	created() {
@@ -191,27 +197,4 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-
-	.flush {
-		font-size: 16px;
-		border-radius: 5px;
-		width: auto;
-		cursor: pointer;
-		color: white;
-		background: linear-gradient(#6bbdff, #007bff);
-		border: solid 2px #007bff;
-		font-weight: bold;
-	}
 </style>

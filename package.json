@@ -1,9 +1,9 @@
 {
-  "name": "staff-fe",
+  "name": "overload-fe",
   "version": "1.0.0",
   "private": true,
-  "description": "Staff front end",
-  "author": "ikopeykin",
+  "description": "Overload front end",
+  "author": "overload team",
   "scripts": {
     "build": "nuxt build",
     "lint": "eslint --ext .vue,.js,.ts . --rule \"vue/html-self-closing: off\"",
