@@ -7,9 +7,9 @@
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
-			<v-layout class="row justify-space-between">
+			<v-layout class="row justify-space-between d-inline-flex">
 				<form class="d-inline-flex" @change="getFilteredCollections(selected={env, project, name})">
-					<v-flex xs12 sm3>
+					<v-flex class="xs12 sm3 mr-2">
 						<v-select
 							color="cyan darken-1"
 							:items="envs"
@@ -18,19 +18,20 @@
 							outline
 						/>
 					</v-flex>
-					<v-flex xs12 sm3>
+					<v-flex class="xs12 sm3 mr-2">
 						<v-select
 							color="cyan darken-1"
 							:items="projects"
 							label="All projects"
 							outline
+							class="dropdown-filter"
 						/>
 					</v-flex>
-					<v-flex xs12 sm3>
+					<v-flex class="xs12 sm3 mr-2">
 						<v-select
 							color="cyan darken-1"
 							:items="names"
-							v-model="name"
+							@change="getFilteredCollections(selected={env, project, name})"
 							label="All names"
 							outline
 						/>
@@ -44,18 +45,20 @@
 				<v-data-table
 					:headers="tableHeaders"
 					:items="collections"
-					:rowsPerPageItems="[10, 25, 50]">
+					:rowsPerPageItems="[10, 25, 50]"
+					hideActions
+					sortIcon="">
 					<template slot="items" slot-scope="props">
-						<td class="text-md-right body-2">
+						<td class="text-lg-center body-2">
 							<a :href='"/collection?id="+props.item.id'>{{ props.item.id }}</a>
 						</td>
-						<td class="text-lg-right body-2">{{ props.item.author }}</td>
-						<td class="text-lg-right body-2">{{ props.item.env }}</td>
-						<td class="text-lg-right body-2">{{ props.item.service }}</td>
-						<td class="text-lg-right body-2">{{ props.item.project }}</td>
-						<td class="text-lg-right body-2">{{ props.item.name }}</td>
-						<td class="text-lg-right body-2">{{ props.item.ref }}</td>
-						<td class="text-lg-right body-2">
+						<td class="text-lg-center body-2">{{ props.item.author }}</td>
+						<td class="text-lg-center body-2">{{ props.item.env }}</td>
+						<td class="text-lg-center body-2">{{ props.item.service }}</td>
+						<td class="text-lg-center body-2">{{ props.item.project }}</td>
+						<td class="text-lg-center body-2">{{ props.item.name }}</td>
+						<td class="text-lg-center body-2">{{ props.item.ref }}</td>
+						<td class="text-lg-center body-2">
 							<a :href='"/job?id="+job.id' v-for="job in props.item.latestJobs" :key="job.id" class="mr-2">
 								{{ job.id }}
 							</a>
@@ -137,6 +140,7 @@ export default {
 	},
 	methods: {
 		getFilteredCollections(params) {
+			console.log('MDE');
 			this.loading = true;
 			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
@@ -177,24 +181,11 @@ export default {
 			this.selected = {};
 		}
 	},
-	computed: {
-		routes() {
-			return [
-				{
-					title: 'Collections',
-					to: '/collections',
-					isVisible: true
-				},
-				{
-					title: 'Ammo',
-					to: '/ammo',
-					isVisible: true
-				},
-			];
-		}
-	}
 };
 </script>
 
 <style scoped>
+	.dropdown-filter {
+		width: auto;
+	}
 </style>

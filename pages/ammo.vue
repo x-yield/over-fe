@@ -8,7 +8,7 @@
 				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
 					<input type="text" name="name" placeholder="Имя" required/>
 					<input type="file" name="file" required/>
-					<button @click="submitForm" type="button">Загрузить</button>
+					<v-btn color="cyan darken-1" dark @click="submitForm" type="button">Загрузить</v-btn>
 				</form>
 			</div>
 			<br/>

@@ -3,143 +3,142 @@
 		<template>
 			<app-header/>
 		</template>
+		<modal v-show="visibilities.editorVisibility" @close="toggleVisibility('editorVisibility')">
+			<h3 slot="header">Редактирование теста {{ job.id }}</h3>
+			<h3 slot="body">
+				<div class="overload-fe-container job-editor">
+					<Container fluid>
+						<Row>
+							<Column>
+								<Input
+									label="Author"
+									v-model="jobUpdateBuffer.author"
+								/>
+							</Column>
+						</Row>
+						<Row>
+							<Column>
+								<Input
+									label="Description"
+									v-model="jobUpdateBuffer.description"
+								/>
+							</Column>
+						</Row>
+						<Row>
+							<Column>
+								<Input
+									label="Status"
+									v-model="jobUpdateBuffer.status"
+								/>
+							</Column>
+						</Row>
+						<Row>
+							<Column>
+								<Input
+									label="Tank"
+									v-model="jobUpdateBuffer.tank"
+								/>
+							</Column>
+						</Row>
+						<Row>
+							<Column>
+								<Input
+									label="Target"
+									v-model="jobUpdateBuffer.target"
+								/>
+							</Column>
+						</Row>
+					</Container>
+				</div>
+			</h3>
+			<h3 slot="footer">
+				<div class="overload-fe-container buttons">
+					<Row>
+						<Column>
+							<Button
+								theme="primary"
+								@click="updateJob"
+								:icon="loading ? 'actions-spinner' : ''"
+							>
+								Сохранить
+							</Button>
+						</Column>
+						<Column>
+							<Button
+								theme="secondary"
+								@click="toggleVisibility('editorVisibility')"
+							>
+								Отмена
+							</Button>
+						</Column>
+					</Row>
+				</div>
+
+			</h3>
+		</modal>
+
+		<modal v-show="visibilities.kubernetesInfoVisibility" @close="toggleVisibility('kubernetesInfoVisibility')">
+			<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
+			<h3 slot="body" class="job-kubernetes-info">
+				<div class="overload-fe-container">
+					<pre>{{ job.environmentDetails }}</pre>
+				</div>
+			</h3>
+			<h3 slot="footer">
+				<div class="overload-fe-container buttons">
+					<Row>
+						<Column>
+							<Button
+								theme="secondary"
+								@click="toggleVisibility('kubernetesInfoVisibility')"
+							>
+								Закрыть
+							</Button>
+						</Column>
+					</Row>
+				</div>
+
+			</h3>
+		</modal>
+
+		<modal v-show="visibilities.collectionsListVisibility" @close="toggleVisibility('collectionsListVisibility')">
+			<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
+			<h3 slot="body">
+				<div v-for="(collection) in collections" :key="collection.id">
+					<a :href='"/collection?id="+collection.id' class="text-link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+					</a>
+				</div>
+			</h3>
+			<h3 slot="footer">
+				<div class="overload-fe-container buttons">
+					<Row>
+						<Column>
+							<Button
+								theme="secondary"
+								@click="toggleVisibility('collectionsListVisibility')">
+								Закрыть
+							</Button>
+						</Column>
+					</Row>
+				</div>
+
+			</h3>
+		</modal>
 		<v-container fluid>
-			<modal v-show="visibilities.editorVisibility" @close="toggleVisibility('editorVisibility')">
-				<h3 slot="header">Редактирование теста {{ job.id }}</h3>
-				<h3 slot="body">
-					<div class="overload-fe-container job-editor">
-						<Container fluid>
-							<Row>
-								<Column>
-									<Input
-										label="Author"
-										v-model="jobUpdateBuffer.author"
-									/>
-								</Column>
-							</Row>
-							<Row>
-								<Column>
-									<Input
-										label="Description"
-										v-model="jobUpdateBuffer.description"
-									/>
-								</Column>
-							</Row>
-							<Row>
-								<Column>
-									<Input
-										label="Status"
-										v-model="jobUpdateBuffer.status"
-									/>
-								</Column>
-							</Row>
-							<Row>
-								<Column>
-									<Input
-										label="Tank"
-										v-model="jobUpdateBuffer.tank"
-									/>
-								</Column>
-							</Row>
-							<Row>
-								<Column>
-									<Input
-										label="Target"
-										v-model="jobUpdateBuffer.target"
-									/>
-								</Column>
-							</Row>
-						</Container>
-					</div>
-				</h3>
-				<h3 slot="footer">
-					<div class="overload-fe-container buttons">
-						<Row>
-							<Column>
-								<Button
-									theme="primary"
-									@click="updateJob"
-									:icon="loading ? 'actions-spinner' : ''"
-								>
-									Сохранить
-								</Button>
-							</Column>
-							<Column>
-								<Button
-									theme="secondary"
-									@click="toggleVisibility('editorVisibility')"
-								>
-									Отмена
-								</Button>
-							</Column>
-						</Row>
-					</div>
-
-				</h3>
-			</modal>
-
-			<modal v-show="visibilities.kubernetesInfoVisibility" @close="toggleVisibility('kubernetesInfoVisibility')">
-				<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
-				<h3 slot="body" class="job-kubernetes-info">
-					<div class="overload-fe-container">
-						<pre>{{ job.environmentDetails }}</pre>
-					</div>
-				</h3>
-				<h3 slot="footer">
-					<div class="overload-fe-container buttons">
-						<Row>
-							<Column>
-								<Button
-									theme="secondary"
-									@click="toggleVisibility('kubernetesInfoVisibility')"
-								>
-									Закрыть
-								</Button>
-							</Column>
-						</Row>
-					</div>
-
-				</h3>
-			</modal>
-
-			<modal v-show="visibilities.collectionsListVisibility" @close="toggleVisibility('collectionsListVisibility')">
-				<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
-				<h3 slot="body">
-					<div v-for="(collection) in collections" :key="collection.id">
-						<a :href='"/collection?id="+collection.id' class="text-link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
-						</a>
-					</div>
-				</h3>
-				<h3 slot="footer">
-					<div class="overload-fe-container buttons">
-						<Row>
-							<Column>
-								<Button
-									theme="secondary"
-									@click="toggleVisibility('collectionsListVisibility')">
-									Закрыть
-								</Button>
-							</Column>
-						</Row>
-					</div>
-
-				</h3>
-			</modal>
-
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				<!-- panel with editor buttons -->
-				<panel-item
-					:status="job.status"
-					:hasCollections="job.collections !== null"
-					@toggleModalVisibility="toggleVisibility($event)"
-				/>
+				<v-layout class="row justify-content-end">
+					<!-- panel with editor buttons -->
+					<panel-item
+						:status="job.status"
+						:hasCollections="job.collections !== null"
+						@toggleModalVisibility="toggleVisibility($event)"
+					/>
+				</v-layout>
 				<!-- test id table -->
-				<div class="col-md-12">
-					<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
-				</div>
+				<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="job" :isCollection="false"/>
 
 				<!-- Artifacts accordeon-->
 				<accordeon
@@ -170,64 +169,68 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-				<div class="col-md-12">
-					<h3 align="center">Graphs</h3>
-					<div v-if="sortedAggregates.length > 1">
-						<h4	align="left">
-							<form @change="selectGraphs(selectedTag) " >
-								<select v-model="selectedTag">
-									<option>__OVERALL__</option>
-									<option v-for="tag in sortedAggregates" :key="tag.label">
-										{{ tag.label }}
-									</option>
-								</select>
-							</form>
-						</h4>
-					</div>
-					<!-- grafana graphs -->
-					<div class="row justify-content-between" style="height:300px;">
-						<div class="col-md-6 col-sm-12">
-							<!-- rps -->
-							<graph :content="job.graphs.rps"/>
-						</div>
-						<div class="col-md-6 col-sm-12">
-							<!-- net codes -->
-							<graph :content="job.graphs.netcodes"/>
-						</div>
-					</div>
-					<div class="row justify-content-between" style="height:300px;">
-						<div class="col-md-6 col-sm-12">
-							<!-- quantiles -->
-							<graph :content="job.graphs.quantiles"/>
-						</div>
-						<div class="col-md-6 col-sm-12">
-							<!-- tank threads -->
-							<graph :content="job.graphs.threads"/>
-						</div>
-					</div>
-				</div>
+				<!--<v-layout>-->
+					<!--<v-card-title>Graphs</v-card-title>-->
+					<!--<v-flex class="xs-12 sm-6">-->
+						<!--&lt;!&ndash;<div v-if="sortedAggregates.length > 1">&ndash;&gt;-->
+							<!--&lt;!&ndash;<h4	align="left">&ndash;&gt;-->
+								<!--&lt;!&ndash;<form @change="selectGraphs(selectedTag) " >&ndash;&gt;-->
+									<!--&lt;!&ndash;<select v-model="selectedTag">&ndash;&gt;-->
+										<!--&lt;!&ndash;<option>__OVERALL__</option>&ndash;&gt;-->
+										<!--&lt;!&ndash;<option v-for="tag in sortedAggregates" :key="tag.label">&ndash;&gt;-->
+											<!--&lt;!&ndash;{{ tag.label }}&ndash;&gt;-->
+										<!--&lt;!&ndash;</option>&ndash;&gt;-->
+									<!--&lt;!&ndash;</select>&ndash;&gt;-->
+								<!--&lt;!&ndash;</form>&ndash;&gt;-->
+							<!--&lt;!&ndash;</h4>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash; grafana graphs &ndash;&gt;-->
+						<!--<div class="row justify-content-between" style="height:300px;">-->
+							<!--<div class="col-md-6 col-sm-12">-->
+								<!--&lt;!&ndash; rps &ndash;&gt;-->
+								<!--<graph :content="job.graphs.rps"/>-->
+							<!--</div>-->
+							<!--<div class="col-md-6 col-sm-12">-->
+								<!--&lt;!&ndash; net codes &ndash;&gt;-->
+								<!--<graph :content="job.graphs.netcodes"/>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--<div class="row justify-content-between" style="height:300px;">-->
+							<!--<div class="col-md-6 col-sm-12">-->
+								<!--&lt;!&ndash; quantiles &ndash;&gt;-->
+								<!--<graph :content="job.graphs.quantiles"/>-->
+							<!--</div>-->
+							<!--<div class="col-md-6 col-sm-12">-->
+								<!--&lt;!&ndash; tank threads &ndash;&gt;-->
+								<!--<graph :content="job.graphs.threads"/>-->
+							<!--</div>-->
+						<!--</div>-->
+					<!--</v-flex>-->
+				<!--</v-layout>-->
 
-				<!-- summary stats -->
-				<h3 align="center">Summary stats</h3>
-				<v-layout class="align-center justify-space-between row fill-height">
-					<table-aggregates
-						title="StatsOverall"
-						:headers="aggregatesTableHeaders"
-						:commonAggregates="overall"
-						:detailedAggregates="overallByCode"
-						:isOverall="true"/>
-				</v-layout>
-				<h4 align="center">Detailed stats</h4>
-				<v-layout class="align-center justify-space-between row fill-height">
-					<table-aggregates
-						title="DetailedStats"
-						:headers="aggregatesTableHeaders"
-						:commonAggregates="sortedAggregates"
-						:detailedAggregates="taggedByCode"
-						@sortAggregates="sortAggregates($event)"
-						:currentSort="currentSort"
-						:currentSortDir="currentSortDir"
-						:isOverall="false"/>
+				<v-layout>
+					<!-- summary stats -->
+					<h3 align="center">Summary stats</h3>
+					<div class="align-center justify-space-between row fill-height">
+						<table-aggregates
+							title="StatsOverall"
+							:headers="aggregatesTableHeaders"
+							:commonAggregates="overall"
+							:detailedAggregates="overallByCode"
+							:isOverall="true"/>
+					</div>
+					<h4 align="center">Detailed stats</h4>
+					<div class="align-center justify-space-between row fill-height">
+						<table-aggregates
+							title="DetailedStats"
+							:headers="aggregatesTableHeaders"
+							:commonAggregates="sortedAggregates"
+							:detailedAggregates="taggedByCode"
+							@sortAggregates="sortAggregates($event)"
+							:currentSort="currentSort"
+							:currentSortDir="currentSortDir"
+							:isOverall="false"/>
+					</div>
 				</v-layout>
 			</div>
 		</v-container>

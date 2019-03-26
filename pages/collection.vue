@@ -4,15 +4,6 @@
 			<template>
 				<app-header/>
 			</template>
-			<v-sparkline
-				:value="value"
-				:smooth="radius || false"
-				:padding="padding"
-				autoDrawDuration="1000"
-				:lineWidth="width"
-				:strokeLinecap="lineCap"
-				autoDraw="true"
-				width="100"/>
 			<v-card>
 				<table-info
 					class="ml-4 mr-4"
@@ -42,11 +33,6 @@ export default {
 					imbalance: null
 				}
 			},
-			width: 1,
-			radius: 0,
-			padding: 20,
-			lineCap: 'round',
-			value: [0, 100, 0, 9, 26, 22, 40, 150, 50, 17, 26, 70, 5, 0],
 			collectionId: '',
 			collection: {},
 			collectionHeaders: {
@@ -97,22 +83,4 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
-	.sub-menu {
-
-	}
 </style>

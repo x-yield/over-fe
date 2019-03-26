@@ -3,27 +3,20 @@
 значение - ключ в джейсоне из бэка; и сам джейсон с данными.
 Если это коллекция - в таблице добавляется дополнительный столбец, содержащий ссылку -->
 <template>
-	<div class="table-info">
-		<h4 align="center">{{ title }}</h4>
-		<table class="table table-sm table-hover" >
-			<tbody>
-				<!--Оправдано, так как рисуем только строку, которой пришло значение с бэка-->
-				<tr v-if="content[value]" v-for="(value, key) in headers" :key="key">
-					<td align="center">{{ key }}</td>
-					<td align="center" v-if="value !== 'testStop' && value !== 'testStart'"> {{ content[value] }} </td>
-					<td align="center" v-else> {{ tsToDate(content[value]) }} </td>
+	<v-card class="justify-space-between">
+		<v-card-title class="subheading font-weight-bold">{{ title }}</v-card-title>
+		<v-data-table
+			:items="content"
+			hideActions
+			hideHeaders>
+			<template slot="items" slot-scope="props">
+				<tr v-for="(value, key) in headers" :key="key">
+					<td align="center">{{ key }}</td>-->
+					<td class="text-lg-right body-2">{{ props.item[value] }}</td>
 				</tr>
-				<tr v-if="isCollection">
-					<td align="center">Latest jobs for this collection</td>
-					<td align="center">
-						<a :href='"/job?id="+job.id' v-for="job in content.latestJobs" :key="job.id">
-							{{ job.id }}
-						</a>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+			</template>
+		</v-data-table>
+	</v-card>
 </template>
 
 <script>
@@ -39,7 +32,7 @@ export default {
 			default: null,
 		},
 		content: {
-			type: Object,
+			type: Array,
 			default: null,
 		},
 		isCollection: {

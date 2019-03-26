@@ -3,65 +3,26 @@
 значение - ключ в джейсоне из бэка; и сам джейсон с данными.
 Если это коллекция - в таблице добавляется дополнительный столбец, содержащий ссылку -->
 <template>
-	<table class="table table-sm table-bordered" >
-		<thead>
-			<tr>
-				<th v-for="header in headers" :key="header" scope="col" class="text-center">{{ header }}</th>
-			</tr>
-		</thead>
-		<tbody v-if="isJobs">
-			<tr v-for="job in content" :key="job.id">
-				<td align="center">
-					<a :href='"/job?id="+job.id'>{{ job.id }}</a>
+	<v-card v-if="isJobs" class="justify-space-between">
+		<v-data-table
+			:headers="headers"
+			:items="content"
+			:totalItems="totalContent"
+			:pagination.sync="pagination"
+			:loading="loading"
+			:rowsPerPageItems="[50, 100, 150]">
+			<template slot="items" slot-scope="props">
+				<td class="text-md-right body-2">
+					<a :href='"/job?id="+props.item.id'>{{ props.item.id }}</a>
 				</td>
-				<td align="center">
-					{{ job.author }}
-				</td>
-				<td align="center" :class="{active: isInProgress(job.status), warning: !isInProgress(job.status)}">
-					{{ job.status }}
-				</td>
-				<td align="center">
-					{{ tsToDate(job.testStart) }} → {{ tsToDate(job.testStop) }}
-				</td>
-				<td align="center">
-					{{ job.target }}
-				</td>
-				<td align="center">
-					{{ job.description }}
-				</td>
-			</tr>
-		</tbody>
-		<tbody v-else>
-			<tr v-for="collection in content" :key="collection.id">
-				<td align="center">
-					<a :href='"/collection?id="+collection.id'>{{ collection.id }}</a>
-				</td>
-				<td align="center">
-					{{ collection.author }}
-				</td>
-				<td align="center">
-					{{ collection.env }}
-				</td>
-				<td align="center">
-					{{ collection.project }}
-				</td>
-				<td align="center">
-					{{ collection.service }}
-				</td>
-				<td align="center">
-					{{ collection.name }}
-				</td>
-				<td align="center">
-					{{ collection.ref }}
-				</td>
-				<td align="center">
-					<a :href='"/job?id="+job.id' v-for="job in collection.latestJobs" :key="job.id">
-						{{ job.id }}
-					</a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+				<td class="text-lg-right body-2">{{ props.item.author }}</td>
+				<td class="text-lg-right body-2">{{ props.item.status }}</td>
+				<td class="text-lg-right body-2">{{ tsToDate(props.item.testStart) + '→' + tsToDate(props.item.testStop) }}</td>
+				<td class="text-lg-right body-2">{{ props.item.target }}</td>
+				<td class="text-lg-right body-2">{{ props.item.description }}</td>
+			</template>
+		</v-data-table>
+	</v-card>
 </template>
 
 <script>
@@ -80,9 +41,21 @@ export default {
 			type: Array,
 			default: null,
 		},
+		totalContent: {
+			type: Number,
+			default: 0,
+		},
 		isJobs: {
 			type: Boolean,
 			default: true
+		},
+		loading: {
+			type: Boolean,
+			default: false,
+		},
+		pagination: {
+			type: Object,
+			default: null
 		}
 	},
 	methods: {
