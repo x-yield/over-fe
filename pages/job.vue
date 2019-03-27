@@ -46,7 +46,7 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				<v-layout class="row justify-content-end">
+				<v-flex class="row justify-content-end">
 					<!-- panel with editor buttons -->
 					<v-btn
 						v-show="job.status !== 'finished'"
@@ -62,7 +62,7 @@
 						color="primary"
 						@click="toggleVisibility('kubernetesInfoVisibility')">View Kubernetes info</v-btn>
 					<v-btn color="warning" @click="deleteJob">Delete job</v-btn>
-				</v-layout>
+				</v-flex>
 				<!-- test id table -->
 				<table-info
 					:title="'Test #'+job.id"
@@ -76,14 +76,12 @@
 				<v-expansion-panel v-if="artifacts.length">
 					<v-expansion-panel-content>
 						<template slot="header">
-							<div align="center">artifacts</div>
+							<div align="center">ARTIFACTS</div>
 						</template>
 						<v-card>
-							<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
-								<table class="table table-sm" id="artifactsTable" v-for="a in artifacts" :key="a.id">
-									<span><a :href="a.path">{{ a.key }}</a></span><br/>
-								</table>
-							</div>
+							<table id="artifactsTable" style="padding-left: 2em;" v-for="a in artifacts" :key="a.id">
+								<span><a :href="a.path">{{ a.key }}</a></span><br/>
+							</table>
 						</v-card>
 					</v-expansion-panel-content>
 				</v-expansion-panel>
@@ -110,7 +108,8 @@
 						</v-list-tile>
 					</v-list>
 				</v-menu>
-				<v-flex class="row justify-content-center">
+
+				<v-flex class="row justify-content-between">
 					<v-flex class="md6 sm12">
 						<!-- rps -->
 						<graph :content="job.graphs.rps"/>
