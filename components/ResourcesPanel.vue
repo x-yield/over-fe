@@ -1,18 +1,18 @@
 <template>
 	<div>
-		<div class="row justify-content-between">
-			<div class="col-md-12 col-sm-12" >
-				<div v-for="value in content" :key="value.name" class="col-md-3 col-sm-6 pod-btns-location">
-					<v-btn
-						@click=getResourcesGraphs(value.name,value.labels.env)
-						color="teal lighten-2"
-						dark
-						:disabled="openedGraphs.includes(value.name)">
-						{{ value.name }}
-					</v-btn>
-				</div>
-			</div>
-		</div>
+		<v-menu class="offset-y full-width">
+			<template slot="activator">
+				<v-btn color="light-green lighten-1">resources utilization</v-btn>
+			</template>
+			<v-list>
+				<v-list-tile
+					v-for="value in content"
+					:key="value.name"
+					@click="getResourcesGraphs(value.name,value.labels.env)" >
+					<v-list-tile-title>{{ value.name }}</v-list-tile-title>
+				</v-list-tile>
+			</v-list>
+		</v-menu>
 		<div v-show="openedGraphs.length > 0" class="row justify-content-between" style="height: 250px;">
 			<div class="col-md-4 col-sm-12">
 				<!-- cpu -->

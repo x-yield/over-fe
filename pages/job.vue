@@ -46,7 +46,7 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				<v-layout class="row justify-content-start">
+				<v-layout class="row justify-content-end">
 					<!-- panel with editor buttons -->
 					<v-btn
 						v-show="job.status !== 'finished'"
@@ -86,16 +86,8 @@
 						</table>
 					</div>
 				</div>
-				<!-- Resources btn -->
-				<v-btn
-					v-if="job.environmentDetails && job.environmentDetails !== 'null'"
-					@click="toggleResourcesVisibility"
-					block
-					color="green">
-					resources utilization</v-btn>
-
 				<!-- grafana graphs for resources -->
-				<div v-show="visibilities.resourcesVisibility">
+				<div v-if="job.environmentDetails && job.environmentDetails !== 'null'" align="center">
 					<resources-panel
 						:content="podsData"
 						:jobStart="job.testStart"
@@ -103,7 +95,7 @@
 				</div>
 
 				<h2 align="center">Graphs</h2>
-				<v-menu v-if="sortedAggregates.length > 1" class="offset-y full-width">
+				<v-menu v-if="sortedAggregates.length > 1" class="offset-y full-width" align="center">
 					<template slot="activator">
 						<v-btn color="light-green lighten-1">__OVERALL__</v-btn>
 					</template>
@@ -171,6 +163,7 @@ import TableAggregates from '../components/TableAggregates';
 import Graph from '../components/Graph';
 import ResourcesPanel from '../components/ResourcesPanel';
 import Layout from '@ozonui/layout';
+import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import AppHeader from '../components/AppHeader';

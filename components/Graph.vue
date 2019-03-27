@@ -1,11 +1,9 @@
 <template>
-	<v-card md12 xs12>
-		<iframe
-			:src="content"
-			class="iframe-graphs"
-			scrolling="No"
-		/>
-	</v-card>
+	<iframe
+		:src="content"
+		class="iframe-graphs"
+		scrolling="No"
+	/>
 </template>
 
 <script>
@@ -23,7 +21,7 @@ export default {
 <style scoped>
 	.iframe-graphs {
 		width: 100%;
-		height: 300%;
+		height: 380px;
 		overflow: hidden;
 		border: none;
 	}
