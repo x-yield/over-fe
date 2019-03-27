@@ -3,127 +3,44 @@
 		<template>
 			<app-header/>
 		</template>
-		<modal v-show="visibilities.editorVisibility" @close="toggleVisibility('editorVisibility')">
-			<h3 slot="header">Редактирование теста {{ job.id }}</h3>
-			<h3 slot="body">
-				<div class="overload-fe-container job-editor">
-					<Container fluid>
-						<Row>
-							<Column>
-								<Input
-									label="Author"
-									v-model="jobUpdateBuffer.author"
-								/>
-							</Column>
-						</Row>
-						<Row>
-							<Column>
-								<Input
-									label="Description"
-									v-model="jobUpdateBuffer.description"
-								/>
-							</Column>
-						</Row>
-						<Row>
-							<Column>
-								<Input
-									label="Status"
-									v-model="jobUpdateBuffer.status"
-								/>
-							</Column>
-						</Row>
-						<Row>
-							<Column>
-								<Input
-									label="Tank"
-									v-model="jobUpdateBuffer.tank"
-								/>
-							</Column>
-						</Row>
-						<Row>
-							<Column>
-								<Input
-									label="Target"
-									v-model="jobUpdateBuffer.target"
-								/>
-							</Column>
-						</Row>
-					</Container>
-				</div>
-			</h3>
-			<h3 slot="footer">
-				<div class="overload-fe-container buttons">
-					<Row>
-						<Column>
-							<Button
-								theme="primary"
-								@click="updateJob"
-								:icon="loading ? 'actions-spinner' : ''"
-							>
-								Сохранить
-							</Button>
-						</Column>
-						<Column>
-							<Button
-								theme="secondary"
-								@click="toggleVisibility('editorVisibility')"
-							>
-								Отмена
-							</Button>
-						</Column>
-					</Row>
-				</div>
 
-			</h3>
+		<modal
+			:title="'Редактирование теста '+job.id"
+			width="400px"
+			:modalIsVisible="visibilities.editorVisibility"
+			:isEditor="true"
+			@saveEditedInfo="updateJob"
+			@close="toggleVisibility('editorVisibility')">
+			<div slot="body">
+				<v-text-field v-model="visibilities.editorVisibility" label="Dessert name"/>
+			</div>
 		</modal>
 
-		<modal v-show="visibilities.kubernetesInfoVisibility" @close="toggleVisibility('kubernetesInfoVisibility')">
-			<h3 slot="header">Данные о {{ job.target }} из Kubernetes </h3>
-			<h3 slot="body" class="job-kubernetes-info">
-				<div class="overload-fe-container">
-					<pre>{{ job.environmentDetails }}</pre>
-				</div>
-			</h3>
-			<h3 slot="footer">
-				<div class="overload-fe-container buttons">
-					<Row>
-						<Column>
-							<Button
-								theme="secondary"
-								@click="toggleVisibility('kubernetesInfoVisibility')"
-							>
-								Закрыть
-							</Button>
-						</Column>
-					</Row>
-				</div>
-
-			</h3>
+		<modal
+			:title="'Данные о '+job.target+'из Kubernetes'"
+			width="1200px"
+			:modalIsVisible="visibilities.kubernetesInfoVisibility"
+			:isEditor="false"
+			@close="toggleVisibility('kubernetesInfoVisibility')">
+			<div slot="body">
+				<pre>{{ job.environmentDetails }}</pre>
+			</div>
 		</modal>
 
-		<modal v-show="visibilities.collectionsListVisibility" @close="toggleVisibility('collectionsListVisibility')">
-			<h3 slot="header">Список доступных коллекций для теста #{{ job.id }}</h3>
-			<h3 slot="body">
+		<modal
+			:title="'Список коллекций для теста #'+job.id"
+			width="400px"
+			:modalIsVisible="visibilities.collectionsListVisibility"
+			@close="toggleVisibility('collectionsListVisibility')">
+			<div slot="body">
 				<div v-for="(collection) in collections" :key="collection.id">
-					<a :href='"/collection?id="+collection.id' class="text-link">{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
+					<a :href='"/collection?id="+collection.id' class="text-link">
+						{{ collection.env + ' -> ' + collection.project + ' -> ' + collection.name }}
 					</a>
 				</div>
-			</h3>
-			<h3 slot="footer">
-				<div class="overload-fe-container buttons">
-					<Row>
-						<Column>
-							<Button
-								theme="secondary"
-								@click="toggleVisibility('collectionsListVisibility')">
-								Закрыть
-							</Button>
-						</Column>
-					</Row>
-				</div>
-
-			</h3>
+			</div>
 		</modal>
+
 		<v-container fluid>
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
@@ -131,14 +48,20 @@
 			<div v-else>
 				<v-layout class="row justify-content-end">
 					<!-- panel with editor buttons -->
-					<panel-item
-						:status="job.status"
-						:hasCollections="job.collections !== null"
-						@toggleModalVisibility="toggleVisibility($event)"
-					/>
+					<v-btn color="red darken-1" dark @click.once="stopTest" v-show="status !== 'finished'" :disabled="status === 'stopped'">
+						Stop test
+					</v-btn>
+					<v-btn color="green" @click="toggleVisibility('collectionsListVisibility')">View collections</v-btn>
+					<v-btn color="primary" @click="toggleVisibility('kubernetesInfoVisibility')">View Kubernetes info</v-btn>
+					<v-btn color="warning" @click="deleteJob">Delete job</v-btn>
 				</v-layout>
 				<!-- test id table -->
-				<table-info :title="'Test #'+job.id" :headers="tableHeaders" :content="myJob" :isCollection="false"/>
+				<table-info
+					:title="'Test #'+job.id"
+					:headers="tableHeaders"
+					:content="myJob"
+					:isCollection="false"
+					:editItem="editItem($event)"/>
 
 				<!-- Artifacts btn-->
 				<v-btn
@@ -269,6 +192,7 @@ export default {
 				status: null,
 			},
 			myJob: [],
+			dialog: false,
 			jobUpdateBuffer: {},
 			artifacts: [],
 			collections: [],
@@ -337,21 +261,22 @@ export default {
 		this.test_id = this.$route.query.id;
 	},
 	mounted() {
-		this.refresh();
+		//this.refresh();
+		this.getTestInfo(this.test_id);
 	},
 	methods: {
-		async refresh() {
-			await this.getTestInfo(this.test_id);
-			if (this.job.status === 'finished') {
-				await this.getArtifacts(this.test_id);
-				await this.getTestAggregates(this.test_id);
-				if (Object.keys(this.overall).length === 0) {
-					setTimeout(this.refresh, 5000);
-				}
-			} else {
-				setTimeout(this.refresh, 5000);
-			}
-		},
+		// async refresh() {
+		// 	await this.getTestInfo(this.test_id);
+		// 	if (this.job.status === 'finished') {
+		// 		await this.getArtifacts(this.test_id);
+		// 		await this.getTestAggregates(this.test_id);
+		// 		if (Object.keys(this.overall).length === 0) {
+		// 			setTimeout(this.refresh, 5000);
+		// 		}
+		// 	} else {
+		// 		setTimeout(this.refresh, 5000);
+		// 	}
+		// },
 		updateJob() {
 			this.$store.dispatch('job/updateJob', this._dataToUpdate());
 			this.toggleVisibility('editorVisibility');
@@ -486,6 +411,9 @@ export default {
 				}
 			}
 			return buffer;
+		},
+		editItem: function(param) {
+			this.dialog = true;
 		}
 	},
 	computed: {
@@ -505,67 +433,4 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-		horiz-align: center;
-	}
-
-	td > * {
-		vertical-align : middle;
-	}
-
-	.buttons {
-		padding-top: 10px;
-	}
-
-	.job-editor * {
-		padding-top: 10px;
-	}
-
-	.job-kubernetes-info * {
-		padding-top: 10px;
-		font-size: 14px;
-		max-height: 350px;
-		overflow-y: scroll;
-		color: black;
-	}
-
-	.text-link{
-		text-decoration: underline;
-	}
-
-	select {
-		background-color: white;
-		border: thin solid black;
-		display: inline-block;
-		font-size: 14px;
-		line-height: 1.5em;
-		padding: 0.5em 3.5em 0.5em 1em;
-}
-
-	/*select.minimal {*/
-		/*background-image:*/
-			/*linear-gradient(45deg, transparent 50%, gray 50%),*/
-			/*linear-gradient(135deg, gray 50%, transparent 50%),*/
-			/*linear-gradient(to right, #ccc, #ccc);*/
-		/*background-position:*/
-			/*calc(100% - 20px) calc(1em + 2px),*/
-			/*calc(100% - 15px) calc(1em + 2px),*/
-			/*calc(100% - 2.5em) 0.5em;*/
-		/*background-size:*/
-		/*5px 5px,*/
-		/*5px 5px,*/
-		/*1px 1.5em;*/
-		/*background-repeat: no-repeat;*/
-/*}*/
-
 </style>

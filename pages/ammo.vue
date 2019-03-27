@@ -17,40 +17,25 @@
 					<h3 align="center">Loading...</h3>
 				</div>
 				<div v-else>
-					<table class="table table-sm table-bordered" id="ammoTable">
-						<thead>
-							<tr>
-								<th scope="col" class="text-center">Path</th>
-								<th scope="col" class="text-center">Size</th>
-								<th scope="col" class="text-center">Modified</th>
-								<th scope="col" class="text-center">Last Used</th>
-								<!-- <th scope="col" class="text-center">Type</th> -->
-								<th scope="col" class="text-center">Author</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="a in ammo" :key="a.id">
-								<td align="left">
-									{{ a.path }}
+					<v-card class="justify-space-between">
+						<v-data-table
+							:headers="tableHeaders"
+							:items="ammo"
+							:rowsPerPageItems="[10, 25, 50]"
+							hideActions
+							sortIcon="">
+							<template slot="items" slot-scope="props">
+								<td class="text-lg-center body-2">
+									<a :href='"/collection?id="+props.item.id'>{{ props.item.id }}</a>
 								</td>
-								<td align="center">
-									{{ a.size }}
-								</td>
-								<td align="center">
-									{{ a.lastModified }}
-								</td>
-								<td align="center">
-									{{ a.lastUsed }}
-								</td>
-								<!-- <td align="center">
-									{{ a.type }}
-								</td> -->
-								<td align="center">
-									{{ a.author }}
-								</td>
-							</tr>
-						</tbody>
-					</table>
+								<td class="text-lg-center body-2">{{ props.item.path }}</td>
+								<td class="text-lg-center body-2">{{ props.item.size }}</td>
+								<td class="text-lg-center body-2">{{ props.item.lastModified }}</td>
+								<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
+								<td class="text-lg-center body-2">{{ props.item.Author }}</td>
+							</template>
+						</v-data-table>
+					</v-card>
 				</div>
 			</div>
 		</v-container>
@@ -72,13 +57,19 @@ export default {
 			loading: true,
 			error: null,
 			success: null,
-			tableHeaders: {
-				'Path':'path',
-				'Size':'size',
-				'Modified':'lastModified',
-				'Last Used':'lastUsed',
-				'Author':'author'
-			}
+			// tableHeaders: {
+			// 	'Path':'path',
+			// 	'Size':'size',
+			// 	'Modified':'lastModified',
+			// 	'Last Used':'lastUsed',
+			// 	'Author':'author'
+			// },
+			tableHeaders: [
+				{text: 'Path', align: 'center'},
+				{text: 'Size', align: 'center'},
+				{text: 'Modified', align: 'center'},
+				{text:'Last Used', align: 'center'},
+				{text: 'Author', align: 'center'}],
 		};
 	},
 	head: {

@@ -3,40 +3,38 @@
 		<template>
 			<app-header/>
 		</template>
-		<v-container id="dropdown-collections" class="fluid">
-			<div v-if="loading">
-				<h3 align="center">Loading...</h3>
-			</div>
-			{{ selected }}
-			{{ name }}
-			<v-layout class="row justify-content-end">
+
+		<div v-if="loading">
+			<h3 align="center">Loading...</h3>
+		</div>
+		<v-container v-else class="fluid">
+			<div align="right">
 				<v-form class="d-inline-flex" @change="getFilteredCollections(selected={env, project, name})">
 					<v-select
 						color="cyan darken-1"
 						:items="envs"
 						v-model="env"
+						@change="getFilteredCollections(selected={env, project, name})"
 						label="All envs"
-						outline
 						class="mr-2"
 					/>
 					<v-select
 						color="cyan darken-1"
 						:items="projects.projectName"
 						label="All projects"
-						outline
 						class="mr-2"
 					/>
 					<v-select
 						color="cyan darken-1"
 						:items="names"
 						v-model="name"
+						@change="getFilteredCollections(selected={env, project, name})"
 						label="All names"
-						outline
 						class="mr-2"
 					/>
 					<v-btn @click="flushAllFilters()" color="cyan darken-1" dark>Flush all filters</v-btn>
 				</v-form>
-			</v-layout>
+			</div>
 			<v-card class="justify-space-between">
 				<v-data-table
 					:headers="tableHeaders"
@@ -144,6 +142,10 @@ export default {
 		},
 		flushAllFilters() {
 			this.selected = {};
+			this.env = this.project = this.name= '';
+			this.project = '';
+			this.name = '';
+
 		},
 		rabotaiTvar(param) {
 			console.log('RABOTAI TVAR', param);
@@ -154,6 +156,7 @@ export default {
 
 <style scoped>
 	.dropdown-filter {
-		width: auto;
+		max-height: 50px;
 	}
+
 </style>
