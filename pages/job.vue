@@ -9,7 +9,7 @@
 			width="400px"
 			:modalIsVisible="visibilities.editorVisibility"
 			:isEditor="true"
-			@saveEditedInfo="updateJob"
+			@saveEditedInfo="updateJob(editedItemKey, editedItem)"
 			@close="toggleVisibility('editorVisibility')">
 			<div slot="body">
 				<v-text-field v-model="editedItem" :label="editedItemLabel"/>
@@ -69,7 +69,7 @@
 					:headers="tableHeaders"
 					:content="myJob"
 					:isCollection="false"
-					@editItem="editItem($event, $event)"/>
+					@editItem="editItem"/>
 
 				<!-- Artifacts btn-->
 				<v-btn
@@ -171,7 +171,6 @@ import TableAggregates from '../components/TableAggregates';
 import Graph from '../components/Graph';
 import ResourcesPanel from '../components/ResourcesPanel';
 import Layout from '@ozonui/layout';
-import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import AppHeader from '../components/AppHeader';
@@ -200,6 +199,7 @@ export default {
 			myJob: [],
 			editedItem: null,
 			editedItemLabel: null,
+			editedItemKey: null,
 			jobUpdateBuffer: {},
 			artifacts: [],
 			collections: [],
@@ -282,8 +282,11 @@ export default {
 				setTimeout(this.refresh, 5000);
 			}
 		},
-		updateJob() {
-			this.$store.dispatch('job/updateJob', this._dataToUpdate());
+		updateJob(key, value) {
+			let buffer = {id: this.job.id};
+
+			buffer[key] = value;
+			this.$store.dispatch('job/updateJob', buffer);
 			this.toggleVisibility('editorVisibility');
 		},
 		deleteJob() {
@@ -404,25 +407,11 @@ export default {
 			this.jobUpdateBuffer.status = 'stopped';
 			this.updateJob();
 		},
-		_dataToUpdate: function() {
-			// возвращает разницу между джобой и обновленными данными, которые хранятся в jobUpdateBuffer
-			let buffer = {id: this.job.id};
-
-			for (let k in this.jobUpdateBuffer) {
-				if (this.jobUpdateBuffer.hasOwnProperty(k)) {
-					if (JSON.stringify(this.job[k]) !== JSON.stringify(this.jobUpdateBuffer[k])) {
-						this.job[k] = this.jobUpdateBuffer[k];
-						buffer[k] = this.jobUpdateBuffer[k];
-					}
-				}
-			}
-			return buffer;
-		},
-		editItem: function(value, key) {
-			console.log('Parent????', value, key);
+		editItem: function(jobParamHeader, jobParamKey, jobParamValue) {
 			this.toggleVisibility('editorVisibility');
-			this.editedItem = value;
-			this.editedItemLabel = key;
+			this.editedItem = jobParamValue;
+			this.editedItemLabel = jobParamHeader;
+			this.editedItemKey = jobParamKey;
 		}
 	},
 	computed: {
