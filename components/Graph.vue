@@ -1,5 +1,5 @@
 <template>
-	<v-card>
+	<v-card md12 xs12>
 		<iframe
 			:src="content"
 			class="iframe-graphs"
@@ -23,7 +23,7 @@ export default {
 <style scoped>
 	.iframe-graphs {
 		width: 100%;
-		height: 380px;
+		height: 300%;
 		overflow: hidden;
 		border: none;
 	}

@@ -1,5 +1,5 @@
 <template>
-	<v-dialog v-model="modalIsVisible" :maxWidth="width">
+	<v-dialog v-model="modalIsVisible" :maxWidth="width" persistent>
 		<v-card>
 			<v-card-title>
 				<span class="subheading font-weight-bold">{{ title }}</span>

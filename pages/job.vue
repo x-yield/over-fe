@@ -12,7 +12,7 @@
 			@saveEditedInfo="updateJob"
 			@close="toggleVisibility('editorVisibility')">
 			<div slot="body">
-				<v-text-field v-model="visibilities.editorVisibility" label="Dessert name"/>
+				<v-text-field v-model="editedItem" :label="editedItemLabel"/>
 			</div>
 		</modal>
 
@@ -48,11 +48,19 @@
 			<div v-else>
 				<v-layout class="row justify-content-end">
 					<!-- panel with editor buttons -->
-					<v-btn color="red darken-1" dark @click.once="stopTest" v-show="status !== 'finished'" :disabled="status === 'stopped'">
-						Stop test
-					</v-btn>
-					<v-btn color="green" @click="toggleVisibility('collectionsListVisibility')">View collections</v-btn>
-					<v-btn color="primary" @click="toggleVisibility('kubernetesInfoVisibility')">View Kubernetes info</v-btn>
+					<v-btn
+						v-show="job.status !== 'finished'"
+						color="red darken-1"
+						@click.once="stopTest"
+						:disabled="job.status === 'stopped'">Stop test</v-btn>
+					<v-btn
+						v-if="job.collections"
+						color="green"
+						@click="toggleVisibility('collectionsListVisibility')">View collections</v-btn>
+					<v-btn
+						v-if="job.environmentDetails && job.environmentDetails !== 'null'"
+						color="primary"
+						@click="toggleVisibility('kubernetesInfoVisibility')">View Kubernetes info</v-btn>
 					<v-btn color="warning" @click="deleteJob">Delete job</v-btn>
 				</v-layout>
 				<!-- test id table -->
@@ -61,12 +69,12 @@
 					:headers="tableHeaders"
 					:content="myJob"
 					:isCollection="false"
-					:editItem="editItem($event)"/>
+					@editItem="editItem($event, $event)"/>
 
 				<!-- Artifacts btn-->
 				<v-btn
 					v-if="artifacts.length"
-					@click="toggleArtifactsVisibility"
+					@click="toggleVisibility('artifactsVisibility')"
 					block
 					color="green">
 					artifacts</v-btn>
@@ -94,61 +102,61 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-				<h3 align="center">Graphs</h3>
-				<div v-if="sortedAggregates.length > 1">
-					<h4	align="left">
-						<form @change="selectGraphs(selectedTag) " >
-							<select v-model="selectedTag">
-								<option>__OVERALL__</option>
-								<option v-for="tag in sortedAggregates" :key="tag.label">
-									{{ tag.label }}
-								</option>
-							</select>
-						</form>
-					</h4>
-				</div>
-				<v-flex class="justify-content-between">
-					<v-flex class="md-6 sm-12">
+				<h2 align="center">Graphs</h2>
+				<v-menu v-if="sortedAggregates.length > 1" class="offset-y full-width">
+					<template slot="activator">
+						<v-btn color="light-green lighten-1">__OVERALL__</v-btn>
+					</template>
+					<v-list>
+						<v-list-tile
+							v-for="tag in sortedAggregates"
+							:key="tag.label"
+							@click="selectGraphs(tag.label)" >
+							<v-list-tile-title>{{ tag.label }}</v-list-tile-title>
+						</v-list-tile>
+					</v-list>
+				</v-menu>
+				<v-flex class="row justify-content-center">
+					<v-flex class="md6 sm12">
 						<!-- rps -->
 						<graph :content="job.graphs.rps"/>
 					</v-flex>
-					<v-flex class="md-6 sm-12">
+					<v-flex class="md6 sm12">
 						<!-- net codes -->
 						<graph :content="job.graphs.netcodes"/>
 					</v-flex>
 				</v-flex>
-				<v-flex class="md-6 sm-12">
+				<v-flex class="row justify-content-center">
 					<!-- quantiles -->
-					<graph :content="job.graphs.quantiles"/>
+					<v-flex class="md6 sm12">
+						<graph :content="job.graphs.quantiles"/>
+					</v-flex>
 					<!-- tank threads -->
-					<graph :content="job.graphs.threads"/>
+					<v-flex class="md6 sm12">
+						<graph :content="job.graphs.threads"/>
+					</v-flex>
 				</v-flex>
 
-
-				<v-layout>
+				<v-flex>
 					<!-- summary stats -->
-					<h3 align="center">Summary stats</h3>
-					<div class="align-center justify-space-between row fill-height">
-						<table-aggregates
-							title="StatsOverall"
-							:headers="aggregatesTableHeaders"
-							:commonAggregates="overall"
-							:detailedAggregates="overallByCode"
-							:isOverall="true"/>
-					</div>
-					<h4 align="center">Detailed stats</h4>
-					<div class="align-center justify-space-between row fill-height">
-						<table-aggregates
-							title="DetailedStats"
-							:headers="aggregatesTableHeaders"
-							:commonAggregates="sortedAggregates"
-							:detailedAggregates="taggedByCode"
-							@sortAggregates="sortAggregates($event)"
-							:currentSort="currentSort"
-							:currentSortDir="currentSortDir"
-							:isOverall="false"/>
-					</div>
-				</v-layout>
+					<h2 align="center">Summary stats</h2>
+					<table-aggregates
+						title="StatsOverall"
+						:headers="aggregatesTableHeaders"
+						:commonAggregates="overall"
+						:detailedAggregates="overallByCode"
+						:isOverall="true"/>
+					<h3 align="center">Detailed stats</h3>
+					<table-aggregates
+						title="DetailedStats"
+						:headers="aggregatesTableHeaders"
+						:commonAggregates="sortedAggregates"
+						:detailedAggregates="taggedByCode"
+						@sortAggregates="sortAggregates($event)"
+						:currentSort="currentSort"
+						:currentSortDir="currentSortDir"
+						:isOverall="false"/>
+				</v-flex>
 			</div>
 		</v-container>
 	</div>
@@ -166,8 +174,6 @@ import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
-import Button from '@ozonui/custom-button';
-import PanelItem from '../components/PanelItem';
 import AppHeader from '../components/AppHeader';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
@@ -192,7 +198,8 @@ export default {
 				status: null,
 			},
 			myJob: [],
-			dialog: false,
+			editedItem: null,
+			editedItemLabel: null,
 			jobUpdateBuffer: {},
 			artifacts: [],
 			collections: [],
@@ -243,7 +250,6 @@ export default {
 	},
 	components: {
 		Modal,
-		Button,
 		Input,
 		Select,
 		Option,
@@ -252,7 +258,6 @@ export default {
 		Graph,
 		AppHeader,
 		ResourcesPanel,
-		PanelItem,
 		Row: row,
 		Column: column,
 		Container: container
@@ -261,22 +266,22 @@ export default {
 		this.test_id = this.$route.query.id;
 	},
 	mounted() {
-		//this.refresh();
-		this.getTestInfo(this.test_id);
+		this.refresh();
+		// this.getTestInfo(this.test_id);
 	},
 	methods: {
-		// async refresh() {
-		// 	await this.getTestInfo(this.test_id);
-		// 	if (this.job.status === 'finished') {
-		// 		await this.getArtifacts(this.test_id);
-		// 		await this.getTestAggregates(this.test_id);
-		// 		if (Object.keys(this.overall).length === 0) {
-		// 			setTimeout(this.refresh, 5000);
-		// 		}
-		// 	} else {
-		// 		setTimeout(this.refresh, 5000);
-		// 	}
-		// },
+		async refresh() {
+			await this.getTestInfo(this.test_id);
+			if (this.job.status === 'finished') {
+				await this.getArtifacts(this.test_id);
+				await this.getTestAggregates(this.test_id);
+				if (Object.keys(this.overall).length === 0) {
+					setTimeout(this.refresh, 5000);
+				}
+			} else {
+				setTimeout(this.refresh, 5000);
+			}
+		},
 		updateJob() {
 			this.$store.dispatch('job/updateJob', this._dataToUpdate());
 			this.toggleVisibility('editorVisibility');
@@ -293,9 +298,6 @@ export default {
 		toggleResourcesVisibility: function() {
 			this.toggleVisibility('resourcesVisibility');
 			this.podsData = JSON.parse(this.job.environmentDetails);
-		},
-		toggleArtifactsVisibility: function() {
-			this.toggleVisibility('artifactsVisibility');
 		},
 		getTestInfo: function(id) {
 			return this.$api.get('/job/' + id)
@@ -329,9 +331,9 @@ export default {
 				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 			} else {
-				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=11&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
-				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=12&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
-				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=13&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + tag;
+				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=11&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + encodeURIComponent(tag);
+				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=12&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + encodeURIComponent(tag);
+				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=13&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id + '&var-tag=' + encodeURIComponent(tag);
 				this.job.graphs.threads = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=6&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 			}
 			this.selectedTag=tag;
@@ -398,6 +400,10 @@ export default {
 			}
 			this.currentSort = s;
 		},
+		stopTest: function() {
+			this.jobUpdateBuffer.status = 'stopped';
+			this.updateJob();
+		},
 		_dataToUpdate: function() {
 			// возвращает разницу между джобой и обновленными данными, которые хранятся в jobUpdateBuffer
 			let buffer = {id: this.job.id};
@@ -412,8 +418,11 @@ export default {
 			}
 			return buffer;
 		},
-		editItem: function(param) {
-			this.dialog = true;
+		editItem: function(value, key) {
+			console.log('Parent????', value, key);
+			this.toggleVisibility('editorVisibility');
+			this.editedItem = value;
+			this.editedItemLabel = key;
 		}
 	},
 	computed: {

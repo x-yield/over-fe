@@ -1,10 +1,13 @@
 <template>
 	<div id="overload">
-		<v-app id="inspire">
-			<template>
-				<app-header/>
-			</template>
-			<v-card>
+		<template>
+			<app-header/>
+		</template>
+		<v-container fluid>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
+			</div>
+			<div v-else>
 				<table-info
 					class="mt-2 mr-2 ml-2"
 					:title="'Collection #'+collectionId"
@@ -14,8 +17,8 @@
 				<h3 align="center">Trends</h3>
 				<!-- Trends -->
 				<graph :content="regression.graphs.imbalance"/>
-			</v-card>
-		</v-app>
+			</div>
+		</v-container>
 	</div>
 </template>
 
@@ -43,8 +46,6 @@ export default {
 				'Author':'author'
 			},
 			loading: true,
-			error: null,
-			success: null,
 		};
 	},
 	head: {

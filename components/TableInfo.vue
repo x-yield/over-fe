@@ -14,7 +14,7 @@
 					<td align=center class="body-2 font-weight-bold">{{ key }}</td>
 					<td align=center class="body-2">{{ props.item[value] }}</td>
 					<td v-if="!isCollection" class="justify-center layout px-0">
-						<v-icon small class="mr-2" @click="editItem(props.item[value])">edit</v-icon>
+						<v-icon small class="mr-2" @click="editItem(props.item[value], key)">edit</v-icon>
 					</td>
 				</tr>
 				<tr v-if="isCollection">
@@ -75,8 +75,9 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		editItem(jobParam) {
-			this.$emit('editItem', jobParam);
+		editItem(jobParam, jobKey) {
+			console.log('PARAM', jobParam, jobKey);
+			this.$emit('editItem', jobParam, jobKey);
 		}
 	}
 };
