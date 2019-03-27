@@ -98,26 +98,4 @@ export default {
 </script>
 
 <style scoped>
-	.pod-btn {
-		background: linear-gradient(to bottom, #d3f8ab, #7d9f5e);
-		border-radius: 7px;
-		font-size: 13px;
-		text-align: center;
-		border: 1px solid #7d9f5e;
-		cursor: pointer;
-	}
-
-	.pod-btn.expanded {
-		background: linear-gradient(to top, #7d9f5e, #486934);
-		border: 1px solid #486934;
-		color: white;
-		box-shadow: 0 0 3px #444;
-	}
-
-	.pod-btns-location {
-		margin: 10px 0 15px 0;
-		display: inline;
-		float: left;
-	}
-
 </style>

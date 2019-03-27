@@ -84,8 +84,4 @@ export default {
 
 
 <style>
-	.table-info {
-		background-color: white;
-	}
-
 </style>

@@ -147,9 +147,6 @@ export default {
 			this.name = '';
 
 		},
-		rabotaiTvar(param) {
-			console.log('RABOTAI TVAR', param);
-		}
 	},
 };
 </script>

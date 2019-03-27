@@ -3,40 +3,35 @@
 		<template>
 			<app-header/>
 		</template>
-		<v-container>
-			<div>
-				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
-					<input type="text" name="name" placeholder="Имя" required/>
-					<input type="file" name="file" required/>
-					<v-btn color="cyan darken-1" dark @click="submitForm" type="button">Загрузить</v-btn>
-				</form>
+		<v-container fluid>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
 			</div>
-			<br/>
-			<div class="table">
-				<div v-if="loading">
-					<h3 align="center">Loading...</h3>
-				</div>
-				<div v-else>
-					<v-card class="justify-space-between">
-						<v-data-table
-							:headers="tableHeaders"
-							:items="ammo"
-							:rowsPerPageItems="[10, 25, 50]"
-							hideActions
-							sortIcon="">
-							<template slot="items" slot-scope="props">
-								<td class="text-lg-center body-2">
-									<a :href='"/collection?id="+props.item.id'>{{ props.item.id }}</a>
-								</td>
-								<td class="text-lg-center body-2">{{ props.item.path }}</td>
-								<td class="text-lg-center body-2">{{ props.item.size }}</td>
-								<td class="text-lg-center body-2">{{ props.item.lastModified }}</td>
-								<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
-								<td class="text-lg-center body-2">{{ props.item.Author }}</td>
-							</template>
-						</v-data-table>
-					</v-card>
-				</div>
+			<div v-else>
+				<v-card>
+					<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
+						<input type="text" name="name" placeholder="Имя" required/>
+						<input type="file" name="file" required/>
+						<v-btn color="cyan darken-1" dark @click="submitForm" type="button">Загрузить</v-btn>
+					</form>
+				</v-card>
+
+				<v-card class="justify-space-between">
+					<v-data-table
+						:headers="tableHeaders"
+						:items="ammo"
+						:rowsPerPageItems="[10, 25, 50]"
+						hideActions
+						sortIcon="">
+						<template slot="items" slot-scope="props">
+							<td class="text-lg-center body-2">{{ props.item.path }}</td>
+							<td class="text-lg-center body-2">{{ props.item.size }}</td>
+							<td class="text-lg-center body-2">{{ props.item.lastModified }}</td>
+							<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
+							<td class="text-lg-center body-2">{{ props.item.Author }}</td>
+						</template>
+					</v-data-table>
+				</v-card>
 			</div>
 		</v-container>
 	</div>
@@ -53,7 +48,7 @@ let ammoKeys = [];
 export default {
 	data() {
 		return {
-			ammo: {},
+			ammo: [],
 			loading: true,
 			error: null,
 			success: null,
@@ -116,13 +111,17 @@ export default {
 		getAmmoInfo: function() {
 			this.$api.get('/list_ammo')
 				.then(response => {
-					return response[0].data.ammo;
+					return response[0].data;
 				})
 				.then(json => {
-					if (!json) {
+					if (!json.ammo) {
 						return;
 					}
-					this.ammo = json;
+					json.ammo.forEach(
+						ammo => {
+							this.ammo.push(ammo);
+						}
+					);
 					let i = 0;
 					let len_a = this.ammo.length;
 

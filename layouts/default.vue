@@ -9,36 +9,12 @@
 <script>
 
 import 'vuetify/dist/vuetify.min.css';
-//import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default {
 	components: {
 	}
 };
 </script>
-
-<style scoped>
-@import "@ozonui/color-palette";
-
-.overload-layout-default {
-	display: flex;
-	width: 100%;
-	height: 100%;
-	position: relative;
-}
-
-.overload-app {
-	flex: 1;
-	margin: 20px;
-}
-
-.build-info {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	color: var(--ui-color-gray);
-}
-</style>
 
 <style>
 @import "@ozonui/color-palette"; /*fix this shit pls*/

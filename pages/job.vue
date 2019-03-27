@@ -46,7 +46,7 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				<v-layout class="row justify-content-end">
+				<v-layout class="row justify-content-start">
 					<!-- panel with editor buttons -->
 					<v-btn
 						v-show="job.status !== 'finished'"
@@ -266,22 +266,24 @@ export default {
 		this.test_id = this.$route.query.id;
 	},
 	mounted() {
-		this.refresh();
-		// this.getTestInfo(this.test_id);
+		// this.refresh();
+		this.getTestInfo(this.test_id);
+		this.getArtifacts(this.test_id);
+		this.getTestAggregates(this.test_id);
 	},
 	methods: {
-		async refresh() {
-			await this.getTestInfo(this.test_id);
-			if (this.job.status === 'finished') {
-				await this.getArtifacts(this.test_id);
-				await this.getTestAggregates(this.test_id);
-				if (Object.keys(this.overall).length === 0) {
-					setTimeout(this.refresh, 5000);
-				}
-			} else {
-				setTimeout(this.refresh, 5000);
-			}
-		},
+		// async refresh() {
+		// 	await this.getTestInfo(this.test_id);
+		// 	if (this.job.status === 'finished') {
+		// 		await this.getArtifacts(this.test_id);
+		// 		await this.getTestAggregates(this.test_id);
+		// 		if (Object.keys(this.overall).length === 0) {
+		// 			setTimeout(this.refresh, 5000);
+		// 		}
+		// 	} else {
+		// 		setTimeout(this.refresh, 5000);
+		// 	}
+		// },
 		updateJob(key, value) {
 			let buffer = {id: this.job.id};
 
