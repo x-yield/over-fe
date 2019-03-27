@@ -17,7 +17,6 @@ export default {
 </script>
 
 <style>
-@import "@ozonui/color-palette"; /*fix this shit pls*/
 
 html {
   font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI',

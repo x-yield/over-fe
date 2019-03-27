@@ -9,7 +9,7 @@
 		</div>
 		<v-container v-else class="fluid">
 			<div align="right">
-				<v-form class="d-inline-flex" @change="getFilteredCollections(selected={env, project, name})">
+				<v-form class="d-inline-flex">
 					<v-select
 						color="cyan darken-1"
 						:items="envs"
@@ -20,7 +20,9 @@
 					/>
 					<v-select
 						color="cyan darken-1"
-						:items="projects.projectName"
+						:items="projects"
+						v-model="project"
+						@change="getFilteredCollections(selected={env, project, name})"
 						label="All projects"
 						class="mr-2"
 					/>
@@ -48,8 +50,8 @@
 						</td>
 						<td class="text-lg-center body-2">{{ props.item.author }}</td>
 						<td class="text-lg-center body-2">{{ props.item.env }}</td>
-						<td class="text-lg-center body-2">{{ props.item.service }}</td>
 						<td class="text-lg-center body-2">{{ props.item.project }}</td>
+						<td class="text-lg-center body-2">{{ props.item.service }}</td>
 						<td class="text-lg-center body-2">{{ props.item.name }}</td>
 						<td class="text-lg-center body-2">{{ props.item.ref }}</td>
 						<td class="text-lg-center body-2">
@@ -103,7 +105,6 @@ export default {
 	},
 	methods: {
 		getFilteredCollections(params) {
-			console.log('MDE');
 			this.loading = true;
 			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
@@ -132,7 +133,11 @@ export default {
 							}
 							if (projectId.indexOf(item.project) === -1) {
 								projectId.push(item.project);
-								this.projects.push({projectId: item.project, projectName: item.service});
+								if (item.service) {
+									this.projects.push(item.project + ' ' + item.service);
+								} else {
+									this.projects.push(item.project);
+								}
 							}
 						}
 					);
@@ -142,9 +147,10 @@ export default {
 		},
 		flushAllFilters() {
 			this.selected = {};
-			this.env = this.project = this.name= '';
+			this.env = '';
 			this.project = '';
 			this.name = '';
+			this.getFilteredCollections(this.selected);
 
 		},
 	},
@@ -152,8 +158,5 @@ export default {
 </script>
 
 <style scoped>
-	.dropdown-filter {
-		max-height: 50px;
-	}
 
 </style>

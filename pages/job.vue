@@ -72,20 +72,22 @@
 					@editItem="editItem"/>
 
 				<!-- Artifacts btn-->
-				<v-btn
-					v-if="artifacts.length"
-					@click="toggleVisibility('artifactsVisibility')"
-					block
-					color="green">
-					artifacts</v-btn>
 
-				<div v-show="visibilities.artifactsVisibility">
-					<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
-						<table class="table table-sm" id="artifactsTable" v-for="a in artifacts" :key="a.id">
-							<span><a :href="a.path">{{ a.key }}</a></span><br/>
-						</table>
-					</div>
-				</div>
+				<v-expansion-panel v-if="artifacts.length">
+					<v-expansion-panel-content>
+						<template slot="header">
+							<div align="center">artifacts</div>
+						</template>
+						<v-card>
+							<div class="col-md-12 col-sm-12" style="padding-left: 2em;">
+								<table class="table table-sm" id="artifactsTable" v-for="a in artifacts" :key="a.id">
+									<span><a :href="a.path">{{ a.key }}</a></span><br/>
+								</table>
+							</div>
+						</v-card>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+
 				<!-- grafana graphs for resources -->
 				<div v-if="job.environmentDetails && job.environmentDetails !== 'null'" align="center">
 					<resources-panel

@@ -1,20 +1,10 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/joints">Joints</a>
-					</div>
-				</div>
-			</nav>
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
 
+		<v-container fluid>
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
@@ -45,7 +35,7 @@
 					</tbody>
 				</table>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 
@@ -53,6 +43,7 @@
 import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
+import AppHeader from '../components/AppHeader';
 
 export default {
 	data() {
@@ -65,6 +56,9 @@ export default {
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
+	},
+	components: {
+		AppHeader,
 	},
 	created() {
 		this.get_joints_info();
