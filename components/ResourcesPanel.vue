@@ -1,47 +1,52 @@
 <template>
-	<div>
-		<v-menu class="offset-y full-width">
-			<template slot="activator">
-				<v-btn color="light-green lighten-1">resources utilization</v-btn>
-			</template>
-			<v-list>
-				<v-list-tile
-					v-for="value in content"
-					:key="value.name"
-					@click="getResourcesGraphs(value.name,value.labels.env)" >
-					<v-list-tile-title>{{ value.name }}</v-list-tile-title>
-				</v-list-tile>
-			</v-list>
-		</v-menu>
-		<div v-show="openedGraphs.length > 0" class="row justify-content-between" style="height: 250px;">
-			<div class="col-md-4 col-sm-12">
+	<v-card>
+		<accordeon title="RESOURCES UTILIZATION">
+			<div slot="body">
+				<v-tabs fixedTabs>
+					<v-tab
+						v-for="value in content"
+						:key="value.name"
+						@click="getResourcesGraphs(value.name,value.labels.env)" >
+						{{ value.name }}
+					</v-tab>
+				</v-tabs>
+			</div>
+		</accordeon>
+		<v-flex align="center" v-show="openedGraphs.length > 0" class="row justify-content-between">
+			<v-flex class="md4 sm12">
 				<!-- cpu -->
 				<graph :content="resources.graphs.cpu"/>
-			</div>
-			<div class="col-md-4 col-sm-12">
+			</v-flex>
+			<v-flex class="md4 sm12">
 				<!-- memory -->
 				<graph :content="resources.graphs.memory"/>
-			</div>
-			<div class="col-md-4 col-sm-12">
+			</v-flex>
+			<v-flex class="md4 sm12">
 				<!-- net codes -->
 				<graph :content="resources.graphs.network"/>
-			</div>
-		</div>
-		<div align="center" v-show="openedGraphs.length > 0" style="padding: 1em 0 2em 0;">
+			</v-flex>
+		</v-flex>
+		<div align="center" v-show="openedGraphs.length > 0" style="padding-bottom: 1em">
 			<a :href="resources.link" class="text-link" target="_blank">More info in Grafana</a>
 		</div>
-	</div>
+	</v-card>
 </template>
 
 <script>
 import Graph from '../components/Graph';
+import Accordeon from '../components/Accordeon';
 
 export default {
-	name: 'ButtonPod',
+	name: 'ResourcesPanel',
 	components: {
-		Graph
+		Graph,
+		Accordeon
 	},
 	props: {
+		title: {
+			type: String,
+			default: '',
+		},
 		content: {
 			type: Object,
 			default: null,
@@ -71,7 +76,6 @@ export default {
 	},
 	methods: {
 		getResourcesGraphs: function(name, env) {
-			console.log('MDE', name, env);
 			this.resources.graphs = {};
 			if (isNaN(this.jobStop)) {
 				this.jobFinishedTime = 'now';

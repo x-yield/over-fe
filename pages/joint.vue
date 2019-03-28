@@ -1,31 +1,16 @@
-<template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/joints">Joints</a>
-					</div>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="/">Last joints</a></li>
-						</ul>
-					</div>
-				</div>
-			</nav>
 
+<template>
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+
+		<v-container fluid>
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
+
 			<div v-else>
-				<!-- test id table -->
 				<div>
 					<h4 align="center">Joint id#{{ joint.id }}</h4>
 				</div>
@@ -51,190 +36,50 @@
 						</tbody>
 					</table>
 				</div>
-
-				<!-- grafana graphs -->
-				<div class="col-md-12">
-					<h3 align="center">graphs</h3>
-					<div v-if="sortedAggregates.length > 1">
-						<h4	align="left">
-							<form @change="selectGraphs(selectedTag) " >
-								<select v-model="selectedTag">
-									<option>
-										__OVERALL__
-									</option>
-									<option v-for="tag in sortedAggregates" :key="tag.label">
-										{{ tag.label }}
-									</option>
-								</select>
-							</form>
-						</h4>
-					</div>
-					<div class="row justify-content-between" style="height:300px;">
-						<div class="col-md-6 col-sm-12">
-							<!-- rps -->
-							<iframe
-								:src="joint.graphs.rps"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
-						</div>
-						<div class="col-md-6 col-sm-12">
-							<!-- net codes -->
-							<iframe
-								:src="joint.graphs.quantiles"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
-						</div>
-					</div>
-					<div class="row justify-content-between" style="height:300px;">
-						<div class="col-md-6 col-sm-12">
-							<!-- quantiles -->
-							<iframe
-								:src="joint.graphs.netcodes"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
-						</div>
-						<div class="col-md-6 col-sm-12">
-							<!-- tank threads -->
-							<iframe
-								:src="joint.graphs.threads"
-								class="iframe-graphs"
-								scrolling="No"
-							/>
-						</div>
-					</div>
-				</div>
-
-				<!-- summary stats -->
-				<h3
-					align="center"
-					@click="toggleVisibility('isSummaryVisible')">
-					Summary stats
-				</h3>
-				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
-					<div class="row justify-content-between">
-						<table id="StatsOverall" class="hover table table-bordered">
-							<thead>
-								<tr>
-									<th>label</th>
-									<th>ok</th>
-									<th>errors</th>
-									<th>q50, ms</th>
-									<th>q75, ms</th>
-									<th>q90, ms</th>
-									<th>q95, ms</th>
-									<th>q98, ms</th>
-									<th>q99, ms</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td @click="toggleVisibility('overallCodeVisibility')" class="plus-table-label" :class="{ expanded: visibilities.overallCodeVisibility }">Overall
-									</td>
-									<td>{{ overall.okCount }}</td>
-									<td>{{ overall.errCount }}</td>
-									<td>{{ overall.q50 }}</td>
-									<td>{{ overall.q75 }}</td>
-									<td>{{ overall.q90 }}</td>
-									<td>{{ overall.q95 }}</td>
-									<td>{{ overall.q98 }}</td>
-									<td>{{ overall.q99 }}</td>
-								</tr>
-								<tr v-show="visibilities.overallCodeVisibility" v-for="aggregate in overallByCode" :key="aggregate.responseCode" class="hidden-rows">
-									<td>{{ aggregate.responseCode }}</td>
-									<td>{{ aggregate.okCount }}</td>
-									<td>{{ aggregate.errCount }}</td>
-									<td>{{ aggregate.q50 }}</td>
-									<td>{{ aggregate.q75 }}</td>
-									<td>{{ aggregate.q90 }}</td>
-									<td>{{ aggregate.q95 }}</td>
-									<td>{{ aggregate.q98 }}</td>
-									<td>{{ aggregate.q99 }}</td>
-								</tr>
-							</tbody>
-							<tfoot/>
-							<tfoot/>
-						</table>
-					</div>
-				</div>
-				<h4
-					align="center"
-					@click="toggleVisibility('isSummaryVisible')">
-					Detailed stats
-				</h4>
-				<div v-show="visibilities.isSummaryVisible" class="col-md-12">
-					<div class="row justify-content-between">
-						<table id="StatsDetails" class="hover table table-bordered">
-							<thead>
-								<tr>
-									<th @click="sort_aggregates('label')">label
-										<div v-if="'label'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('okCount')">ok
-										<div v-if="'okCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('errCount')">errors
-										<div v-if="'errCount'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('q50')">q50, ms
-										<div v-if="'q50'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('q75')">q75, ms
-										<div v-if="'q75'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('q90')">q90, ms
-										<div v-if="'q90'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('q95')">q95, ms
-										<div v-if="'q95'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('q98')">q98, ms
-										<div v-if="'q98'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-									<th @click="sort_aggregates('q99')">q99, ms
-										<div v-if="'q99'=== currentSort" class="arrow-table-sort" :class="currentSortDir === 'asc' ? 'asc' : 'dsc'"/>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<template v-for="tag in sortedAggregates" >
-									<tr :key="tag.label">
-										<td @click.stop="toggleResponseCodeVisibility(tag.label)" class="plus-table-label" :class="{ expanded: openedTag.includes(tag.label) }">{{ tag.label }}</td>
-										<td>{{ tag.okCount }}</td>
-										<td>{{ tag.errCount }}</td>
-										<td>{{ tag.q50 }}</td>
-										<td>{{ tag.q75 }}</td>
-										<td>{{ tag.q90 }}</td>
-										<td>{{ tag.q95 }}</td>
-										<td>{{ tag.q98 }}</td>
-										<td>{{ tag.q99 }}</td>
-									</tr>
-									<template v-if="openedTag.includes(code.label)" v-for="code in taggedByCode">
-										<tr :key="code.responseCode" v-if="code.label === tag.label" class="hidden-rows">
-											<td>{{ code.responseCode }}</td>
-											<td>{{ code.okCount }}</td>
-											<td>{{ code.errCount }}</td>
-											<td>{{ code.q50 }}</td>
-											<td>{{ code.q75 }}</td>
-											<td>{{ code.q90 }}</td>
-											<td>{{ code.q95 }}</td>
-											<td>{{ code.q98 }}</td>
-											<td>{{ code.q99 }}</td>
-										</tr>
-									</template>
-								</template>
-							</tbody>
-						</table>
-					</div>
-				</div>
+				<v-flex class="row justify-content-between">
+					<v-flex class="md6 sm12">
+						<!-- rps -->
+						<graph :content="joint.graphs.rps"/>
+					</v-flex>
+					<v-flex class="md6 sm12">
+						<!-- net codes -->
+						<graph :content="joint.graphs.netcodes"/>
+					</v-flex>
+				</v-flex>
+				<v-flex class="row justify-content-center">
+					<!-- quantiles -->
+					<v-flex class="md6 sm12">
+						<graph :content="joint.graphs.quantiles"/>
+					</v-flex>
+					<!-- tank threads -->
+					<v-flex class="md6 sm12">
+						<graph :content="joint.graphs.threads"/>
+					</v-flex>
+				</v-flex>
+				<v-flex>
+					<!-- summary stats -->
+					<h2 align="center">Summary stats</h2>
+					<table-aggregates
+						title="StatsOverall"
+						:headers="aggregatesTableHeaders"
+						:commonAggregates="overall"
+						:detailedAggregates="overallByCode"
+						:isOverall="true"/>
+					<h3 align="center">Detailed stats</h3>
+					<table-aggregates
+						title="DetailedStats"
+						:headers="aggregatesTableHeaders"
+						:commonAggregates="sortedAggregates"
+						:detailedAggregates="taggedByCode"
+						@sortAggregates="sortAggregates($event)"
+						:currentSort="currentSort"
+						:currentSortDir="currentSortDir"
+						:isOverall="false"/>
+				</v-flex>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
-<div>
-</div>
 
 <script>
 import Modal from '../components/Modal';
@@ -243,6 +88,8 @@ import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import Button from '@ozonui/custom-button';
+import AppHeader from '../components/AppHeader';
+import Graph from '../components/Graph';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -310,6 +157,8 @@ export default {
 		Button,
 		Input,
 		Select,
+		AppHeader,
+		Graph,
 		Option,
 		Row: row,
 		Column: column,
@@ -323,7 +172,7 @@ export default {
 	},
 	methods: {
 		async refresh() {
-			await this.get_joint_info(this.test_id);
+			await this.getJointInfo(this.test_id);
 		},
 		toggleVisibility: function(param) {
 			this.visibilities[param] = !this.visibilities[param];
@@ -345,7 +194,7 @@ export default {
 				this.openedGraphs.push(pod_button);
 			}
 		},
-		get_joint_info: function(id) {
+		getJointInfo: function(id) {
 			return this.$api.get('/joint/' + id)
 				.then(response => {
 					return response[0].data.joint;
@@ -387,7 +236,7 @@ export default {
 			this.selectedTag=tag;
 			this.loading=false;
 		},
-		get_test_aggregates: function(id) {
+		getTestAggregates: function(id) {
 			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
 
 			return this.$api.get('/aggregates/' + id)
@@ -422,7 +271,7 @@ export default {
 					);
 				});
 		},
-		sort_aggregates: function(s) {
+		sortAggregates: function(s) {
 			if (s === this.currentSort) {
 				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
 			}
@@ -446,107 +295,4 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-		horiz-align: center;
-	}
-
-	td > * {
-		vertical-align : middle;
-	}
-
-	.job-editor * {
-		padding-top: 10px;
-	}
-
-	.job-kubernetes-info * {
-		padding-top: 10px;
-		font-size: 14px;
-		max-height: 350px;
-		overflow-y: scroll;
-		color: black;
-	}
-
-	.plus-table-label:after {
-		height: 14px;
-		width: 14px;
-		margin-left: 3px;
-		box-sizing: content-box;
-		display: inline-block;
-		vertical-align: middle;
-		color: white;
-		border: 1px solid white;
-		border-radius: 18px;
-		box-shadow: 0 0 3px #444;
-		text-align: center;
-		text-indent: 0 !important;
-		font-family: 'Courier New', Courier, monospace;
-		line-height: 14px;
-		background-color: #31b131;
-		content: '+';
-	}
-
-	.plus-table-label.expanded:after {
-		height: 14px;
-		width: 14px;
-		margin-left: 3px;
-		box-sizing: content-box;
-		display: inline-block;
-		vertical-align: middle;
-		color: white;
-		border: 1px solid white;
-		border-radius: 18px;
-		box-shadow: 0 0 3px #444;
-		text-align: center;
-		text-indent: 0 !important;
-		font-family: 'Courier New', Courier, monospace;
-		line-height: 14px;
-		background-color: #D85B5B;
-		content: '-';
-	}
-
-	.hidden-rows {
-		background-color: #F0EDED;
-	}
-	.iframe-graphs {
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
-		border: none;
-	}
-
-	select {
-		background-color: white;
-		border: thin solid black;
-		display: inline-block;
-		font-size: 14px;
-		line-height: 1.5em;
-		padding: 0.5em 3.5em 0.5em 1em;
-	}
-
-	/*select.minimal {*/
-	/*background-image:*/
-	/*linear-gradient(45deg, transparent 50%, gray 50%),*/
-	/*linear-gradient(135deg, gray 50%, transparent 50%),*/
-	/*linear-gradient(to right, #ccc, #ccc);*/
-	/*background-position:*/
-	/*calc(100% - 20px) calc(1em + 2px),*/
-	/*calc(100% - 15px) calc(1em + 2px),*/
-	/*calc(100% - 2.5em) 0.5em;*/
-	/*background-size:*/
-	/*5px 5px,*/
-	/*5px 5px,*/
-	/*1px 1.5em;*/
-	/*background-repeat: no-repeat;*/
-	/*}*/
-
 </style>

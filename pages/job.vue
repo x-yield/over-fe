@@ -71,20 +71,14 @@
 					:isCollection="false"
 					@editItem="editItem"/>
 
-				<!-- Artifacts btn-->
-
-				<v-expansion-panel v-if="artifacts.length">
-					<v-expansion-panel-content>
-						<template slot="header">
-							<div align="center">ARTIFACTS</div>
-						</template>
-						<v-card>
-							<table id="artifactsTable" style="padding-left: 2em;" v-for="a in artifacts" :key="a.id">
-								<span><a :href="a.path">{{ a.key }}</a></span><br/>
-							</table>
-						</v-card>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
+				<!-- Artifacts accordeon-->
+				<accordeon v-if="artifacts.length" title="ARTIFACTS">
+					<div slot="body">
+						<table id="artifactsTable" style="padding-left: 2em;" v-for="a in artifacts" :key="a.id">
+							<span><a :href="a.path">{{ a.key }}</a></span>
+						</table>
+					</div>
+				</accordeon>
 
 				<!-- grafana graphs for resources -->
 				<div v-if="job.environmentDetails && job.environmentDetails !== 'null'" align="center">
@@ -94,20 +88,16 @@
 						:jobStop="job.testStop"/>
 				</div>
 
+
 				<h2 align="center">Graphs</h2>
-				<v-menu v-if="sortedAggregates.length > 1" class="offset-y full-width" align="center">
-					<template slot="activator">
-						<v-btn color="light-green lighten-1">__OVERALL__</v-btn>
-					</template>
-					<v-list>
-						<v-list-tile
-							v-for="tag in sortedAggregates"
-							:key="tag.label"
-							@click="selectGraphs(tag.label)" >
-							<v-list-tile-title>{{ tag.label }}</v-list-tile-title>
-						</v-list-tile>
-					</v-list>
-				</v-menu>
+				<v-flex md4 xs12 v-if="sortedAggregates.length > 1">
+					<v-select
+						color="cyan darken-1"
+						v-model="tag"
+						:items="tags"
+						label="Tags"
+						@change="selectGraphs(tag)"/>
+				</v-flex>
 
 				<v-flex class="row justify-content-between">
 					<v-flex class="md6 sm12">
@@ -168,6 +158,7 @@ import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import AppHeader from '../components/AppHeader';
+import Accordeon from "../components/Accordeon";
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -203,6 +194,8 @@ export default {
 			overallByCode: [],
 			taggedByCode: [],
 			loading: true,
+			tag: '',
+			tags: [],
 			error: null,
 			success: null,
 			currentSort: 'label',
@@ -211,8 +204,6 @@ export default {
 				editorVisibility: false,
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
-				resourcesVisibility: false,
-				artifactsVisibility: false,
 			},
 			selectedTag: '__OVERALL__',
 			tableHeaders: {
@@ -243,6 +234,7 @@ export default {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
+		Accordeon,
 		Modal,
 		Input,
 		Select,
@@ -294,10 +286,6 @@ export default {
 		toggleVisibility: function(param) {
 			this.visibilities[param] = !this.visibilities[param];
 		},
-		toggleResourcesVisibility: function() {
-			this.toggleVisibility('resourcesVisibility');
-			this.podsData = JSON.parse(this.job.environmentDetails);
-		},
 		getTestInfo: function(id) {
 			return this.$api.get('/job/' + id)
 				.then(response => {
@@ -309,8 +297,6 @@ export default {
 					}
 					this.job = job_json;
 					this.myJob.push(this.job);
-					// клонируем объект. jobUpdateBuffer нужен чтобы отслеживать изменения при редактировании
-					this.jobUpdateBuffer = JSON.parse(JSON.stringify(this.job));
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
 						this.job.finishedTime = 'now';
@@ -320,6 +306,7 @@ export default {
 					this.collections = this.job.collections;
 					this.selectGraphs(this.selectedTag);
 					this.loading = false;
+					this.podsData = JSON.parse(this.job.environmentDetails);
 				});
 		},
 		selectGraphs: function(tag) {
@@ -371,6 +358,13 @@ export default {
 							}
 						}
 					);
+					this.tagged.forEach(
+						item => {
+							if (this.tags.indexOf(item.label) === -1) {
+								this.tags.push(item.label);
+							}
+						}
+					);
 				});
 		},
 		getArtifacts: function(id) {
@@ -400,15 +394,14 @@ export default {
 			this.currentSort = s;
 		},
 		stopTest: function() {
-			this.jobUpdateBuffer.status = 'stopped';
-			this.updateJob();
+			this.updateJob('status', 'stopped');
 		},
 		editItem: function(jobParamHeader, jobParamKey, jobParamValue) {
 			this.toggleVisibility('editorVisibility');
 			this.editedItem = jobParamValue;
 			this.editedItemLabel = jobParamHeader;
 			this.editedItemKey = jobParamKey;
-		}
+		},
 	},
 	computed: {
 		sortedAggregates:function() {
