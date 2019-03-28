@@ -2,7 +2,7 @@
 	<v-card>
 		<accordeon title="RESOURCES UTILIZATION">
 			<div slot="body">
-				<v-tabs fixedTabs>
+				<v-tabs fixedTabs color="grey lighten-4">
 					<v-tab
 						v-for="value in content"
 						:key="value.name"
@@ -12,7 +12,7 @@
 				</v-tabs>
 			</div>
 		</accordeon>
-		<v-flex align="center" v-show="openedGraphs.length > 0" class="row justify-content-between">
+		<v-flex align="center" v-show="openedGraphs.length > 0" class="row justify-content-between pr-2 pl-4 pt-2">
 			<v-flex class="md4 sm12">
 				<!-- cpu -->
 				<graph :content="resources.graphs.cpu"/>

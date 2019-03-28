@@ -88,7 +88,6 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-
 				<h2 align="center">Graphs</h2>
 				<v-flex md4 xs12 v-if="sortedAggregates.length > 1">
 					<v-select
@@ -99,8 +98,8 @@
 						@change="selectGraphs(tag)"/>
 				</v-flex>
 
-				<v-flex class="row justify-content-between">
-					<v-flex class="md6 sm12">
+				<v-flex class="row justify-content-between pl-3">
+					<v-flex class="md6 sm12 pr-2">
 						<!-- rps -->
 						<graph :content="job.graphs.rps"/>
 					</v-flex>
@@ -109,9 +108,9 @@
 						<graph :content="job.graphs.netcodes"/>
 					</v-flex>
 				</v-flex>
-				<v-flex class="row justify-content-center">
+				<v-flex class="row justify-content-center pl-3">
 					<!-- quantiles -->
-					<v-flex class="md6 sm12">
+					<v-flex class="md6 sm12 pr-2">
 						<graph :content="job.graphs.quantiles"/>
 					</v-flex>
 					<!-- tank threads -->
@@ -252,24 +251,24 @@ export default {
 		this.test_id = this.$route.query.id;
 	},
 	mounted() {
-		// this.refresh();
-		this.getTestInfo(this.test_id);
-		this.getArtifacts(this.test_id);
-		this.getTestAggregates(this.test_id);
+		this.refresh();
+		// this.getTestInfo(this.test_id);
+		// this.getArtifacts(this.test_id);
+		// this.getTestAggregates(this.test_id);
 	},
 	methods: {
-		// async refresh() {
-		// 	await this.getTestInfo(this.test_id);
-		// 	if (this.job.status === 'finished') {
-		// 		await this.getArtifacts(this.test_id);
-		// 		await this.getTestAggregates(this.test_id);
-		// 		if (Object.keys(this.overall).length === 0) {
-		// 			setTimeout(this.refresh, 5000);
-		// 		}
-		// 	} else {
-		// 		setTimeout(this.refresh, 5000);
-		// 	}
-		// },
+		async refresh() {
+			await this.getTestInfo(this.test_id);
+			if (this.job.status === 'finished' || this.job.status === 'stopped') {
+				await this.getArtifacts(this.test_id);
+				await this.getTestAggregates(this.test_id);
+				if (Object.keys(this.overall).length === 0) {
+					setTimeout(this.refresh, 5000);
+				}
+			} else {
+				setTimeout(this.refresh, 5000);
+			}
+		},
 		updateJob(key, value) {
 			let buffer = {id: this.job.id};
 
@@ -296,6 +295,10 @@ export default {
 						return;
 					}
 					this.job = job_json;
+					//fix this
+					if (this.myJob.length !== 0) {
+						this.myJob.length = 0;
+					}
 					this.myJob.push(this.job);
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
