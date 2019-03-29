@@ -91,20 +91,4 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
-
 </style>

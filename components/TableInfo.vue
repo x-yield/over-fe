@@ -17,14 +17,7 @@
 						<v-icon small class="mr-2" @click="editItem(key, value, props.item[value])">edit</v-icon>
 					</td>
 				</tr>
-				<tr v-if="isCollection">
-					<td align=center class="body-2 font-weight-bold">Latest jobs for this collection</td>
-					<td align=center class="body-2">
-						<a :href='"/job?id="+job.id' v-for="job in content[0].latestJobs" :key="job.id" class="mr-2">
-							{{ job.id }}
-						</a>
-					</td>
-				</tr>
+				<slot name="extra-link" v-if="isCollection"/>
 			</template>
 		</v-data-table>
 	</v-card>

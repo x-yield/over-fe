@@ -1,4 +1,3 @@
-
 <template>
 	<div id="overload">
 		<template>
@@ -14,9 +13,18 @@
 				<table-info
 					:title="'Joint id#'+ joint.id"
 					:headers="tableHeaders"
-					:content="joint"
-					:isCollection="false"
-					@editItem="'doNothingYet'"/>
+					:content="myJoint"
+					:isCollection="true"
+					@editItem="'doNothingYet'">
+					<tr slot="extra-link">
+						<td align=center class="body-2 font-weight-bold">Tests</td>
+						<td align=center class="body-2">
+							<a :href='"/job?id="+job.id' v-for="job in myJoint[0].jobs" :key="job.id" class="mr-2">
+								{{ job.id }}
+							</a>
+						</td>
+					</tr>
+				</table-info>
 
 				<h2 align="center">Graphs</h2>
 				<v-flex class="row justify-content-between">
@@ -98,7 +106,7 @@ export default {
 				},
 				status: null,
 			},
-			myJob: [],
+			myJoint: [],
 			editedItem: null,
 			editedItemLabel: null,
 			editedItemKey: null,
@@ -124,7 +132,6 @@ export default {
 			selectedTag: '__OVERALL__',
 			tableHeaders: {
 				'Id': 'id',
-				'Status': 'status',
 				'Name': 'name',
 			},
 			aggregatesTableHeaders: {
@@ -205,6 +212,7 @@ export default {
 					joint_json['max_stop'] = Math.max(...joint_json['job_stops']);
 					joint_json['min_start'] = Math.min(...joint_json['job_starts']);
 					this.joint = joint_json;
+					this.myJoint.push(joint_json);
 					this.joint.graphs = {};
 					this.selectGraphs(this.selectedTag);
 					this.loading = false;

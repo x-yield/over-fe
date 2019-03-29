@@ -13,7 +13,16 @@
 					:title="'Collection #'+collectionId"
 					:headers="collectionHeaders"
 					:content="collection"
-					:isCollection="true"/>
+					:isCollection="true">
+					<tr slot="extra-link">
+						<td align=center class="body-2 font-weight-bold">Latest jobs for this collection</td>
+						<td align=center class="body-2">
+							<a :href='"/job?id="+job.id' v-for="job in collection[0].latestJobs" :key="job.id" class="mr-2">
+								{{ job.id }}
+							</a>
+						</td>
+					</tr>
+				</table-info>
 				<h3 align="center">Trends</h3>
 				<!-- Trends -->
 				<graph :content="regression.graphs.imbalance"/>
