@@ -16,8 +16,10 @@
 			</nav>
 			<div>
 				<span class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></span>
-				<span class="error" id="firestarter_message" v-show="visibilities.messageVisibility"></span>
-
+				<div style="background-color: lightcoral; padding: 1em;" v-show="visibilities.messageVisibility">
+					<span class="error" id="firestarter_message"></span>
+				</div>
+				<br/>
 				<label for="tankInput">танк</label>
 				<input name="tank" id="tankInput" type="text" value="" style="width: 100%"/>
 				<br/>
@@ -28,6 +30,7 @@
 				<button id="prepareButton" @click="prepareSessions" v-show="visibilities.prepareButtonVisibility">Prepare</button>
 				<button id="runButton" @click="runSessions" v-show="visibilities.runButtonVisibility">Run</button>
 				<button id="stopButton" @click="stopSessions" v-show="visibilities.stopButtonVisibility">Stop</button>
+				<div class="lds-ellipsis" v-show="loading"><div></div><div></div><div></div><div></div></div>
 			</div>
 		</div>
 	</div>
@@ -42,7 +45,7 @@ import '@ozonui/custom-button';
 export default {
 	data() {
 		return {
-			loading: true,
+			loading: false,
 			error: '',
 			success: null,
 			sessions: [],
@@ -64,18 +67,13 @@ export default {
 	},
 	methods: {
 		perform: async function(action) {
-			let actionMap = {
-				'validate': 'prepare',
-				'prepare': 'run',
-				'run': 'stop',
-			};
 			let waitMap = {
 				'prepare': 'prepare',
 				'run': 'poll',
 				'stop': 'finished',
 			};
 
-			this.$api.post('/firestarter/'+action, JSON.stringify({'sessions': this.sessions}))
+			return this.$api.post('/firestarter/'+action, JSON.stringify({'sessions': this.sessions}))
 				.then(response => {
 					return response[0].data.sessions;
 				})
@@ -89,43 +87,45 @@ export default {
 					if (waitMap.hasOwnProperty(action)) {
 						this.waitFor(waitMap[action]);
 					}
-				})
-				.then(() => {
-					if (!this.error) {
-						this.findFailures();
-					}
-				})
-				.then(() => {
-					if (!this.error) {
-						if (actionMap.hasOwnProperty(action)) {
-							this.activateButton(actionMap[action]);
-						}
-					}
 				});
 		},
-		validateSessions: function() {
+		validateSessions: async function() {
 			this.loading = true;
 			let tank = document.getElementById('tankInput').value;
 			let conf = document.getElementById('confInput').value;
 
 			this.sessions = [{'tank': tank, 'conf': conf}];
-			this.perform('validate');
+			await this.perform('validate');
+			await this.findFailures();
+			if (!this.error) {
+				this.activateButton('prepare');
+			}
+			this.loading = false;
 		},
-		prepareSessions: async function() { // needs polling
+		prepareSessions: function() { // needs polling
 			this.loading = true;
-			this.perform('prepare');
+			return this.perform('prepare');
 		},
 		runSessions: function() { // needs polling
 			this.loading = true;
-			this.perform('run');
+			return this.perform('run');
 		},
 		stopSessions: function() { // needs polling
 			this.loading = true;
-			this.perform('stop');
+			return this.perform('stop');
 		},
 		pollSessions: function() {
 			this.loading = true;
-			this.perform('poll');
+			return this.$api.post('/firestarter/poll', JSON.stringify({'sessions': this.sessions}))
+				.then(response => {
+					return response[0].data.sessions;
+				})
+				.then(json => {
+					if (!json) {
+						return;
+					}
+					this.sessions = json;
+				});
 		},
 		sleep: function(ms) {
 			return new Promise(resolve => setTimeout(resolve, ms));
@@ -133,8 +133,12 @@ export default {
 		waitFor: async function(what) {
 			let reached = true;
 			let finished = false;
+			let nextActionMap = {
+				'prepare': 'run',
+				'poll': 'stop',
+			};
 
-			this.pollSessions();
+			await this.pollSessions();
 			for (let i = 0; i < this.sessions.length; i++) {
 				let s = this.sessions[i];
 
@@ -144,30 +148,32 @@ export default {
 				if (s['stage'] === 'finished') {
 					finished = true;
 				}
-				if (s['status'] === 'failed') {
-					this.success = false;
-					this.loading = false;
-					return;
-				}
 			}
-			this.findFailures();
+			await this.findFailures();
 			if (this.error) {
+				let errorsAlert = document.getElementById('firestarter_message');
+
+				errorsAlert.innerText = this.error;
+				this.visibilities.messageVisibility = true;
 				this.loading = false;
 				return;
 			}
 			if (!reached && !finished) {
 				await this.sleep(1000);
-				this.waitFor(what);
+				return this.waitFor(what);
 			} else {
 				this.loading = false;
+				if (nextActionMap.hasOwnProperty(what)) {
+					this.activateButton(nextActionMap[what]);
+				}
 			}
 		},
-		activateButton: async function(action) {
+		activateButton: function(nextAction) {
 			this.visibilities.validateButtonVisibility = false;
 			this.visibilities.prepareButtonVisibility = false;
 			this.visibilities.runButtonVisibility = false;
 			this.visibilities.stopButtonVisibility = false;
-			switch (action) {
+			switch (nextAction) {
 				case 'validate':
 					this.visibilities.validateButtonVisibility = true;
 					break;
@@ -196,10 +202,9 @@ export default {
 					sessionLocation = sessionLocation+ session['name'] + '@';
 				}
 				sessionLocation = sessionLocation+ session['tank'];
-
 				// formatting error message
-				if (session.hasOwnProperty('failures') && session['failures'].length > 0) {
-					failures = failures + '\n' + sessionLocation + ': ';
+				if (session['status'] === 'failed' || (session.hasOwnProperty('failures') && session['failures'].length > 0)) {
+					failures = failures + sessionLocation + ': ';
 					for (let j = 0; j < session['failures'].length; j++) {
 						let f = session['failures'][j];
 
@@ -235,5 +240,62 @@ export default {
 	td > * {
 		vertical-align : middle;
 	}
+
+	.lds-ellipsis {
+		display: inline-block;
+		position: relative;
+		width: 16px;
+		height: 16px;
+	}
+	.lds-ellipsis div {
+		position: absolute;
+		top: 7px;
+		width: 3px;
+		height: 3px;
+		border-radius: 50%;
+		background: #000;
+		animation-timing-function: cubic-bezier(0, 1, 1, 0);
+	}
+	.lds-ellipsis div:nth-child(1) {
+		left: 2px;
+		animation: lds-ellipsis1 0.6s infinite;
+	}
+	.lds-ellipsis div:nth-child(2) {
+		left: 2px;
+		animation: lds-ellipsis2 0.6s infinite;
+	}
+	.lds-ellipsis div:nth-child(3) {
+		left: 6.5px;
+		animation: lds-ellipsis2 0.6s infinite;
+	}
+	.lds-ellipsis div:nth-child(4) {
+		left: 11px;
+		animation: lds-ellipsis3 0.6s infinite;
+	}
+	@keyframes lds-ellipsis1 {
+		0% {
+			transform: scale(0);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+	@keyframes lds-ellipsis3 {
+		0% {
+			transform: scale(1);
+		}
+		100% {
+			transform: scale(0);
+		}
+	}
+	@keyframes lds-ellipsis2 {
+		0% {
+			transform: translate(0, 0);
+		}
+		100% {
+			transform: translate(5px, 0);
+		}
+	}
+
 
 </style>
