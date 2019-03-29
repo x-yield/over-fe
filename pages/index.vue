@@ -46,7 +46,6 @@
 							@change="getJobs(1, pagination.rowsPerPage, {author, status, target, description})"/>
 					</v-flex>
 				</v-layout>
-				<!--<table-list :headers="tableHeaders" :content="lastJobs" :isJobs="true"/>-->
 				<v-card class="justify-space-between">
 					<v-data-table
 						:headers="tableHeaders"

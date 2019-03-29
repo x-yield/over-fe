@@ -157,7 +157,7 @@ import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
 import AppHeader from '../components/AppHeader';
-import Accordeon from "../components/Accordeon";
+import Accordeon from '../components/Accordeon';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -252,9 +252,6 @@ export default {
 	},
 	mounted() {
 		this.refresh();
-		// this.getTestInfo(this.test_id);
-		// this.getArtifacts(this.test_id);
-		// this.getTestAggregates(this.test_id);
 	},
 	methods: {
 		async refresh() {
@@ -295,6 +292,9 @@ export default {
 						return;
 					}
 					this.job = job_json;
+					this.job.testStart = this.tsToDate(this.job.testStart);
+					this.job.testStop = this.tsToDate(this.job.testStop);
+					this.job.autostopTime = this.tsToDate(this.job.autostopTime);
 					//fix this
 					if (this.myJob.length !== 0) {
 						this.myJob.length = 0;
@@ -311,6 +311,29 @@ export default {
 					this.loading = false;
 					this.podsData = JSON.parse(this.job.environmentDetails);
 				});
+		},
+		tsToDate: function(ts) {
+			const from_ts = new Date(ts * 1000);
+
+			const from_ts_hour = from_ts.getHours();
+
+			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
+
+			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
+
+			const from_ts_year = from_ts.getFullYear();
+
+			if (isNaN(from_ts.getDate())) {
+				return 'not yet received';
+			} else {
+				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+				const month = months[from_ts.getMonth()];
+
+				const date = from_ts.getDate();
+
+				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
+			}
 		},
 		selectGraphs: function(tag) {
 			this.loading=true;

@@ -20,10 +20,12 @@
 					/>
 					<v-select
 						color="cyan darken-1"
-						:items="projects"
 						v-model="project"
-						@change="getFilteredCollections(selected={env, project, name})"
+						:items="projects"
+						itemText="projectName"
+						itemValue="projectId"
 						label="All projects"
+						@change="getFilteredCollections(selected={env, project, name})"
 						class="mr-2"
 					/>
 					<v-select
@@ -75,7 +77,10 @@ export default {
 		return {
 			selected: {},
 			env: '',
-			project: '',
+			project: {
+				projectId: '',
+				projectName: ''
+			},
 			name: '',
 			collections: [],
 			envs: [],
@@ -133,11 +138,8 @@ export default {
 							}
 							if (projectId.indexOf(item.project) === -1) {
 								projectId.push(item.project);
-								if (item.service) {
-									this.projects.push(item.project + ' ' + item.service);
-								} else {
-									this.projects.push(item.project);
-								}
+								if (!item.service) { item.service = '';}
+								this.projects.push({projectId: item.project, projectName: item.project+' '+item.service});
 							}
 						}
 					);

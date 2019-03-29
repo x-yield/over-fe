@@ -11,31 +11,14 @@
 			</div>
 
 			<div v-else>
-				<div>
-					<h4 align="center">Joint id#{{ joint.id }}</h4>
-				</div>
-				<div class="col-md-12">
-					<table class="table table-sm table-hover">
-						<tbody>
-							<tr>
-								<td align="center">Id</td>
-								<td align="center">{{ joint.id }}</td>
-							</tr>
-							<tr>
-								<td align="center">Tests</td>
-								<td align="center">
-									<a :href='"/job?id="+job.id' v-for="job in joint.jobs" :key="job.id">
-										{{ job.id }}
-									</a>
-								</td>
-							</tr>
-							<tr>
-								<td align="center">Name</td>
-								<td align="center">{{ joint.name }}</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+				<table-info
+					:title="'Joint id#'+ joint.id"
+					:headers="tableHeaders"
+					:content="joint"
+					:isCollection="false"
+					@editItem="'doNothingYet'"/>
+
+				<h2 align="center">Graphs</h2>
 				<v-flex class="row justify-content-between">
 					<v-flex class="md6 sm12">
 						<!-- rps -->
@@ -83,13 +66,16 @@
 
 <script>
 import Modal from '../components/Modal';
+import TableInfo from '../components/TableInfo';
+import TableAggregates from '../components/TableAggregates';
+import Graph from '../components/Graph';
+import ResourcesPanel from '../components/ResourcesPanel';
 import Layout from '@ozonui/layout';
 import '@ozonui/layout/src/grid.css';
 import Input from '@ozonui/form-input';
 import FormSelect from '@ozonui/form-select';
-import Button from '@ozonui/custom-button';
 import AppHeader from '../components/AppHeader';
-import Graph from '../components/Graph';
+import Accordeon from '../components/Accordeon';
 
 const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
 
@@ -112,54 +98,62 @@ export default {
 				},
 				status: null,
 			},
-			resources: {
-				graphs: {
-					cpu: null,
-					memory: null,
-					network: null,
-				},
-				link: null,
-			},
-			jobUpdateBuffer: {},
+			myJob: [],
+			editedItem: null,
+			editedItemLabel: null,
+			editedItemKey: null,
 			artifacts: [],
 			collections: [],
 			podsData: {},
-			overall: {},
+			overall: [],
 			tagged: [],
 			overallByCode: [],
 			taggedByCode: [],
-			sortedTaggedByCode: [],
-			openedTag: [],
-			openedGraphs: [],
 			loading: true,
+			tag: '',
+			tags: [],
 			error: null,
 			success: null,
-			visibilities:{
-				isSummaryVisible: true,
-				editorVisibility: false,
-				overallCodeVisibility: false,
-				kubernetesInfoVisibility: false,
-				collectionsListVisibility: false,
-				resourcesVisibility: false,
-				artifactsVisibility: false,
-			},
-			podGraphsVisibility: false,
 			currentSort: 'label',
 			currentSortDir: 'asc',
-			selectedTag: '__OVERALL__'
+			visibilities:{
+				editorVisibility: false,
+				kubernetesInfoVisibility: false,
+				collectionsListVisibility: false,
+			},
+			selectedTag: '__OVERALL__',
+			tableHeaders: {
+				'Id': 'id',
+				'Status': 'status',
+				'Name': 'name',
+			},
+			aggregatesTableHeaders: {
+				'label': 'label',
+				'ok':'okCount',
+				'errors':'errCount',
+				'q50, ms':'q50',
+				'q75, ms':'q75',
+				'q90, ms':'q90',
+				'q95, ms':'q95',
+				'q98, ms':'q98',
+				'q99, ms':'q99'
+			}
 		};
 	},
 	head: {
 		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
+		Accordeon,
 		Modal,
-		Button,
 		Input,
 		Select,
-		AppHeader,
-		Graph,
 		Option,
+		TableInfo,
+		TableAggregates,
+		Graph,
+		AppHeader,
+		ResourcesPanel,
 		Row: row,
 		Column: column,
 		Container: container
@@ -174,25 +168,21 @@ export default {
 		async refresh() {
 			await this.getJointInfo(this.test_id);
 		},
+		updateJob(key, value) {
+			let buffer = {id: this.job.id};
+
+			buffer[key] = value;
+			this.$store.dispatch('job/updateJob', buffer);
+			this.toggleVisibility('editorVisibility');
+		},
+		deleteJob() {
+			if (confirm('Удалить '+this.job.id+'?')) {
+				this.$store.dispatch('job/deleteJob', this.job.id);
+				this.$router.push('/');
+			}
+		},
 		toggleVisibility: function(param) {
 			this.visibilities[param] = !this.visibilities[param];
-		},
-		toggleResponseCodeVisibility(name) {
-			const index = this.openedTag.indexOf(name);
-
-			if (index > -1) {
-				this.openedTag.splice(index, 1);
-			} else {
-				this.openedTag.push(name);
-			}
-		},
-		toggleGraphsVisibility(pod_button) {
-			if (this.openedGraphs.includes(pod_button)) {
-				this.openedGraphs.splice(pod_button);
-			} else {
-				this.openedGraphs = [];
-				this.openedGraphs.push(pod_button);
-			}
 		},
 		getJointInfo: function(id) {
 			return this.$api.get('/joint/' + id)
@@ -236,6 +226,29 @@ export default {
 			this.selectedTag=tag;
 			this.loading=false;
 		},
+		tsToDate: function(ts) {
+			const from_ts = new Date(ts * 1000);
+
+			const from_ts_hour = from_ts.getHours();
+
+			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
+
+			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
+
+			const from_ts_year = from_ts.getFullYear();
+
+			if (isNaN(from_ts.getDate())) {
+				return 'not yet received';
+			} else {
+				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+				const month = months[from_ts.getMonth()];
+
+				const date = from_ts.getDate();
+
+				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
+			}
+		},
 		getTestAggregates: function(id) {
 			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];
 
@@ -259,7 +272,7 @@ export default {
 								}
 							);
 							if (agg.label === '__OVERALL__' && agg.responseCode === '__OVERALL__') {
-								this.overall = (agg);
+								this.overall.push(agg);
 							} if (agg.label !== '__OVERALL__' && agg.responseCode === '__OVERALL__') {
 								this.tagged.push(agg);
 							} if (agg.label === '__OVERALL__' && agg.responseCode !== '__OVERALL__') {
@@ -269,6 +282,33 @@ export default {
 							}
 						}
 					);
+					this.tagged.forEach(
+						item => {
+							if (this.tags.indexOf(item.label) === -1) {
+								this.tags.push(item.label);
+							}
+						}
+					);
+				});
+		},
+		getArtifacts: function(id) {
+			return this.$api.get('/list_artifacts/' + id)
+				.then(response => {
+					return response[0].data.artifacts;
+				})
+				.then(json => {
+					if (!json) {
+						return;
+					}
+					this.artifacts = json;
+
+					// сортируем по имени
+					function compare(a, b) {
+						if (a.key < b.key) { return -1; }
+						if (a.key > b.key) { return 1; }
+						return 0;
+					}
+					this.artifacts.sort(compare);
 				});
 		},
 		sortAggregates: function(s) {
@@ -276,6 +316,15 @@ export default {
 				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
 			}
 			this.currentSort = s;
+		},
+		stopTest: function() {
+			this.updateJob('status', 'stopped');
+		},
+		editItem: function(jobParamHeader, jobParamKey, jobParamValue) {
+			this.toggleVisibility('editorVisibility');
+			this.editedItem = jobParamValue;
+			this.editedItemLabel = jobParamHeader;
+			this.editedItemKey = jobParamKey;
 		},
 	},
 	computed: {
@@ -293,6 +342,7 @@ export default {
 
 };
 </script>
+
 
 <style scoped>
 </style>

@@ -10,30 +10,27 @@
 			</div>
 
 			<div v-else>
-				<table class="table table-sm table-bordered" id="jointsTable">
-					<thead>
-						<tr>
-							<th scope="col" class="text-center">Id</th>
-							<th scope="col" class="text-center">Tests</th>
-							<th scope="col" class="text-center">Name</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="joint in joints" :key="joint.id">
-							<td align="center">
-								<a :href='"/joint?id="+joint.id' :key="joint.id"> {{ joint.id }}</a>
+				<v-card class="justify-space-between">
+					<v-data-table
+						:headers="tableHeaders"
+						:items="joints"
+						class="elevation-1"
+						:rowsPerPageItems="[50, 100, 150]"
+						sortIcon=""
+						hideActions>
+						<template slot="items" slot-scope="props">
+							<td class="text-lg-center body-2">
+								<a :href='"/joint?id="+props.item.id' :key="props.item.id">{{ props.item.id }}</a>
 							</td>
-							<td align="center">
-								<a :href='"/job?id="+job_id' v-for="job_id in joint.job_ids" :key="job_id">
+							<td class="text-lg-center body-2">
+								<a :href='"/job?id="+job_id' v-for="job_id in props.item.job_ids" :key="job_id" class="mr-2">
 									{{ job_id }}
 								</a>
 							</td>
-							<td align="center">
-								{{ joint.name }}
-							</td>
-						</tr>
-					</tbody>
-				</table>
+							<td class="text-lg-center body-2">{{ props.item.name }}</td>
+						</template>
+					</v-data-table>
+				</v-card>
 			</div>
 		</v-container>
 	</div>
@@ -48,7 +45,11 @@ import AppHeader from '../components/AppHeader';
 export default {
 	data() {
 		return {
-			joints: {},
+			joints: [],
+			tableHeaders: [
+				{text: 'Id', align: 'center'},
+				{text: 'Tests', align: 'center'},
+				{text: 'Name', align: 'center'}],
 			loading: true,
 			error: null,
 			success: null,
