@@ -216,17 +216,27 @@ export default {
 				'Autostop reason': 'autostopMessage',
 				'Imbalance': 'imbalance'
 			},
-			aggregatesTableHeaders: {
-				'label': 'label',
-				'ok':'okCount',
-				'errors':'errCount',
-				'q50, ms':'q50',
-				'q75, ms':'q75',
-				'q90, ms':'q90',
-				'q95, ms':'q95',
-				'q98, ms':'q98',
-				'q99, ms':'q99'
-			}
+			// aggregatesTableHeaders: {
+			// 	'label': 'label',
+			// 	'ok':'okCount',
+			// 	'errors':'errCount',
+			// 	'q50, ms':'q50',
+			// 	'q75, ms':'q75',
+			// 	'q90, ms':'q90',
+			// 	'q95, ms':'q95',
+			// 	'q98, ms':'q98',
+			// 	'q99, ms':'q99'
+			// }
+			aggregatesTableHeaders: [
+				{text: 'label', align: 'center'},
+				{text: 'ok', align: 'center'},
+				{text: 'errors', align: 'center'},
+				{text: 'q50, ms', align: 'center'},
+				{text: 'q75, ms', align: 'center'},
+				{text: 'q90, ms', align: 'center'},
+				{text: 'q95, ms', align: 'center'},
+				{text: 'q98, ms', align: 'center'},
+				{text: 'q99, ms', align: 'center'}],
 		};
 	},
 	head: {
