@@ -97,7 +97,6 @@
 						label="Tags"
 						@change="selectGraphs(tag)"/>
 				</v-flex>
-
 				<v-flex class="row justify-content-between pl-3">
 					<v-flex class="md6 sm12 pr-2">
 						<!-- rps -->
@@ -302,9 +301,6 @@ export default {
 						return;
 					}
 					this.job = job_json;
-					this.job.testStart = this.tsToDate(this.job.testStart);
-					this.job.testStop = this.tsToDate(this.job.testStop);
-					this.job.autostopTime = this.tsToDate(this.job.autostopTime);
 					//fix this
 					if (this.myJob.length !== 0) {
 						this.myJob.length = 0;
@@ -321,29 +317,6 @@ export default {
 					this.loading = false;
 					this.podsData = JSON.parse(this.job.environmentDetails);
 				});
-		},
-		tsToDate: function(ts) {
-			const from_ts = new Date(ts * 1000);
-
-			const from_ts_hour = from_ts.getHours();
-
-			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-
-			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-
-			const from_ts_year = from_ts.getFullYear();
-
-			if (isNaN(from_ts.getDate())) {
-				return 'not yet received';
-			} else {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
 		},
 		selectGraphs: function(tag) {
 			this.loading=true;

@@ -44,10 +44,38 @@ export default {
 			default: false
 		}
 	},
+	mounted() {
+		this.content[0].testStart = this.tsToDate(this.content[0].testStart);
+		this.content[0].testStop = this.tsToDate(this.content[0].testStop);
+		this.content[0].autostopTime = this.tsToDate(this.content[0].autostopTime);
+	},
 	methods: {
 		editItem(jobParamHeader, jobParamKey, jobParamValue) {
 			this.$emit('editItem', jobParamHeader, jobParamKey, jobParamValue);
-		}
+		},
+		tsToDate: function(ts) {
+			const from_ts = new Date(ts * 1000);
+
+			const from_ts_hour = from_ts.getHours();
+
+			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
+
+			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
+
+			const from_ts_year = from_ts.getFullYear();
+
+			if (isNaN(from_ts.getDate())) {
+				return 'not yet received';
+			} else {
+				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+				const month = months[from_ts.getMonth()];
+
+				const date = from_ts.getDate();
+
+				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
+			}
+		},
 	}
 };
 </script>

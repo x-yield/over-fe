@@ -8,6 +8,7 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
+				{{ pagination }}
 				<v-layout wrap>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -16,7 +17,7 @@
 							label="Select author"
 							multiple
 							chips
-							@change="getJobs(1, pagination.rowsPerPage, {author, status, target, description})"/>
+							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -25,7 +26,7 @@
 							label="Select status"
 							multiple
 							chips
-							@change="getJobs(1, pagination.rowsPerPage, {author, status, target, description})"/>
+							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -34,7 +35,7 @@
 							label="Select target"
 							multiple
 							chips
-							@change="getJobs(1, pagination.rowsPerPage, {author, status, target, description})"/>
+							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
 					</v-flex>
 					<v-flex md3 xs12>
 						<v-combobox
@@ -43,7 +44,7 @@
 							label="Select description"
 							multiple
 							chips
-							@change="getJobs(1, pagination.rowsPerPage, {author, status, target, description})"/>
+							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
 					</v-flex>
 				</v-layout>
 				<v-card class="justify-space-between">
@@ -108,6 +109,7 @@ export default {
 			pagination: {
 				rowsPerPage: 20,
 				totalItems: 0,
+				page: 1,
 			},
 		};
 	},
@@ -121,7 +123,7 @@ export default {
 	// watch: {
 	// 	pagination: {
 	// 		handler() {
-	// 			this.moreTests()
+	// 			this.moreTests(this.pagination.page, this.pagination.rowsPerPage)
 	// 				.then(data => {
 	// 					this.lastJobs = data.items;
 	// 					this.totalJobs = data.total;
@@ -131,15 +133,22 @@ export default {
 	// 	}
 	// },
 	mounted() {
-		this.getJobs(1, this.pagination.rowsPerPage, {});
+		this.moreTests(this.pagination.page, this.pagination.rowsPerPage)
+			.then(data => {
+				this.lastJobs = data.items;
+				this.totalJobs = data.total;
+			});
 		this.loading = false;
 	},
 	methods: {
-		moreTests: function(page, limit) {
-			return new Promise((resolve) => {
-				const {page, rowsPerPage} = this.pagination;
+		rabotaiTvr() {
 
-				console.log('PPPP', this.pagination);
+		},
+		moreTests: function(page, limit) {
+			console.log('ndfhm ,tcbim ytyfdb;e', this.pagination);
+			this.loading = true;
+			return new Promise((resolve) => {
+				const {sortBy, descending, page, rowsPerPage} = this.pagination;
 
 				let items = this.getJobs(page, limit);
 
@@ -156,13 +165,13 @@ export default {
 						items,
 						total
 					});
-				}, 1000);
+				}, 5000);
 			});
 		},
 		getJobs: function(page, limit, params) {
 			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
-			this.$api.get('/lastjobs?page=' + page + '&limit='+limit + '&'+queryString)
+			this.$api.get('/lastjobs?page=' + page + '&limit='+limit + '&'+ queryString)
 				.then(response => {
 					const jobs = this.lastJobs;
 
@@ -171,9 +180,13 @@ export default {
 					resp_data.forEach(function(item) {
 						jobs.push(item);
 					});
+				});
+			this.$api.get('/count_jobs')
+				.then(response => {
 					this.pagination.totalItems = response[0].data.count;
 				});
 			this.getFilters();
+			return this.lastJobs;
 		},
 		getFilters: function() {
 			this.$api.get('/job_params')
