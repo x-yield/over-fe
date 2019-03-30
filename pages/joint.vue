@@ -130,21 +130,21 @@ export default {
 				collectionsListVisibility: false,
 			},
 			selectedTag: '__OVERALL__',
-			tableHeaders: {
-				'Id': 'id',
-				'Name': 'name',
-			},
-			aggregatesTableHeaders: {
-				'label': 'label',
-				'ok':'okCount',
-				'errors':'errCount',
-				'q50, ms':'q50',
-				'q75, ms':'q75',
-				'q90, ms':'q90',
-				'q95, ms':'q95',
-				'q98, ms':'q98',
-				'q99, ms':'q99'
-			}
+			tableHeaders:
+				{
+					'Id': 'id',
+					'Name': 'name',
+				},
+			aggregatesTableHeaders: [
+				{text: 'label', align: 'center'},
+				{text: 'ok', align: 'center'},
+				{text: 'errors', align: 'center'},
+				{text: 'q50, ms', align: 'center'},
+				{text: 'q75, ms', align: 'center'},
+				{text: 'q90, ms', align: 'center'},
+				{text: 'q95, ms', align: 'center'},
+				{text: 'q98, ms', align: 'center'},
+				{text: 'q99, ms', align: 'center'}],
 		};
 	},
 	head: {
@@ -233,29 +233,6 @@ export default {
 			}
 			this.selectedTag=tag;
 			this.loading=false;
-		},
-		tsToDate: function(ts) {
-			const from_ts = new Date(ts * 1000);
-
-			const from_ts_hour = from_ts.getHours();
-
-			const from_ts_min = from_ts.getMinutes() < 10 ? '0' + from_ts.getMinutes() : from_ts.getMinutes();
-
-			const from_ts_sec = from_ts.getSeconds() < 10 ? '0' + from_ts.getSeconds() : from_ts.getSeconds();
-
-			const from_ts_year = from_ts.getFullYear();
-
-			if (isNaN(from_ts.getDate())) {
-				return 'not yet received';
-			} else {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
 		},
 		getTestAggregates: function(id) {
 			let aggregatesKeys = ['okCount', 'errCount', 'q50', 'q75', 'q90', 'q95', 'q98', 'q99'];

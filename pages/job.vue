@@ -88,6 +88,9 @@
 						:jobStop="job.testStop"/>
 				</div>
 
+				{{ job.graphs.rps }}
+				{{ job.testStart }}
+
 				<h2 align="center">Graphs</h2>
 				<v-flex md4 xs12 v-if="sortedAggregates.length > 1">
 					<v-select
@@ -215,17 +218,6 @@ export default {
 				'Autostop reason': 'autostopMessage',
 				'Imbalance': 'imbalance'
 			},
-			// aggregatesTableHeaders: {
-			// 	'label': 'label',
-			// 	'ok':'okCount',
-			// 	'errors':'errCount',
-			// 	'q50, ms':'q50',
-			// 	'q75, ms':'q75',
-			// 	'q90, ms':'q90',
-			// 	'q95, ms':'q95',
-			// 	'q98, ms':'q98',
-			// 	'q99, ms':'q99'
-			// }
 			aggregatesTableHeaders: [
 				{text: 'label', align: 'center'},
 				{text: 'ok', align: 'center'},
@@ -265,9 +257,10 @@ export default {
 	methods: {
 		async refresh() {
 			await this.getTestInfo(this.test_id);
-			if (this.job.status === 'finished' || this.job.status === 'stopped') {
+			if (this.job.status === 'finished') {
 				await this.getArtifacts(this.test_id);
 				await this.getTestAggregates(this.test_id);
+				await this.parseKubernetesInfo();
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
 				}
@@ -315,8 +308,10 @@ export default {
 					this.collections = this.job.collections;
 					this.selectGraphs(this.selectedTag);
 					this.loading = false;
-					this.podsData = JSON.parse(this.job.environmentDetails);
 				});
+		},
+		parseKubernetesInfo() {
+			this.podsData = JSON.parse(this.job.environmentDetails);
 		},
 		selectGraphs: function(tag) {
 			this.loading=true;

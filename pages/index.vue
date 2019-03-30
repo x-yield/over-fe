@@ -8,7 +8,6 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				{{ pagination }}
 				<v-layout wrap>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -17,7 +16,8 @@
 							label="Select author"
 							multiple
 							chips
-							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -26,7 +26,8 @@
 							label="Select status"
 							multiple
 							chips
-							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -35,7 +36,8 @@
 							label="Select target"
 							multiple
 							chips
-							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12>
 						<v-combobox
@@ -44,16 +46,21 @@
 							label="Select description"
 							multiple
 							chips
-							@change="getJobs(pagination.page, pagination.rowsPerPage, {})"/>
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 				</v-layout>
+				{{ pagination }}
+				{{ totalJobs }}
 				<v-card class="justify-space-between">
 					<v-data-table
 						:headers="tableHeaders"
 						:items="lastJobs"
+						:totalItems="totalJobs"
 						:pagination.sync="pagination"
+						:loading="loading"
 						class="elevation-1"
-						:rowsPerPageItems="[50, 100, 150]"
+						:rowsPerPageItems="[5, 50, 100]"
 						sortIcon=""
 						hideActions>
 						<template slot="items" slot-scope="props">
@@ -71,9 +78,10 @@
 				<div class="text-xs-center pt-2">
 					<v-pagination
 						color="cyan darken-1"
-						totalVisible="5"
+						totalVisible="10"
 						v-model="pagination.page"
-						:length="pages"/>
+						:length="pages"
+						@input="getJobs(selected={author, status, target, description})"/>
 				</div>
 			</div>
 		</v-container>
@@ -89,6 +97,7 @@ export default {
 	data() {
 		return {
 			lastJobs: [],
+			totalJobs: 0,
 			author: '',
 			status: '',
 			target: '',
@@ -104,13 +113,8 @@ export default {
 				{text:'Start → Stop', align: 'center'},
 				{text:'Target', align: 'center'},
 				{text:'Description', align: 'center'}],
-			totalJobs: 0,
-			loading: true,
-			pagination: {
-				rowsPerPage: 20,
-				totalItems: 0,
-				page: 1,
-			},
+			loading: false,
+			pagination: {},
 		};
 	},
 	head: {
@@ -121,72 +125,76 @@ export default {
 		AppHeader
 	},
 	// watch: {
-	// 	pagination: {
-	// 		handler() {
-	// 			this.moreTests(this.pagination.page, this.pagination.rowsPerPage)
-	// 				.then(data => {
-	// 					this.lastJobs = data.items;
-	// 					this.totalJobs = data.total;
-	// 				});
-	// 		},
-	// 		deep: true
-	// 	}
+	// 	pagination() {
+	// 		return this.moreTests()
+	// 			.then(data => {
+	// 				this.lastJobs = data.items;
+	// 				this.totalJobs = data.total;
+	// 			});
+	// 	},
 	// },
 	mounted() {
-		this.moreTests(this.pagination.page, this.pagination.rowsPerPage)
-			.then(data => {
-				this.lastJobs = data.items;
-				this.totalJobs = data.total;
-			});
-		this.loading = false;
+		this.getJobs({});
+		this.getTotal();
 	},
 	methods: {
-		rabotaiTvr() {
-
-		},
-		moreTests: function(page, limit) {
-			console.log('ndfhm ,tcbim ytyfdb;e', this.pagination);
-			this.loading = true;
-			return new Promise((resolve) => {
-				const {sortBy, descending, page, rowsPerPage} = this.pagination;
-
-				let items = this.getJobs(page, limit);
-
-				console.log('AAAAAA', items);
-				const total = items.length;
-
-				if (rowsPerPage > 0) {
-					items = items.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-				}
-
-				setTimeout(() => {
-					this.loading = false;
-					resolve({
-						items,
-						total
-					});
-				}, 5000);
-			});
-		},
-		getJobs: function(page, limit, params) {
+		// moreTests: function() {
+		// 	console.log('pagination', this.pagination);
+		// 	return new Promise((resolve) => {
+		// 		const {sortBy, descending, page, rowsPerPage} = this.pagination;
+		//
+		// 		let items = this.getJobs({});
+		//
+		// 		console.log('lastjobs in more tests', items);
+		// 		let total = items.length;
+		//
+		// 		console.log(items.length);
+		//
+		// 		if (rowsPerPage > 0) {
+		// 			items = items.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+		// 		}
+		//
+		// 		setTimeout(() => {
+		// 			this.loading = false;
+		// 			resolve({
+		// 				items,
+		// 				total
+		// 			});
+		// 		}, 1000);
+		// 	});
+		// },
+		getJobs: function(params) {
 			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
-			this.$api.get('/lastjobs?page=' + page + '&limit='+limit + '&'+ queryString)
+			this.loading = true;
+			this.$api.get('/lastjobs?page=' + this.pagination.page + '&limit=' + this.pagination.rowsPerPage+'&'+queryString)
 				.then(response => {
 					const jobs = this.lastJobs;
 
+					console.log('before splice', this.pagination);
+
 					const resp_data = response[0].data.jobs;
+
+					this.totalJobs = this.lastJobs.length;
+					if (this.lastJobs.length > 0) {
+						this.lastJobs.length = 0;
+						console.log('after splice', this.pagination);
+					}
 
 					resp_data.forEach(function(item) {
 						jobs.push(item);
 					});
 				});
+
+			this.getFilters();
+			this.loading=false;
+		},
+		getTotal() {
 			this.$api.get('/count_jobs')
 				.then(response => {
 					this.pagination.totalItems = response[0].data.count;
 				});
-			this.getFilters();
-			return this.lastJobs;
+			return this.pagination.totalItems;
 		},
 		getFilters: function() {
 			this.$api.get('/job_params')

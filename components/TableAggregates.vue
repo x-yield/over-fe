@@ -40,6 +40,11 @@
 					<td class="text-lg-center body-2">{{ aggregate.q99 }}</td>
 				</tr>
 			</template>
+			<template slot="no-data">
+				<v-alert :value="true" color="amber accent-2" icon="warning">
+					There're no aggregates for this job
+				</v-alert>
+			</template>
 		</v-data-table>
 		<v-data-table
 			v-else
@@ -47,6 +52,7 @@
 			:items="commonAggregates"
 			hideActions>
 			<template slot="items" slot-scope="props">
+				<thead @click="sortAggregates(props.item.label)"/>
 				<tr>
 					<td
 						class="text-lg-center body-2 plus-table-label"
@@ -75,6 +81,11 @@
 					</tr>
 				</template>
 			</template>
+			<template slot="no-data">
+				<v-alert :value="true" color="amber accent-2" icon="warning">
+					There're no detailed aggregates for this job
+				</v-alert>
+			</template>
 		</v-data-table>
 	</v-card>
 </template>
@@ -88,7 +99,7 @@ export default {
 			default: 'Caption'
 		},
 		headers: {
-			type: Object,
+			type: Array,
 			default: null,
 		},
 		commonAggregates: {
