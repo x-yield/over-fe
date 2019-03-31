@@ -24,7 +24,7 @@
 					<v-data-table
 						:headers="tableHeaders"
 						:items="ammo"
-						:rowsPerPageItems="[10, 25, 50]"
+						:rowsPerPageItems="[25, 50]"
 						hideActions
 						sortIcon="">
 						<template slot="items" slot-scope="props">
@@ -76,7 +76,6 @@ export default {
 	},
 	methods: {
 		сhooseFile() {
-			console.log('MPEJ');
 			console.log(event.target.files[0].name);
 			//this.name ='Введите имя файла';
 		},

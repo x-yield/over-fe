@@ -57,7 +57,6 @@
 						:totalItems="pagination.totalItems"
 						:pagination.sync="pagination"
 						:loading="loading"
-						class="elevation-1"
 						:rowsPerPageItems="[25]"
 						sortIcon=""
 						hideActions>
@@ -76,7 +75,7 @@
 				<div class="text-xs-center pt-2">
 					<v-pagination
 						color="cyan darken-1"
-						totalVisible="10"
+						totalVisible="7"
 						v-model="pagination.page"
 						:length="pages"
 						@input="getJobs(selected={author, status, target, description})"/>
@@ -134,18 +133,12 @@ export default {
 					const resp_data = response[0].data.jobs;
 
 					this.lastJobs = resp_data;
-				});
 
-			this.getTotal();
-			this.getFilters();
-			this.loading=false;
-		},
-		getTotal() {
-			this.$api.get('/count_jobs')
-				.then(response => {
 					this.pagination.totalItems = response[0].data.count;
 				});
-			return this.pagination.totalItems;
+
+			this.getFilters();
+			this.loading=false;
 		},
 		getFilters: function() {
 			this.$api.get('/job_params')

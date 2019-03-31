@@ -13,13 +13,13 @@
 				<table-info
 					:title="'Joint id#'+ joint.id"
 					:headers="tableHeaders"
-					:content="myJoint"
+					:content="tableJoint"
 					:isCollection="true"
 					@editItem="'doNothingYet'">
 					<tr slot="extra-link">
 						<td align=center class="body-2 font-weight-bold">Tests</td>
 						<td align=center class="body-2">
-							<a :href='"/job?id="+job.id' v-for="job in myJoint[0].jobs" :key="job.id" class="mr-2">
+							<a :href='"/job?id="+job.id' v-for="job in tableJoint[0].jobs" :key="job.id" class="mr-2">
 								{{ job.id }}
 							</a>
 						</td>
@@ -27,8 +27,8 @@
 				</table-info>
 
 				<h2 align="center">Graphs</h2>
-				<v-flex class="row justify-content-between">
-					<v-flex class="md6 sm12">
+				<v-flex class="row justify-content-between pl-3">
+					<v-flex class="md6 sm12 pr-2">
 						<!-- rps -->
 						<graph :content="joint.graphs.rps"/>
 					</v-flex>
@@ -37,9 +37,9 @@
 						<graph :content="joint.graphs.netcodes"/>
 					</v-flex>
 				</v-flex>
-				<v-flex class="row justify-content-center">
+				<v-flex class="row justify-content-center pl-3">
 					<!-- quantiles -->
-					<v-flex class="md6 sm12">
+					<v-flex class="md6 sm12 pr-2">
 						<graph :content="joint.graphs.quantiles"/>
 					</v-flex>
 					<!-- tank threads -->
@@ -60,11 +60,8 @@
 					<table-aggregates
 						title="DetailedStats"
 						:headers="aggregatesTableHeaders"
-						:commonAggregates="sortedAggregates"
+						:commonAggregates="tagged"
 						:detailedAggregates="taggedByCode"
-						@sortAggregates="sortAggregates($event)"
-						:currentSort="currentSort"
-						:currentSortDir="currentSortDir"
 						:isOverall="false"/>
 				</v-flex>
 			</div>
@@ -106,7 +103,7 @@ export default {
 				},
 				status: null,
 			},
-			myJoint: [],
+			tableJoint: [],
 			editedItem: null,
 			editedItemLabel: null,
 			editedItemKey: null,
@@ -122,8 +119,6 @@ export default {
 			tags: [],
 			error: null,
 			success: null,
-			currentSort: 'label',
-			currentSortDir: 'asc',
 			visibilities:{
 				editorVisibility: false,
 				kubernetesInfoVisibility: false,
@@ -136,15 +131,15 @@ export default {
 					'Name': 'name',
 				},
 			aggregatesTableHeaders: [
-				{text: 'label', align: 'center'},
-				{text: 'ok', align: 'center'},
-				{text: 'errors', align: 'center'},
-				{text: 'q50, ms', align: 'center'},
-				{text: 'q75, ms', align: 'center'},
-				{text: 'q90, ms', align: 'center'},
-				{text: 'q95, ms', align: 'center'},
-				{text: 'q98, ms', align: 'center'},
-				{text: 'q99, ms', align: 'center'}],
+				{text: 'label', align: 'center', value: 'label'},
+				{text: 'ok', align: 'center', value: 'okCount'},
+				{text: 'errors', align: 'center', value: 'errCount'},
+				{text: 'q50, ms', align: 'center', value: 'q50'},
+				{text: 'q75, ms', align: 'center', value: 'q75'},
+				{text: 'q90, ms', align: 'center', value: 'q90'},
+				{text: 'q95, ms', align: 'center', value: 'q95'},
+				{text: 'q98, ms', align: 'center', value: 'q98'},
+				{text: 'q99, ms', align: 'center', value: 'q99'}],
 		};
 	},
 	head: {
@@ -212,7 +207,7 @@ export default {
 					joint_json['max_stop'] = Math.max(...joint_json['job_stops']);
 					joint_json['min_start'] = Math.min(...joint_json['job_starts']);
 					this.joint = joint_json;
-					this.myJoint.push(joint_json);
+					this.tableJoint.push(joint_json);
 					this.joint.graphs = {};
 					this.selectGraphs(this.selectedTag);
 					this.loading = false;
@@ -296,12 +291,6 @@ export default {
 					this.artifacts.sort(compare);
 				});
 		},
-		sortAggregates: function(s) {
-			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
-			}
-			this.currentSort = s;
-		},
 		stopTest: function() {
 			this.updateJob('status', 'stopped');
 		},
@@ -312,19 +301,6 @@ export default {
 			this.editedItemKey = jobParamKey;
 		},
 	},
-	computed: {
-		sortedAggregates:function() {
-			return this.tagged.slice().sort((a, b) => {
-				let modifier =1;
-
-				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {return modifier;}
-				return 0;
-			});
-		}
-	}
-
 };
 </script>
 

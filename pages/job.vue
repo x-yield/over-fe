@@ -46,7 +46,7 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				<v-flex class="row justify-content-end">
+				<v-flex class="row justify-content-end mb-2">
 					<!-- panel with editor buttons -->
 					<v-btn
 						v-show="job.status !== 'finished'"
@@ -67,7 +67,7 @@
 				<table-info
 					:title="'Test #'+job.id"
 					:headers="tableHeaders"
-					:content="myJob"
+					:content="tableJob"
 					:isCollection="false"
 					@editItem="editItem"/>
 
@@ -89,7 +89,7 @@
 				</div>
 
 				<h2 align="center">Graphs</h2>
-				<v-flex md4 xs12 v-if="sortedAggregates.length > 1">
+				<v-flex md4 xs12 v-if="tagged.length > 1">
 					<v-select
 						color="cyan darken-1"
 						v-model="tag"
@@ -131,11 +131,8 @@
 					<table-aggregates
 						title="DetailedStats"
 						:headers="aggregatesTableHeaders"
-						:commonAggregates="sortedAggregates"
+						:commonAggregates="tagged"
 						:detailedAggregates="taggedByCode"
-						@sortAggregates="sortAggregates($event)"
-						:currentSort="currentSort"
-						:currentSortDir="currentSortDir"
 						:isOverall="false"/>
 				</v-flex>
 			</div>
@@ -179,7 +176,7 @@ export default {
 				},
 				status: null,
 			},
-			myJob: [],
+			tableJob: [],
 			editedItem: null,
 			editedItemLabel: null,
 			editedItemKey: null,
@@ -196,8 +193,6 @@ export default {
 			tags: [],
 			error: null,
 			success: null,
-			currentSort: 'label',
-			currentSortDir: 'asc',
 			visibilities:{
 				editorVisibility: false,
 				kubernetesInfoVisibility: false,
@@ -216,15 +211,15 @@ export default {
 				'Imbalance': 'imbalance'
 			},
 			aggregatesTableHeaders: [
-				{text: 'label', align: 'center'},
-				{text: 'ok', align: 'center'},
-				{text: 'errors', align: 'center'},
-				{text: 'q50, ms', align: 'center'},
-				{text: 'q75, ms', align: 'center'},
-				{text: 'q90, ms', align: 'center'},
-				{text: 'q95, ms', align: 'center'},
-				{text: 'q98, ms', align: 'center'},
-				{text: 'q99, ms', align: 'center'}],
+				{text: 'label', align: 'center', value: 'label'},
+				{text: 'ok', align: 'center', value: 'okCount'},
+				{text: 'errors', align: 'center', value: 'errCount'},
+				{text: 'q50, ms', align: 'center', value: 'q50'},
+				{text: 'q75, ms', align: 'center', value: 'q75'},
+				{text: 'q90, ms', align: 'center', value: 'q90'},
+				{text: 'q95, ms', align: 'center', value: 'q95'},
+				{text: 'q98, ms', align: 'center', value: 'q98'},
+				{text: 'q99, ms', align: 'center', value: 'q99'}],
 		};
 	},
 	head: {
@@ -257,7 +252,6 @@ export default {
 			if (this.job.status === 'finished') {
 				await this.getArtifacts(this.test_id);
 				await this.getTestAggregates(this.test_id);
-				await this.parseKubernetesInfo();
 				if (Object.keys(this.overall).length === 0) {
 					setTimeout(this.refresh, 5000);
 				}
@@ -292,10 +286,10 @@ export default {
 					}
 					this.job = job_json;
 					//fix this
-					if (this.myJob.length !== 0) {
-						this.myJob.length = 0;
+					if (this.tableJob.length !== 0) {
+						this.tableJob.length = 0;
 					}
-					this.myJob.push(this.job);
+					this.tableJob.push(this.job);
 					this.job.graphs = {};
 					if (isNaN(this.job.testStop)) {
 						this.job.finishedTime = 'now';
@@ -304,11 +298,14 @@ export default {
 					}
 					this.collections = this.job.collections;
 					this.selectGraphs(this.selectedTag);
+					this.parseKubernetesInfo()
 					this.loading = false;
 				});
 		},
 		parseKubernetesInfo() {
-			this.podsData = JSON.parse(this.job.environmentDetails);
+			if (this.job.environmentDetails && this.job.environmentDetails !== 'null') {
+				this.podsData = JSON.parse(this.job.environmentDetails);
+			}
 		},
 		selectGraphs: function(tag) {
 			this.loading=true;
@@ -388,12 +385,6 @@ export default {
 					this.artifacts.sort(compare);
 				});
 		},
-		sortAggregates: function(s) {
-			if (s === this.currentSort) {
-				this.currentSortDir = this.currentSortDir === 'asc' ? 'dsc' : 'asc';
-			}
-			this.currentSort = s;
-		},
 		stopTest: function() {
 			this.updateJob('status', 'stopped');
 		},
@@ -404,18 +395,6 @@ export default {
 			this.editedItemKey = jobParamKey;
 		},
 	},
-	computed: {
-		sortedAggregates:function() {
-			return this.tagged.slice().sort((a, b) => {
-				let modifier =1;
-
-				if (this.currentSortDir === 'dsc') {modifier = -1;}
-				if (a[this.currentSort] < b[this.currentSort]) {return -1 * modifier;}
-				if (a[this.currentSort] > b[this.currentSort]) {return modifier;}
-				return 0;
-			});
-		}
-	}
 
 };
 </script>

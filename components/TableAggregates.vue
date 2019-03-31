@@ -41,7 +41,7 @@
 				</tr>
 			</template>
 			<template slot="no-data">
-				<v-alert :value="true" color="amber accent-2" icon="warning">
+				<v-alert :value="true" color="amber" icon="warning">
 					There're no aggregates for this job
 				</v-alert>
 			</template>
@@ -50,11 +50,9 @@
 			v-else
 			:headers="headers"
 			:items="commonAggregates"
-			:pagination.sync="pagination"
 			hideActions
-			:customSort="sortAggregates">
+			:customSort="customSort">
 			<template slot="items" slot-scope="props">
-				{{ pagination }}
 				<tr>
 					<td
 						class="text-lg-center body-2 plus-table-label"
@@ -84,7 +82,7 @@
 				</template>
 			</template>
 			<template slot="no-data">
-				<v-alert :value="true" color="amber accent-2" icon="warning">
+				<v-alert :value="true" color="amber" icon="warning">
 					There're no detailed aggregates for this job
 				</v-alert>
 			</template>
@@ -129,6 +127,7 @@ export default {
 		return {
 			overallCodeVisibility: false,
 			openedTag: [],
+			isDesc: true
 		};
 	},
 	methods: {
@@ -149,10 +148,20 @@ export default {
 				if (currentSortDir !== 'dsc') {
 					console.log('hru');
 					this.$emit('sortAggregates', index);
-					return items;
 				}
 			}
+			return items;
 		},
+		customSort(items, index, isDesc) {
+			items.sort((a, b) => {
+				if (!isDesc) {
+					return a[index] < b[index] ? -1 : 1;
+				} else {
+					return b[index] < a[index] ? -1 : 1;
+				}
+			});
+			return items;
+		}
 	},
 };
 </script>

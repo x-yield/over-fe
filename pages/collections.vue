@@ -43,7 +43,7 @@
 				<v-data-table
 					:headers="tableHeaders"
 					:items="collections"
-					:rowsPerPageItems="[10, 25, 50]"
+					:rowsPerPageItems="[25]"
 					hideActions
 					sortIcon="">
 					<template slot="items" slot-scope="props">

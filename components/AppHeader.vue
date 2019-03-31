@@ -1,5 +1,5 @@
 <template>
-	<v-toolbar class="mb-2">
+	<v-toolbar color="cyan lighten-1">
 		<v-toolbar-title class="headline font-weight-bold">Overload</v-toolbar-title>
 		<v-spacer/>
 		<v-toolbar-items class="hidden-sm-and-down">

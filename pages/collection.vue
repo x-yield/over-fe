@@ -9,7 +9,6 @@
 			</div>
 			<div v-else>
 				<table-info
-					class="mt-2 mr-2 ml-2"
 					:title="'Collection #'+collectionId"
 					:headers="collectionHeaders"
 					:content="collection"

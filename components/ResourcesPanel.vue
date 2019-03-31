@@ -1,6 +1,7 @@
 <template>
 	<v-card>
 		<accordeon title="RESOURCES UTILIZATION">
+			{{ content }}
 			<div slot="body">
 				<v-tabs fixedTabs color="grey lighten-4">
 					<v-tab
