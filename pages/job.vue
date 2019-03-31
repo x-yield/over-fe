@@ -88,9 +88,6 @@
 						:jobStop="job.testStop"/>
 				</div>
 
-				{{ job.graphs.rps }}
-				{{ job.testStart }}
-
 				<h2 align="center">Graphs</h2>
 				<v-flex md4 xs12 v-if="sortedAggregates.length > 1">
 					<v-select

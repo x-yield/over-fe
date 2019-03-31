@@ -9,10 +9,9 @@
 			</div>
 			<div v-else>
 				<v-card class="mb-2">
-					<!--Костыли, но vuetify для загрузки файлов ничего пока не придумал-->
 					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em">
 						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1"/>
-						<input id="file-input" type="file" name="file" required style="display: none" @submit="сhooseFile"/>
+						<input id="file-input" type="file" name="file" required style="display: none" @change="сhooseFile"/>
 						<label for="file-input">
 							<span class="choose-btn">Выберите файл</span>
 							<span>{{ name }}</span>
@@ -77,7 +76,8 @@ export default {
 	},
 	methods: {
 		сhooseFile() {
-			console.log(event.target.files);
+			console.log('MPEJ');
+			console.log(event.target.files[0].name);
 			//this.name ='Введите имя файла';
 		},
 		sexyBytes: function(bytes) {

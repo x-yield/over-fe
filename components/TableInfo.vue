@@ -12,7 +12,7 @@
 			<template slot="items" slot-scope="props">
 				<tr v-if="props.item[value]" v-for="(value, key) in headers" :key="key">
 					<td align=center class="body-2 font-weight-bold">{{ key }}</td>
-					<td align=center class="body-2">{{ props.item[value] }}</td>
+					<td align=center class="body-2">{{ checkKey(value, props.item[value]) }}</td>
 					<td v-if="!isCollection" class="justify-center layout px-0">
 						<v-icon small class="mr-2" @click="editItem(key, value, props.item[value])">edit</v-icon>
 					</td>
@@ -44,14 +44,19 @@ export default {
 			default: false
 		}
 	},
-	mounted() {
-		this.content[0].testStart = this.tsToDate(this.content[0].testStart);
-		this.content[0].testStop = this.tsToDate(this.content[0].testStop);
-		this.content[0].autostopTime = this.tsToDate(this.content[0].autostopTime);
-	},
 	methods: {
 		editItem(jobParamHeader, jobParamKey, jobParamValue) {
 			this.$emit('editItem', jobParamHeader, jobParamKey, jobParamValue);
+		},
+		checkKey(key, value) {
+			switch (key) {
+				case 'testStart':
+				case 'testStop':
+				case 'autostopTime':
+					return this.tsToDate(value);
+				default:
+					return value;
+			}
 		},
 		tsToDate: function(ts) {
 			const from_ts = new Date(ts * 1000);

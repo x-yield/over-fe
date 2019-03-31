@@ -50,9 +50,11 @@
 			v-else
 			:headers="headers"
 			:items="commonAggregates"
-			hideActions>
+			:pagination.sync="pagination"
+			hideActions
+			:customSort="sortAggregates">
 			<template slot="items" slot-scope="props">
-				<thead @click="sortAggregates(props.item.label)"/>
+				{{ pagination }}
 				<tr>
 					<td
 						class="text-lg-center body-2 plus-table-label"
@@ -142,9 +144,15 @@ export default {
 				this.openedTag.push(name);
 			}
 		},
-		sortAggregates(value) {
-			this.$emit('sortAggregates', value);
-		}
+		sortAggregates(items, index, currentSortDir) {
+			if (index === 'label') {
+				if (currentSortDir !== 'dsc') {
+					console.log('hru');
+					this.$emit('sortAggregates', index);
+					return items;
+				}
+			}
+		},
 	},
 };
 </script>

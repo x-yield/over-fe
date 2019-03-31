@@ -50,17 +50,15 @@
 							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 				</v-layout>
-				{{ pagination }}
-				{{ totalJobs }}
 				<v-card class="justify-space-between">
 					<v-data-table
 						:headers="tableHeaders"
 						:items="lastJobs"
-						:totalItems="totalJobs"
+						:totalItems="pagination.totalItems"
 						:pagination.sync="pagination"
 						:loading="loading"
 						class="elevation-1"
-						:rowsPerPageItems="[5, 50, 100]"
+						:rowsPerPageItems="[25]"
 						sortIcon=""
 						hideActions>
 						<template slot="items" slot-scope="props">
@@ -97,7 +95,6 @@ export default {
 	data() {
 		return {
 			lastJobs: [],
-			totalJobs: 0,
 			author: '',
 			status: '',
 			target: '',
@@ -124,68 +121,22 @@ export default {
 		TableList,
 		AppHeader
 	},
-	// watch: {
-	// 	pagination() {
-	// 		return this.moreTests()
-	// 			.then(data => {
-	// 				this.lastJobs = data.items;
-	// 				this.totalJobs = data.total;
-	// 			});
-	// 	},
-	// },
 	mounted() {
 		this.getJobs({});
-		this.getTotal();
 	},
 	methods: {
-		// moreTests: function() {
-		// 	console.log('pagination', this.pagination);
-		// 	return new Promise((resolve) => {
-		// 		const {sortBy, descending, page, rowsPerPage} = this.pagination;
-		//
-		// 		let items = this.getJobs({});
-		//
-		// 		console.log('lastjobs in more tests', items);
-		// 		let total = items.length;
-		//
-		// 		console.log(items.length);
-		//
-		// 		if (rowsPerPage > 0) {
-		// 			items = items.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-		// 		}
-		//
-		// 		setTimeout(() => {
-		// 			this.loading = false;
-		// 			resolve({
-		// 				items,
-		// 				total
-		// 			});
-		// 		}, 1000);
-		// 	});
-		// },
 		getJobs: function(params) {
 			let queryString = Object.keys(params).map(key => key + '=' + params[key]).join('&');
 
 			this.loading = true;
 			this.$api.get('/lastjobs?page=' + this.pagination.page + '&limit=' + this.pagination.rowsPerPage+'&'+queryString)
 				.then(response => {
-					const jobs = this.lastJobs;
-
-					console.log('before splice', this.pagination);
-
 					const resp_data = response[0].data.jobs;
 
-					this.totalJobs = this.lastJobs.length;
-					if (this.lastJobs.length > 0) {
-						this.lastJobs.length = 0;
-						console.log('after splice', this.pagination);
-					}
-
-					resp_data.forEach(function(item) {
-						jobs.push(item);
-					});
+					this.lastJobs = resp_data;
 				});
 
+			this.getTotal();
 			this.getFilters();
 			this.loading=false;
 		},
