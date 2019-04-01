@@ -143,15 +143,6 @@ export default {
 				this.openedTag.push(name);
 			}
 		},
-		sortAggregates(items, index, currentSortDir) {
-			if (index === 'label') {
-				if (currentSortDir !== 'dsc') {
-					console.log('hru');
-					this.$emit('sortAggregates', index);
-				}
-			}
-			return items;
-		},
 		customSort(items, index, isDesc) {
 			items.sort((a, b) => {
 				if (!isDesc) {
@@ -167,21 +158,6 @@ export default {
 </script>
 
 <style scoped>
-	.arrow-table-sort.asc{
-		margin-left: 5px;
-		display: inline-block;
-		border-left: 7px solid transparent;
-		border-right: 7px solid transparent;
-		border-bottom: 8px solid #31b131;
-	}
-
-	.arrow-table-sort.dsc {
-		margin-left: 5px;
-		display: inline-block;
-		border-left: 7px solid transparent;
-		border-right: 7px solid transparent;
-		border-top: 8px solid #31b131;
-	}
 	.plus-table-label:after {
 		height: 14px;
 		width: 14px;

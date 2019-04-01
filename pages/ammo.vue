@@ -11,7 +11,7 @@
 				<v-card class="mb-2">
 					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em">
 						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1"/>
-						<input id="file-input" type="file" name="file" required style="display: none" @change="сhooseFile"/>
+						<input id="file-input" type="file" @change="chooseFile($event)" required style="display: none"/>
 						<label for="file-input">
 							<span class="choose-btn">Выберите файл</span>
 							<span>{{ name }}</span>
@@ -75,9 +75,8 @@ export default {
 		this.getAmmoInfo();
 	},
 	methods: {
-		сhooseFile() {
-			console.log(event.target.files[0].name);
-			//this.name ='Введите имя файла';
+		chooseFile: function(event) {
+			this.name = event.target.files[0].name;
 		},
 		sexyBytes: function(bytes) {
 			if (typeof bytes === 'string') {

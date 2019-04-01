@@ -298,7 +298,7 @@ export default {
 					}
 					this.collections = this.job.collections;
 					this.selectGraphs(this.selectedTag);
-					this.parseKubernetesInfo()
+					this.parseKubernetesInfo();
 					this.loading = false;
 				});
 		},
