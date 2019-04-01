@@ -1,69 +1,43 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-					</div>
-				</div>
-			</nav>
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+		<v-container fluid>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
+			</div>
+			<div v-else>
+				<v-card class="mb-2">
+					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em">
+						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1"/>
+						<input id="file-input" type="file" @change="chooseFile($event)" required style="display: none"/>
+						<label for="file-input">
+							<span class="choose-btn">Выберите файл</span>
+							<span>{{ name }}</span>
+						</label>
+						<v-btn color="cyan darken-1" dark @click="submitForm" type="button">Загрузить</v-btn>
+					</form>
+				</v-card>
 
-			<div>
-				<form id="ammoUploadForm" enctype="multipart/form-data" method="post">
-					<input type="text" name="name" placeholder="Имя" required/>
-					<input type="file" name="file" required/>
-					<button @click="submit_form" type="button">Загрузить</button>
-				</form>
+				<v-card class="justify-space-between">
+					<v-data-table
+						:headers="tableHeaders"
+						:items="ammo"
+						:rowsPerPageItems="[25, 50]"
+						hideActions
+						sortIcon="">
+						<template slot="items" slot-scope="props">
+							<td class="text-lg-center body-2">{{ props.item.path }}</td>
+							<td class="text-lg-center body-2">{{ props.item.size }}</td>
+							<td class="text-lg-center body-2">{{ props.item.lastModified }}</td>
+							<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
+							<td class="text-lg-center body-2">{{ props.item.Author }}</td>
+						</template>
+					</v-data-table>
+				</v-card>
 			</div>
-			<br/>
-			<div class="table">
-				<div v-if="loading">
-					<h3 align="center">Loading...</h3>
-				</div>
-				<div v-else>
-					<table class="table table-sm table-bordered" id="ammoTable">
-						<thead>
-							<tr>
-								<th scope="col" class="text-center">Path</th>
-								<th scope="col" class="text-center">Size</th>
-								<th scope="col" class="text-center">Modified</th>
-								<th scope="col" class="text-center">Last Used</th>
-								<!-- <th scope="col" class="text-center">Type</th> -->
-								<th scope="col" class="text-center">Author</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="a in ammo" :key="a.id">
-								<td align="left">
-									{{ a.path }}
-								</td>
-								<td align="center">
-									{{ a.size }}
-								</td>
-								<td align="center">
-									{{ a.lastModified }}
-								</td>
-								<td align="center">
-									{{ a.lastUsed }}
-								</td>
-								<!-- <td align="center">
-									{{ a.type }}
-								</td> -->
-								<td align="center">
-									{{ a.author }}
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 
@@ -71,26 +45,37 @@
 import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
+import AppHeader from '../components/AppHeader';
 
 let ammoKeys = [];
 
 export default {
 	data() {
 		return {
-			ammo: {},
+			name: '',
+			ammo: [],
 			loading: true,
 			error: null,
 			success: null,
+			tableHeaders: [
+				{text: 'Path', align: 'center'},
+				{text: 'Size', align: 'center'},
+				{text: 'Modified', align: 'center'},
+				{text:'Last Used', align: 'center'},
+				{text: 'Author', align: 'center'}],
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
+	components: {
+		AppHeader
 	},
 	created() {
-		this.get_ammo_info();
+		this.getAmmoInfo();
 	},
 	methods: {
-		sexy_bytes: function(bytes) {
+		chooseFile: function(event) {
+			this.name = event.target.files[0].name;
+		},
+		sexyBytes: function(bytes) {
 			if (typeof bytes === 'string') {
 				bytes = parseInt(bytes);
 			}
@@ -118,19 +103,23 @@ export default {
 		zfill: function(num, len) { // заполняет строковое представление числа нулями, например zfill(5, 3) -> "005"
 			return (1e15+num+'').slice(-len);
 		},
-		set_form_action: function($form) {
+		setFormAction: function($form) {
 			$form.action = '//' + this.$env.endpoint + '/upload_ammo';
 		},
-		get_ammo_info: function() {
+		getAmmoInfo: function() {
 			this.$api.get('/list_ammo')
 				.then(response => {
-					return response[0].data.ammo;
+					return response[0].data;
 				})
 				.then(json => {
-					if (!json) {
+					if (!json.ammo) {
 						return;
 					}
-					this.ammo = json;
+					json.ammo.forEach(
+						ammo => {
+							this.ammo.push(ammo);
+						}
+					);
 					let i = 0;
 					let len_a = this.ammo.length;
 
@@ -140,7 +129,7 @@ export default {
 						let a = this.ammo[i];
 
 						ammoKeys.push(a['key']);
-						a['size'] = this.sexy_bytes(a['size']); // мегабайты, гигабайты и прочее
+						a['size'] = this.sexyBytes(a['size']); // мегабайты, гигабайты и прочее
 						a['order'] = new Date(a['lastModified']); // поле для сортировки
 						let lm = new Date(a['lastModified']); // локальная таймзона
 
@@ -161,23 +150,23 @@ export default {
 				});
 			this.loading = false;
 		},
-		submit_form: function() {
+		submitForm: function() {
 			let $form = document.getElementById('ammoUploadForm');
 			let ammoKey = $form.children[0]['value'];
 
 			$form.reportValidity();
-			this.set_form_action($form);
+			this.setFormAction($form);
 
 			// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
 			if (ammoKeys.indexOf(ammoKey) > -1) {
 				if (confirm('Файл с таким именем уже существует. Перезаписать?')) {
-					this.send_form_data($form);
+					this.sendFormData($form);
 				}
 			} else {
-				this.send_form_data($form);
+				this.sendFormData($form);
 			}
 		},
-		highlight_new_ammo: function(scope, value) {
+		highlightNewAmmo: function(scope, value) {
 			let highlightingColor = '#ffeb99'; // yellow-ish
 
 			// ждем пока обновится табличка
@@ -197,7 +186,7 @@ export default {
 				}
 			}, 100);
 		},
-		send_form_data: function($form) {
+		sendFormData: function($form) {
 			let request = new XMLHttpRequest();
 			let ammoUrl = '';
 
@@ -214,8 +203,8 @@ export default {
 			// обновляем таблицу и подсвечаваем обновленный файл
 			if (ammoUrl !== '') {
 				this.loading = true;
-				this.get_ammo_info();
-				this.highlight_new_ammo(this, ammoUrl);
+				this.getAmmoInfo();
+				this.highlightNewAmmo(this, ammoUrl);
 			}
 		}
 	},
@@ -223,20 +212,18 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
+	.choose-btn {
+		border-radius: 2px;
+		box-shadow: 0 2px 1px #a0a2a7;
+		background-color: #00acc1;
+		color: #ffffff;
+		cursor: pointer;
+		font: 14px Roboto, sans-serif;
+		font-weight: 500;
+		padding: 0.7em 1em 0.7em 1em;
+		text-align: center;
+		text-transform: uppercase;
+		vertical-align: middle;
 	}
 
 </style>
