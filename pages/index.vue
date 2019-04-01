@@ -1,125 +1,155 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-					</div>
-					<!-- Основная часть меню (может содержать ссылки, формы и другие элементы) -->
-					<div class="collapse navbar-collapse" id="navbar-main">
-						<ul class="nav navbar-nav">
-							<li class="active"><a href="">Last tests</a></li>
-						</ul>
-					</div>
-				</div>
-			</nav>
-
-			<div class="table">
-				<div v-if="loading">
-					<h3 align="center">Loading...</h3>
-				</div>
-				<div v-else>
-					<table class="table table-sm table-bordered" >
-						<caption>Last tests</caption>
-						<thead>
-							<tr>
-								<th scope="col" class="text-center">Test id</th>
-								<th scope="col" class="text-center">Author</th>
-								<th scope="col" class="text-center">Status</th>
-								<th scope="col" class="text-center">Start → Stop</th>
-								<th scope="col" class="text-center">Target</th>
-								<th scope="col" class="text-center">Description</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="job in last_jobs" :key="job.id">
-								<td
-									align="center"
-								>
-									<a :href='"/job?id="+job.id'>{{ job.id }}</a>
-								</td>
-								<td
-									align="center"
-								>
-									{{ job.author }}
-								</td>
-								<td
-									align="center"
-									:class="{active: is_in_progress(job.status), warning: !is_in_progress(job.status)}"
-								>
-									{{ job.status }}
-								</td>
-								<td align="center">
-									{{ ts_to_date(job.testStart) }} → {{ ts_to_date(job.testStop) }}
-								</td>
-								<td align="center">
-									{{ job.target }}
-								</td>
-								<td align="center">
-									{{ job.description }}
-								</td>
-							</tr>
-						</tbody>
-					</table>
-					<button class="btn-lg" @click="more_tests(last_jobs[last_jobs.length-1].id)">I need more tests</button>
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+		<v-container fluid>
+			<div v-if="loading">
+				<h3 align="center">Loading...</h3>
+			</div>
+			<div v-else>
+				<v-layout wrap>
+					<v-flex md3 xs12 class="pr-3">
+						<v-combobox
+							v-model="author"
+							:items="authors"
+							label="Select author"
+							multiple
+							chips
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
+					</v-flex>
+					<v-flex md3 xs12 class="pr-3">
+						<v-combobox
+							v-model="status"
+							:items="statuses"
+							label="Select status"
+							multiple
+							chips
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
+					</v-flex>
+					<v-flex md3 xs12 class="pr-3">
+						<v-combobox
+							v-model="target"
+							:items="targets"
+							label="Select target"
+							multiple
+							chips
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
+					</v-flex>
+					<v-flex md3 xs12>
+						<v-combobox
+							v-model="description"
+							:items="descriptions"
+							label="Select description"
+							multiple
+							chips
+							deletableChips
+							@change="getJobs(selected={author, status, target, description})"/>
+					</v-flex>
+				</v-layout>
+				<v-card class="justify-space-between">
+					<v-data-table
+						:headers="tableHeaders"
+						:items="lastJobs"
+						:totalItems="pagination.totalItems"
+						:pagination.sync="pagination"
+						:loading="loading"
+						:rowsPerPageItems="[25]"
+						sortIcon=""
+						hideActions>
+						<template slot="items" slot-scope="props">
+							<td class="text-lg-center body-2">
+								<a :href='"/job?id="+props.item.id'>{{ props.item.id }}</a>
+							</td>
+							<td class="text-lg-center body-2">{{ props.item.author }}</td>
+							<td class="text-lg-center body-2">{{ props.item.status }}</td>
+							<td class="text-lg-center body-2">{{ tsToDate(props.item.testStart) + '→' + tsToDate(props.item.testStop) }}</td>
+							<td class="text-lg-center body-2">{{ props.item.target }}</td>
+							<td class="text-lg-center body-2">{{ props.item.description }}</td>
+						</template>
+					</v-data-table>
+				</v-card>
+				<div class="text-xs-center pt-2">
+					<v-pagination
+						color="cyan darken-1"
+						totalVisible="7"
+						v-model="pagination.page"
+						:length="pages"
+						@input="getJobs(selected={author, status, target, description})"/>
 				</div>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 
 <script>
 
+import TableList from '../components/TableList';
+import AppHeader from '../components/AppHeader';
+
 export default {
 	data() {
 		return {
-			last_jobs: [],
-			loading: true,
+			lastJobs: [],
+			author: '',
+			status: '',
+			target: '',
+			description: '',
+			authors: [],
+			statuses: [],
+			targets: [],
+			descriptions: [],
+			tableHeaders: [
+				{text: 'Test id', align: 'center'},
+				{text: 'Author', align: 'center'},
+				{text: 'Status', align: 'center'},
+				{text:'Start → Stop', align: 'center'},
+				{text:'Target', align: 'center'},
+				{text:'Description', align: 'center'}],
+			loading: false,
+			pagination: {},
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
-	},
 	components: {
-	},
-	created() {
-		this.$api.get('/lastjobs/0')
-			.then(response => {
-				const jobs = this.last_jobs;
-
-				const resp_data = response[0].data.jobs;
-
-				resp_data.forEach(function(item) {
-					jobs.push(item);
-				});
-				this.loading = false;
-			});
+		TableList,
+		AppHeader
 	},
 	mounted() {
+		this.getJobs({});
 	},
 	methods: {
-		more_tests: function(from_) {
-			this.$api.get('/lastjobs/' + from_)
-				.then(response => {
-					const jobs = this.last_jobs;
+		getJobs: function(params) {
+			let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
 
+			this.loading = true;
+			this.$api.get('/lastjobs?page=' + this.pagination.page + '&limit=' + this.pagination.rowsPerPage+'&'+queryString)
+				.then(response => {
 					const resp_data = response[0].data.jobs;
 
-					resp_data.forEach(function(item) {
-						jobs.push(item);
-					});
+					this.lastJobs = resp_data;
+
+					this.pagination.totalItems = response[0].data.count;
+				});
+
+			this.getFilters();
+			this.loading=false;
+		},
+		getFilters: function() {
+			this.$api.get('/job_params')
+				.then(response => {
+					const resp_data = response[0].data;
+
+					this.authors = resp_data.authors;
+					this.statuses = resp_data.statuses;
+					this.targets = resp_data.targets;
+					this.descriptions = resp_data.descriptions;
 				});
 		},
-		ts_to_date: function(ts) {
+		tsToDate: function(ts) {
 			const from_ts = new Date(ts * 1000);
-
-			const today = new Date();
 
 			const from_ts_hour = from_ts.getHours();
 
@@ -130,21 +160,8 @@ export default {
 			const from_ts_year = from_ts.getFullYear();
 
 			if (isNaN(from_ts.getDate())) {
-				return 'not yet';
-			}
-			else if (today.getDate() === from_ts.getDate()) {
-				return from_ts_hour + ':' + from_ts_min;
-			}
-			else if (today.getFullYear() === from_ts_year) {
-				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-				const month = months[from_ts.getMonth()];
-
-				const date = from_ts.getDate();
-
-				return date + ' ' + month + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
-			}
-			else {
+				return 'not yet received';
+			} else {
 				const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 				const month = months[from_ts.getMonth()];
@@ -154,34 +171,19 @@ export default {
 				return date + ' ' + month + ' ' + from_ts_year + ' ' + from_ts_hour + ':' + from_ts_min + ':' + from_ts_sec;
 			}
 		},
-		is_in_progress: function(status) {
-			if (status !== 'finished') {
-				return false;
-			}
-			else {
-				return true;
-			}
-		}
 	},
+	computed: {
+		pages() {
+			if (this.pagination.rowsPerPage == null ||
+				this.pagination.totalItems == null
+			) {return 0;}
+
+			return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage);
+		}
+	}
+
 };
 </script>
 
-
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
 </style>
-

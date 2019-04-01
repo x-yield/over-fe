@@ -1,51 +1,38 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/joints">Joints</a>
-					</div>
-				</div>
-			</nav>
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
 
+		<v-container fluid>
 			<div v-if="loading">
 				<h3 align="center">Loading...</h3>
 			</div>
 
 			<div v-else>
-				<table class="table table-sm table-bordered" id="jointsTable">
-					<thead>
-						<tr>
-							<th scope="col" class="text-center">Id</th>
-							<th scope="col" class="text-center">Tests</th>
-							<th scope="col" class="text-center">Name</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="joint in joints" :key="joint.id">
-							<td align="center">
-								<a :href='"/joint?id="+joint.id' :key="joint.id"> {{ joint.id }}</a>
+				<v-card class="justify-space-between">
+					<v-data-table
+						:headers="tableHeaders"
+						:items="joints"
+						class="elevation-1"
+						:rowsPerPageItems="[50, 100, 150]"
+						sortIcon=""
+						hideActions>
+						<template slot="items" slot-scope="props">
+							<td class="text-lg-center body-2">
+								<a :href='"/joint?id="+props.item.id' :key="props.item.id">{{ props.item.id }}</a>
 							</td>
-							<td align="center">
-								<a :href='"/job?id="+job_id' v-for="job_id in joint.job_ids" :key="job_id">
+							<td class="text-lg-center body-2">
+								<a :href='"/job?id="+job_id' v-for="job_id in props.item.job_ids" :key="job_id" class="mr-2">
 									{{ job_id }}
 								</a>
 							</td>
-							<td align="center">
-								{{ joint.name }}
-							</td>
-						</tr>
-					</tbody>
-				</table>
+							<td class="text-lg-center body-2">{{ props.item.name }}</td>
+						</template>
+					</v-data-table>
+				</v-card>
 			</div>
-		</div>
+		</v-container>
 	</div>
 </template>
 
@@ -53,18 +40,23 @@
 import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
+import AppHeader from '../components/AppHeader';
 
 export default {
 	data() {
 		return {
-			joints: {},
+			joints: [],
+			tableHeaders: [
+				{text: 'Id', align: 'center'},
+				{text: 'Tests', align: 'center'},
+				{text: 'Name', align: 'center'}],
 			loading: true,
 			error: null,
 			success: null,
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
+	components: {
+		AppHeader,
 	},
 	created() {
 		this.get_joints_info();
@@ -96,20 +88,4 @@ export default {
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
-
 </style>
