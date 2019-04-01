@@ -1,70 +1,41 @@
 <template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/firestarter">FS</a>
-					</div>
-				</div>
-			</nav>
-			<div>
-				<span class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></span>
-				<div style="background-color: lightcoral; padding: 1em;" v-show="visibilities.messageVisibility">
-					<span class="error" id="firestarter_message"></span>
-				</div>
-				<br/>
-				<label for="tankInput">танк</label>
-				<input name="tank" id="tankInput" type="text" value="" style="width: 100%"/>
-				<br/>
-				<label for="confInput">конфиг</label>
-				<textarea name="conf" id="confInput" rows="10" style="width: 100%"></textarea>
-
-				<button id="validateButton" @click="validateSessions" v-show="visibilities.validateButtonVisibility">Validate</button>
-				<button id="prepareButton" @click="prepareSessions" v-show="visibilities.prepareButtonVisibility">Prepare</button>
-				<button id="runButton" @click="runSessions" v-show="visibilities.runButtonVisibility">Run</button>
-				<button id="stopButton" @click="stopSessions" v-show="visibilities.stopButtonVisibility">Stop</button>
-				<div class="lds-ellipsis" v-show="loading"><div></div><div></div><div></div><div></div></div>
-			</div>
+	<div>
+		<span class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></span>
+		<div style="background-color: lightcoral; padding: 1em;" v-show="visibilities.messageVisibility">
+			<span class="error" id="firestarter_message"></span>
 		</div>
+		<br/>
+		<label for="tankInput">танк</label>
+		<input name="tank" id="tankInput" type="text" value="" style="width: 100%"/>
+		<br/>
+		<label for="confInput">конфиг</label>
+		<textarea name="conf" id="confInput" rows="10" style="width: 100%"></textarea>
+
+		<span id="validLabel" v-show="visibilities.validLabelVisibility"></span>
+
 	</div>
+
 </template>
 
 <script>
-import '../components/FirestarterPanel.vue';
-import '@ozonui/layout/src/grid.css';
-import '@ozonui/form-input';
-import '@ozonui/custom-button';
-
-
 export default {
+	name: 'FirestarterPanel',
 	data() {
 		return {
 			loading: false,
 			error: '',
 			success: null,
-			sessions: [],
+			session: [],
 
 			stage: '',
 
-			visibilities:{
-				statusVisibility: false,
-				messageVisibility: false,
-				validateButtonVisibility: true,
-				prepareButtonVisibility: false,
-				runButtonVisibility: false,
-				stopButtonVisibility: false,
+			visibilities: {
+				validLabelVisibility: true,
+				preparedLabelVisibility: false,
+				runningLabelVisibility: false,
+				stoppedLabelVisibility: false,
 			},
 		};
-	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
 	},
 	methods: {
 		perform: async function(action) {
@@ -74,7 +45,7 @@ export default {
 				'stop': 'finished',
 			};
 
-			return this.$api.post('/firestarter/'+action, JSON.stringify({'sessions': this.sessions}))
+			return this.$api.post('/firestarter/' + action, JSON.stringify({'sessions': this.sessions}))
 				.then(response => {
 					return response[0].data.sessions;
 				})
@@ -99,7 +70,10 @@ export default {
 			await this.perform('validate');
 			await this.findFailures();
 			if (!this.error) {
+
 				this.activateButton('prepare');
+			} else {
+
 			}
 			this.loading = false;
 		},
@@ -165,6 +139,7 @@ export default {
 			} else {
 				this.loading = false;
 				if (nextActionMap.hasOwnProperty(what)) {
+					this.$emit(true);
 					this.activateButton(nextActionMap[what]);
 				}
 			}
@@ -200,9 +175,9 @@ export default {
 				let sessionLocation = '';
 
 				if (session.hasOwnProperty('name') && session['name'] !== '') {
-					sessionLocation = sessionLocation+ session['name'] + '@';
+					sessionLocation = sessionLocation + session['name'] + '@';
 				}
-				sessionLocation = sessionLocation+ session['tank'];
+				sessionLocation = sessionLocation + session['tank'];
 				// formatting error message
 				if (session['status'] === 'failed' || (session.hasOwnProperty('failures') && session['failures'].length > 0)) {
 					failures = failures + sessionLocation + ': ';
@@ -222,81 +197,10 @@ export default {
 				this.visibilities.messageVisibility = true;
 			}
 		},
-	},
+	}
 };
 </script>
 
 <style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
-
-	.lds-ellipsis {
-		display: inline-block;
-		position: relative;
-		width: 16px;
-		height: 16px;
-	}
-	.lds-ellipsis div {
-		position: absolute;
-		top: 7px;
-		width: 3px;
-		height: 3px;
-		border-radius: 50%;
-		background: #000;
-		animation-timing-function: cubic-bezier(0, 1, 1, 0);
-	}
-	.lds-ellipsis div:nth-child(1) {
-		left: 2px;
-		animation: lds-ellipsis1 0.6s infinite;
-	}
-	.lds-ellipsis div:nth-child(2) {
-		left: 2px;
-		animation: lds-ellipsis2 0.6s infinite;
-	}
-	.lds-ellipsis div:nth-child(3) {
-		left: 6.5px;
-		animation: lds-ellipsis2 0.6s infinite;
-	}
-	.lds-ellipsis div:nth-child(4) {
-		left: 11px;
-		animation: lds-ellipsis3 0.6s infinite;
-	}
-	@keyframes lds-ellipsis1 {
-		0% {
-			transform: scale(0);
-		}
-		100% {
-			transform: scale(1);
-		}
-	}
-	@keyframes lds-ellipsis3 {
-		0% {
-			transform: scale(1);
-		}
-		100% {
-			transform: scale(0);
-		}
-	}
-	@keyframes lds-ellipsis2 {
-		0% {
-			transform: translate(0, 0);
-		}
-		100% {
-			transform: translate(5px, 0);
-		}
-	}
-
 
 </style>
