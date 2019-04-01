@@ -14,7 +14,7 @@
 						color="cyan darken-1"
 						:items="envs"
 						v-model="env"
-						@change="getFilteredCollections(selected={env, project, name})"
+						@change="getFilteredCollections(selected={env, project: '', name})"
 						label="All envs"
 						class="mr-2"
 					/>
@@ -25,14 +25,14 @@
 						itemText="projectName"
 						itemValue="projectId"
 						label="All projects"
-						@change="getFilteredCollections(selected={env, project, name})"
+						@change="getFilteredCollections(selected={env, project: '', name})"
 						class="mr-2"
 					/>
 					<v-select
 						color="cyan darken-1"
 						:items="names"
 						v-model="name"
-						@change="getFilteredCollections(selected={env, project, name})"
+						@change="getFilteredCollections(selected={env, project: '', name})"
 						label="All names"
 						class="mr-2"
 					/>

@@ -1,6 +1,6 @@
 <template>
 	<v-toolbar color="cyan lighten-1">
-		<v-toolbar-title class="headline font-weight-bold">Overload</v-toolbar-title>
+		<v-toolbar-title class="headline font-weight-bold" href="/">Overload</v-toolbar-title>
 		<v-spacer/>
 		<v-toolbar-items class="hidden-sm-and-down">
 			<v-btn flat href="/">Jobs</v-btn>
