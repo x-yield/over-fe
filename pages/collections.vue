@@ -98,9 +98,6 @@ export default {
 				{text:'Latest jobs', align: 'center'}],
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
-	},
 	components: {
 		TableList,
 		AppHeader

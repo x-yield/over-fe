@@ -52,7 +52,7 @@ let ammoKeys = [];
 export default {
 	data() {
 		return {
-			name: 'Выберите файл',
+			name: '',
 			ammo: [],
 			loading: true,
 			error: null,
@@ -64,9 +64,6 @@ export default {
 				{text:'Last Used', align: 'center'},
 				{text: 'Author', align: 'center'}],
 		};
-	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
 	},
 	components: {
 		AppHeader

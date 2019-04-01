@@ -11,6 +11,9 @@
 import 'vuetify/dist/vuetify.min.css';
 
 export default {
+	head: {
+		title: 'Overload - нагрузочные тесты',
+	},
 	components: {
 	}
 };

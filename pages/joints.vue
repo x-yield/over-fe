@@ -55,9 +55,6 @@ export default {
 			success: null,
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
-	},
 	components: {
 		AppHeader,
 	},

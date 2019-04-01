@@ -56,9 +56,6 @@ export default {
 			loading: true,
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
-	},
 	components: {
 		TableInfo,
 		Graph,

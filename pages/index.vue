@@ -113,9 +113,6 @@ export default {
 			pagination: {},
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
-	},
 	components: {
 		TableList,
 		AppHeader

@@ -222,9 +222,6 @@ export default {
 				{text: 'q99, ms', align: 'center', value: 'q99'}],
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
-	},
 	components: {
 		Accordeon,
 		Modal,
