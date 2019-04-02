@@ -1,43 +1,34 @@
-<template>
-	<div class="overload-fe">
-		<div class="overload-fe-container">
-			<nav class="navbar navbar-default">
-				<!-- Контейнер (определяет ширину Navbar) -->
-				<div class="container-fluid">
-					<!-- Заголовок -->
-					<div class="navbar-header">
-						<!-- Бренд или название сайта (отображается в левой части меню) -->
-						<a class="navbar-brand" href="/">Overload</a>
-						<a class="navbar-brand" href="/collections">Collections</a>
-						<a class="navbar-brand" href="/ammo">Ammo</a>
-						<a class="navbar-brand" href="/firestarter">FS</a>
-					</div>
-				</div>
-			</nav>
-			<div>
-				<span class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></span>
-				<div style="background-color: lightcoral; padding: 1em;" v-show="visibilities.messageVisibility">
-					<span class="error" id="firestarter_message"></span>
-				</div>
-				<br/>
-				<label for="tankInput">танк</label>
-				<input name="tank" id="tankInput" type="text" value="" style="width: 100%"/>
-				<br/>
-				<label for="confInput">конфиг</label>
-				<textarea name="conf" id="confInput" rows="10" style="width: 100%"></textarea>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
+	<div id="overload">
+		<template>
+			<app-header/>
+		</template>
+		<v-container fluid>
+			<v-alert class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></v-alert>
+			<v-alert class="error" id="firestarter_message" v-show="visibilities.messageVisibility"></v-alert>
 
-				<button id="validateButton" @click="validateSessions" v-show="visibilities.validateButtonVisibility">Validate</button>
-				<button id="prepareButton" @click="prepareSessions" v-show="visibilities.prepareButtonVisibility">Prepare</button>
-				<button id="runButton" @click="runSessions" v-show="visibilities.runButtonVisibility">Run</button>
-				<button id="stopButton" @click="stopSessions" v-show="visibilities.stopButtonVisibility">Stop</button>
-				<div class="lds-ellipsis" v-show="loading"><div></div><div></div><div></div><div></div></div>
+			<button id="validateButton" @click="validateSessions" v-show="visibilities.validateButtonVisibility">Validate</button>
+			<button id="prepareButton" @click="prepareSessions" v-show="visibilities.prepareButtonVisibility">Prepare</button>
+			<button id="runButton" @click="runSessions" v-show="visibilities.runButtonVisibility">Run</button>
+			<button id="stopButton" @click="stopSessions" v-show="visibilities.stopButtonVisibility">Stop</button>
+			<div class="d-flex justify-between align-center mb-3">
+				<v-btn @click="all">all</v-btn>
+				<v-btn @click="none">none</v-btn>
 			</div>
-		</div>
+			<div>
+				<v-expansion-panel
+					v-model="panels"
+					expand
+				>
+				</v-expansion-panel>
+			</div>
+		</v-container>
 	</div>
 </template>
 
 <script>
-import '../components/FirestarterPanel.vue';
+import AppHeader from '../components/AppHeader';
+import FirestarterPanel from '../components/FirestarterPanel.vue';
 import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
@@ -50,7 +41,7 @@ export default {
 			error: '',
 			success: null,
 			sessions: [],
-
+			panels: [],
 			stage: '',
 
 			visibilities:{
@@ -63,10 +54,18 @@ export default {
 			},
 		};
 	},
-	head: {
-		title: 'Overload - нагрузочные тесты',
+	mounted() {
+		this.createPanel();
+		this.createPanel();
+	},
+	components: {
+		FirestarterPanel,
+		AppHeader,
 	},
 	methods: {
+		createPanel: function() {
+			this.panels.push(FirestarterPanel);
+		},
 		perform: async function(action) {
 			let waitMap = {
 				'prepare': 'prepare',
@@ -222,6 +221,13 @@ export default {
 				this.visibilities.messageVisibility = true;
 			}
 		},
+		all: function() {
+			this.panel = [...Array(this.panel).keys()].map(_ => true);
+		},
+		// Reset the panel
+		none: function() {
+			this.panel = [];
+		},
 	},
 };
 </script>
@@ -241,62 +247,5 @@ export default {
 	td > * {
 		vertical-align : middle;
 	}
-
-	.lds-ellipsis {
-		display: inline-block;
-		position: relative;
-		width: 16px;
-		height: 16px;
-	}
-	.lds-ellipsis div {
-		position: absolute;
-		top: 7px;
-		width: 3px;
-		height: 3px;
-		border-radius: 50%;
-		background: #000;
-		animation-timing-function: cubic-bezier(0, 1, 1, 0);
-	}
-	.lds-ellipsis div:nth-child(1) {
-		left: 2px;
-		animation: lds-ellipsis1 0.6s infinite;
-	}
-	.lds-ellipsis div:nth-child(2) {
-		left: 2px;
-		animation: lds-ellipsis2 0.6s infinite;
-	}
-	.lds-ellipsis div:nth-child(3) {
-		left: 6.5px;
-		animation: lds-ellipsis2 0.6s infinite;
-	}
-	.lds-ellipsis div:nth-child(4) {
-		left: 11px;
-		animation: lds-ellipsis3 0.6s infinite;
-	}
-	@keyframes lds-ellipsis1 {
-		0% {
-			transform: scale(0);
-		}
-		100% {
-			transform: scale(1);
-		}
-	}
-	@keyframes lds-ellipsis3 {
-		0% {
-			transform: scale(1);
-		}
-		100% {
-			transform: scale(0);
-		}
-	}
-	@keyframes lds-ellipsis2 {
-		0% {
-			transform: translate(0, 0);
-		}
-		100% {
-			transform: translate(5px, 0);
-		}
-	}
-
 
 </style>

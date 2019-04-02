@@ -1,9 +1,8 @@
 <template>
-	<div>
-		<span class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></span>
-		<div style="background-color: lightcoral; padding: 1em;" v-show="visibilities.messageVisibility">
-			<span class="error" id="firestarter_message"></span>
-		</div>
+	<v-expansion-panel-content>
+		<template v-slot:header>
+			<div>None</div>
+		</template>
 		<br/>
 		<label for="tankInput">танк</label>
 		<input name="tank" id="tankInput" type="text" value="" style="width: 100%"/>
@@ -12,12 +11,11 @@
 		<textarea name="conf" id="confInput" rows="10" style="width: 100%"></textarea>
 
 		<span id="validLabel" v-show="visibilities.validLabelVisibility"></span>
-
-	</div>
-
+	</v-expansion-panel-content>
 </template>
 
 <script>
+
 export default {
 	name: 'FirestarterPanel',
 	data() {
@@ -70,12 +68,14 @@ export default {
 			await this.perform('validate');
 			await this.findFailures();
 			if (!this.error) {
-
-				this.activateButton('prepare');
+				this.showLabel('valid', true);
+				this.$emit(true);
+				this.loading = false;
 			} else {
-
+				this.showLabel('valid', false);
+				this.$emit(false);
+				this.loading = false;
 			}
-			this.loading = false;
 		},
 		prepareSessions: function() { // needs polling
 			this.loading = true;
@@ -130,6 +130,8 @@ export default {
 
 				errorsAlert.innerText = this.error;
 				this.visibilities.messageVisibility = true;
+				this.$emit(true);
+				this.showLabel(nextActionMap[what], false);
 				this.loading = false;
 				return;
 			}
@@ -140,27 +142,30 @@ export default {
 				this.loading = false;
 				if (nextActionMap.hasOwnProperty(what)) {
 					this.$emit(true);
-					this.activateButton(nextActionMap[what]);
+					this.showLabel(nextActionMap[what], true);
 				}
 			}
 		},
-		activateButton: function(nextAction) {
-			this.visibilities.validateButtonVisibility = false;
-			this.visibilities.prepareButtonVisibility = false;
-			this.visibilities.runButtonVisibility = false;
-			this.visibilities.stopButtonVisibility = false;
-			switch (nextAction) {
+		showLabel: function(labelType, success) {
+			let validLabel = document.getElementById('validLabel');
+
+			switch (labelType) {
 				case 'validate':
-					this.visibilities.validateButtonVisibility = true;
+					if (success) {
+						validLabel.setAttribute('style', 'background-color: green;');
+					} else {
+						validLabel.setAttribute('style', 'background-color: red;');
+					}
+					this.visibilities.validLabelVisibility = true;
 					break;
 				case 'prepare':
-					this.visibilities.prepareButtonVisibility = true;
+					this.visibilities.preparedLabelVisibility = true;
 					break;
 				case 'run':
-					this.visibilities.runButtonVisibility = true;
+					this.visibilities.runningLabelVisibility = true;
 					break;
 				case 'stop':
-					this.visibilities.stopButtonVisibility = true;
+					this.visibilities.stoppedLabelVisibility = true;
 					break;
 				default:
 					break;
