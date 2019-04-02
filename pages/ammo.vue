@@ -205,11 +205,6 @@ export default {
 			let data = new FormData($form);
 
 			data.append('file', $form.children[1].files[0]);
-
-			data.forEach(function(value, key, parent) {
-				console.log(value, key, parent);
-			});
-
 			request.send(data);
 
 			// обновляем таблицу и подсвечаваем обновленный файл
