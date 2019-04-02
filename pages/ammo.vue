@@ -32,7 +32,7 @@
 								<a :href="props.item.download">{{ props.item.key }}</a>
 							</td>
 							<td class="text-lg-center body-2">{{ props.item.size }}</td>
-							<td class="text-lg-center body-2">{{ props.item.lastModified }}</td>
+							<td class="text-lg-center body-2" style="white-space: nowrap;">{{ props.item.lastModified }}</td>
 							<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
 							<td class="text-lg-center body-2">{{ props.item.Author }}</td>
 						</template>
