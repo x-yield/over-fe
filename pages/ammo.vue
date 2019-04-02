@@ -9,10 +9,10 @@
 			</div>
 			<div v-else>
 				<v-card class="mb-2">
-					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em">
-						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1"/>
-						<input id="file-input" type="file" @change="chooseFile($event)" required style="display: none"/>
-						<label for="file-input">
+					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em;">
+						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1;"/>
+						<input id="fileInput" type="file" @change="chooseFile($event)" required style="display: none;"/>
+						<label for="fileInput">
 							<span class="choose-btn">Выберите файл</span>
 							<span>{{ name }}</span>
 						</label>
@@ -28,7 +28,9 @@
 						hideActions
 						sortIcon="">
 						<template slot="items" slot-scope="props">
-							<td class="text-lg-center body-2">{{ props.item.path }}</td>
+							<td class="text-lg-center body-2">
+								<a :href="props.item.download">{{ props.item.key }}</a>
+							</td>
 							<td class="text-lg-center body-2">{{ props.item.size }}</td>
 							<td class="text-lg-center body-2">{{ props.item.lastModified }}</td>
 							<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
@@ -58,7 +60,7 @@ export default {
 			error: null,
 			success: null,
 			tableHeaders: [
-				{text: 'Path', align: 'center'},
+				{text: 'Key', align: 'center'},
 				{text: 'Size', align: 'center'},
 				{text: 'Modified', align: 'center'},
 				{text:'Last Used', align: 'center'},
@@ -131,6 +133,7 @@ export default {
 						ammoKeys.push(a['key']);
 						a['size'] = this.sexyBytes(a['size']); // мегабайты, гигабайты и прочее
 						a['order'] = new Date(a['lastModified']); // поле для сортировки
+						a['download'] = '//' + this.$env.endpoint + '/download_ammo?key=' + a['key'];
 						let lm = new Date(a['lastModified']); // локальная таймзона
 
 						// форматируем дату 'YYYY-MM-DD HH:MM'
@@ -154,16 +157,17 @@ export default {
 			let $form = document.getElementById('ammoUploadForm');
 			let ammoKey = $form.children[0]['value'];
 
-			$form.reportValidity();
-			this.setFormAction($form);
+			if ($form.reportValidity()) {
+				this.setFormAction($form);
 
-			// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
-			if (ammoKeys.indexOf(ammoKey) > -1) {
-				if (confirm('Файл с таким именем уже существует. Перезаписать?')) {
+				// эта проверка сломается при введении паджинации. Нужна будет ручка для отдачи ключей патронов из базы
+				if (ammoKeys.indexOf(ammoKey) > -1) {
+					if (confirm('Файл с таким именем уже существует. Перезаписать?')) {
+						this.sendFormData($form);
+					}
+				} else {
 					this.sendFormData($form);
 				}
-			} else {
-				this.sendFormData($form);
 			}
 		},
 		highlightNewAmmo: function(scope, value) {
@@ -198,13 +202,21 @@ export default {
 				console.log(request.status + ': ' + request.statusText);
 			};
 
-			request.send(new FormData($form));
+			let data = new FormData($form);
+
+			data.append('file', $form.children[1].files[0]);
+
+			data.forEach(function(value, key, parent) {
+				console.log(value, key, parent);
+			});
+
+			request.send(data);
 
 			// обновляем таблицу и подсвечаваем обновленный файл
 			if (ammoUrl !== '') {
 				this.loading = true;
 				this.getAmmoInfo();
-				this.highlightNewAmmo(this, ammoUrl);
+				//this.highlightNewAmmo(this, ammoUrl);
 			}
 		}
 	},
