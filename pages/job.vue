@@ -98,19 +98,19 @@
 						@change="selectGraphs(tag)"/>
 				</v-flex>
 				<v-flex class="row justify-content-between pl-3">
+					<!-- rps -->
 					<v-flex class="md6 sm12 pr-2">
-						<!-- rps -->
 						<graph :content="job.graphs.rps"/>
 					</v-flex>
+					<!-- quantiles -->
 					<v-flex class="md6 sm12">
-						<!-- net codes -->
-						<graph :content="job.graphs.netcodes"/>
+						<graph :content="job.graphs.quantiles"/>
 					</v-flex>
 				</v-flex>
 				<v-flex class="row justify-content-center pl-3">
-					<!-- quantiles -->
+					<!-- net codes -->
 					<v-flex class="md6 sm12 pr-2">
-						<graph :content="job.graphs.quantiles"/>
+						<graph :content="job.graphs.netcodes"/>
 					</v-flex>
 					<!-- tank threads -->
 					<v-flex class="md6 sm12">

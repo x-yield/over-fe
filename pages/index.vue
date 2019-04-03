@@ -17,6 +17,7 @@
 							multiple
 							chips
 							deletableChips
+							color="cyan darken-1"
 							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
@@ -27,6 +28,7 @@
 							multiple
 							chips
 							deletableChips
+							color="cyan darken-1"
 							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
@@ -37,6 +39,7 @@
 							multiple
 							chips
 							deletableChips
+							color="cyan darken-1"
 							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12>
@@ -47,6 +50,7 @@
 							multiple
 							chips
 							deletableChips
+							color="cyan darken-1"
 							@change="getJobs(selected={author, status, target, description})"/>
 					</v-flex>
 				</v-layout>
