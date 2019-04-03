@@ -92,10 +92,10 @@
 				<v-flex md4 xs12 v-if="tagged.length > 1">
 					<v-select
 						color="cyan darken-1"
-						v-model="tag"
+						v-model="selectedTag"
 						:items="tags"
 						label="Tags"
-						@change="selectGraphs(tag)"/>
+						@change="selectGraphs(selectedTag)"/>
 				</v-flex>
 				<v-flex class="row justify-content-between pl-3">
 					<!-- rps -->
@@ -189,7 +189,7 @@ export default {
 			overallByCode: [],
 			taggedByCode: [],
 			loading: true,
-			tag: '',
+			selectedTag: 'Overall',
 			tags: [],
 			error: null,
 			success: null,
@@ -198,7 +198,6 @@ export default {
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
 			},
-			selectedTag: '__OVERALL__',
 			tableHeaders: {
 				'Author': 'author',
 				'Status': 'status',
@@ -306,7 +305,7 @@ export default {
 		},
 		selectGraphs: function(tag) {
 			this.loading=true;
-			if (tag === '__OVERALL__') {
+			if (tag === 'Overall') {
 				this.job.graphs.rps = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=2&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 				this.job.graphs.netcodes = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=4&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
 				this.job.graphs.quantiles = 'http://grafana.o3.ru/d-solo/gM7Iqapik/tank-universal-dashboard?orgId=1&theme=light&refresh=5s&panelId=8&from=' + this.job.testStart * 1000 + '&to=' + this.job.finishedTime + '&var-test_id=' + this.job.id;
@@ -360,6 +359,7 @@ export default {
 							}
 						}
 					);
+					this.tags.push('Overall');
 				});
 		},
 		getArtifacts: function(id) {

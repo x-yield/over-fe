@@ -28,9 +28,12 @@
 						hideActions
 						sortIcon="">
 						<template slot="items" slot-scope="props">
-							<td class="text-lg-center body-2">
-								<a :href="props.item.download">{{ props.item.key }}</a>
+							<td class="text-lg-center">
+								<a :href="props.item.download" style="text-decoration: none;">
+									<v-icon size="30" color="cyan">get_app</v-icon>
+								</a>
 							</td>
+							<td class="text-lg-center body-2">{{ props.item.key }}</td>
 							<td class="text-lg-center body-2">{{ props.item.size }}</td>
 							<td class="text-lg-center body-2" style="white-space: nowrap;">{{ props.item.lastModified }}</td>
 							<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
@@ -60,6 +63,7 @@ export default {
 			error: null,
 			success: null,
 			tableHeaders: [
+				{text: 'Download ammo', align: 'center'},
 				{text: 'Key', align: 'center'},
 				{text: 'Size', align: 'center'},
 				{text: 'Modified', align: 'center'},
