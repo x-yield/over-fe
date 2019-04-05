@@ -142,12 +142,10 @@ export default {
 	},
 	methods: {
 		getFilteredCollections(params) {
-			// const querystring = require('querystring');
-			//
-			// let queryString = querystring.stringify(params);
-			let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
+			const querystring = require('querystring');
 
-
+			let queryString = querystring.stringify(params);
+			// let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
 			this.loading = true;
 
 			this.collections = [];

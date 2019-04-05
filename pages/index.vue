@@ -126,10 +126,10 @@ export default {
 	},
 	methods: {
 		getJobs: function(params) {
-			// const querystring = require('querystring');
-			//
-			// let queryString = querystring.stringify(params);
-			let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
+			const querystring = require('querystring');
+
+			let queryString = querystring.stringify(params);
+			// let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
 
 			this.loading = true;
 			this.$api.get('/lastjobs?page=' + this.pagination.page + '&limit=' + this.pagination.rowsPerPage+'&'+queryString)
