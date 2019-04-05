@@ -24,11 +24,6 @@
 
 export default {
 	name: 'AppHeader',
-	data() {
-		return {
-			show: false,
-		};
-	}
 };
 </script>
 
