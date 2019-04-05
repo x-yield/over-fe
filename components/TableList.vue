@@ -3,25 +3,41 @@
 <!--Принимает на вход название, объект заголовков где ключ - желаемое название на фронте,
 значение - ключ в джейсоне из бэка; и сам джейсон с данными. -->
 <!--<template>-->
-	<!--<v-card v-if="isJobs" class="justify-space-between">-->
+	<!--<v-card class="justify-space-between">-->
 		<!--<v-data-table-->
 			<!--:headers="headers"-->
 			<!--:items="content"-->
-			<!--:totalItems="totalContent"-->
+			<!--:totalItems="pagination.totalItems"-->
 			<!--:pagination.sync="pagination"-->
 			<!--:loading="loading"-->
-			<!--:rowsPerPageItems="[50, 100, 150]">-->
+			<!--:rowsPerPageItems="[25]"-->
+			<!--sortIcon=""-->
+			<!--hideActions>-->
 			<!--<template slot="items" slot-scope="props">-->
-				<!--<td class="text-md-right body-2">-->
-					<!--<a :href='"/job?id="+props.item.id'>{{ props.item.id }}</a>-->
+				<!--<td class="text-lg-center body-2">-->
+					<!--<a :href='"/collection?id="+props.item.id'>{{ props.item.id }}</a>-->
 				<!--</td>-->
-				<!--<td class="text-lg-right body-2">{{ props.item.author }}</td>-->
-				<!--<td class="text-lg-right body-2">{{ props.item.status }}</td>-->
-				<!--<td class="text-lg-right body-2">{{ tsToDate(props.item.testStart) + '→' + tsToDate(props.item.testStop) }}</td>-->
-				<!--<td class="text-lg-right body-2">{{ props.item.target }}</td>-->
-				<!--<td class="text-lg-right body-2">{{ props.item.description }}</td>-->
+				<!--<td class="text-lg-center body-2">{{ props.item.author }}</td>-->
+				<!--<td class="text-lg-center body-2">{{ props.item.env }}</td>-->
+				<!--<td class="text-lg-center body-2">{{ props.item.project }}</td>-->
+				<!--<td class="text-lg-center body-2">{{ props.item.service }}</td>-->
+				<!--<td class="text-lg-center body-2">{{ props.item.name }}</td>-->
+				<!--<td class="text-lg-center body-2">{{ props.item.ref }}</td>-->
+				<!--<td class="text-lg-center body-2">-->
+					<!--<a :href='"/job?id="+job.id' v-for="job in props.item.latestJobs" :key="job.id" class="mr-2">-->
+						<!--{{ job.id }}-->
+					<!--</a>-->
+				<!--</td>-->
 			<!--</template>-->
 		<!--</v-data-table>-->
+		<!--<div class="text-xs-center pt-2">-->
+			<!--<v-pagination-->
+				<!--color="cyan darken-1"-->
+				<!--totalVisible="7"-->
+				<!--v-model="pagination.page"-->
+				<!--:length="pages"-->
+				<!--@input="filterTable({env, project, name})"/>-->
+		<!--</div>-->
 	<!--</v-card>-->
 <!--</template>-->
 
@@ -29,10 +45,6 @@
 <!--export default {-->
 	<!--name: 'TableList',-->
 	<!--props: {-->
-		<!--caption: {-->
-			<!--type: String,-->
-			<!--default: 'Caption'-->
-		<!--},-->
 		<!--headers: {-->
 			<!--type: Array,-->
 			<!--default: null,-->
@@ -40,10 +52,6 @@
 		<!--content: {-->
 			<!--type: Array,-->
 			<!--default: null,-->
-		<!--},-->
-		<!--totalContent: {-->
-			<!--type: Number,-->
-			<!--default: 0,-->
 		<!--},-->
 		<!--isJobs: {-->
 			<!--type: Boolean,-->
@@ -55,8 +63,11 @@
 		<!--},-->
 		<!--pagination: {-->
 			<!--type: Object,-->
-			<!--default: null-->
+			<!--default: null,-->
 		<!--}-->
+	<!--},-->
+	<!--created() {-->
+		<!--console.log('Daughter', this.pagination);-->
 	<!--},-->
 	<!--methods: {-->
 		<!--tsToDate: function(ts) {-->
@@ -104,8 +115,11 @@
 			<!--else {-->
 				<!--return true;-->
 			<!--}-->
+		<!--},-->
+		<!--filterTable(params) {-->
+			<!--this.$emit('filterTable', params);-->
 		<!--}-->
-	<!--}-->
+	<!--},-->
 <!--};-->
 <!--</script>-->
 
