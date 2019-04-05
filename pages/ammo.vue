@@ -21,10 +21,24 @@
 				</v-card>
 
 				<v-card class="justify-space-between">
+					<v-card-title class="ml-5 mr-4 subheading font-weight-bold">
+						Uploaded ammo files
+						<v-spacer/>
+						<v-spacer/>
+						<v-text-field
+							v-model="search"
+							appendIcon="search"
+							label="Search"
+							color="cyan"
+							class="font-weight-regular"
+							singleLine
+							hideDetails/>
+					</v-card-title>
 					<v-data-table
 						:headers="tableHeaders"
 						:items="ammo"
-						:rowsPerPageItems="[25, 50]"
+						:search="search"
+						disableInitialSort
 						hideActions
 						sortIcon="">
 						<template slot="items" slot-scope="props">
@@ -41,6 +55,14 @@
 						</template>
 					</v-data-table>
 				</v-card>
+				<!--Enable when backend is ready-->
+				<!--<div class="text-xs-center pt-2">-->
+					<!--<v-pagination-->
+						<!--color="cyan darken-1"-->
+						<!--totalVisible="7"-->
+						<!--v-model="pagination.page"-->
+						<!--:length="pages"/>-->
+				<!--</div>-->
 			</div>
 		</v-container>
 	</div>
@@ -57,18 +79,20 @@ let ammoKeys = [];
 export default {
 	data() {
 		return {
+			search: '',
 			name: '',
 			ammo: [],
+			pagination: {},
 			loading: true,
 			error: null,
 			success: null,
 			tableHeaders: [
-				{text: 'Download ammo', align: 'center'},
-				{text: 'Key', align: 'center'},
-				{text: 'Size', align: 'center'},
-				{text: 'Modified', align: 'center'},
-				{text:'Last Used', align: 'center'},
-				{text: 'Author', align: 'center'}],
+				{text: 'Download ammo', align: 'center', value: 'download'},
+				{text: 'Key', align: 'center', value: 'key'},
+				{text: 'Size', align: 'center', value: 'size'},
+				{text: 'Modified', align: 'center', value: 'lastModified'},
+				{text:'Last Used', align: 'center', value: 'lastUsed'},
+				{text: 'Author', align: 'center', value: 'Author'}],
 		};
 	},
 	components: {
@@ -219,6 +243,15 @@ export default {
 			}
 		}
 	},
+	computed: {
+		pages() {
+			if (this.pagination.rowsPerPage == null ||
+				this.pagination.totalItems == null
+			) {return 0;}
+
+			return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage);
+		}
+	}
 };
 </script>
 

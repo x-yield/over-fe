@@ -18,7 +18,7 @@
 							chips
 							deletableChips
 							color="cyan darken-1"
-							@change="getJobs(selected={author, status, target, description})"/>
+							@change="getJobs({author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -29,7 +29,7 @@
 							chips
 							deletableChips
 							color="cyan darken-1"
-							@change="getJobs(selected={author, status, target, description})"/>
+							@change="getJobs({author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12 class="pr-3">
 						<v-combobox
@@ -40,7 +40,7 @@
 							chips
 							deletableChips
 							color="cyan darken-1"
-							@change="getJobs(selected={author, status, target, description})"/>
+							@change="getJobs({author, status, target, description})"/>
 					</v-flex>
 					<v-flex md3 xs12>
 						<v-combobox
@@ -51,7 +51,7 @@
 							chips
 							deletableChips
 							color="cyan darken-1"
-							@change="getJobs(selected={author, status, target, description})"/>
+							@change="getJobs({author, status, target, description})"/>
 					</v-flex>
 				</v-layout>
 				<v-card class="justify-space-between">
@@ -82,7 +82,7 @@
 						totalVisible="7"
 						v-model="pagination.page"
 						:length="pages"
-						@input="getJobs(selected={author, status, target, description})"/>
+						@input="getJobs({author, status, target, description})"/>
 				</div>
 			</div>
 		</v-container>
@@ -98,21 +98,21 @@ export default {
 	data() {
 		return {
 			lastJobs: [],
-			author: '',
-			status: '',
-			target: '',
-			description: '',
+			author: [],
+			status: [],
+			target: [],
+			description: [],
 			authors: [],
 			statuses: [],
 			targets: [],
 			descriptions: [],
 			tableHeaders: [
-				{text: 'Test id', align: 'center'},
-				{text: 'Author', align: 'center'},
-				{text: 'Status', align: 'center'},
-				{text:'Start → Stop', align: 'center'},
-				{text:'Target', align: 'center'},
-				{text:'Description', align: 'center'}],
+				{text: 'Test id', align: 'center', value: 'id'},
+				{text: 'Author', align: 'center', value: 'author'},
+				{text: 'Status', align: 'center', value: 'status'},
+				{text:'Start → Stop', align: 'center', value: ''},
+				{text:'Target', align: 'center', value: 'target'},
+				{text:'Description', align: 'center', value: 'description'}],
 			loading: false,
 			pagination: {},
 		};
@@ -126,6 +126,9 @@ export default {
 	},
 	methods: {
 		getJobs: function(params) {
+			// const querystring = require('querystring');
+			//
+			// let queryString = querystring.stringify(params);
 			let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
 
 			this.loading = true;
