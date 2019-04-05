@@ -24,15 +24,22 @@
 					<v-combobox
 						v-model="project"
 						:items="projects"
-						itemText="projectName"
-						itemValue="projectId"
+						itemText="`${data.item.project}, ${data.item.service}`"
+						itemValue="project"
 						label="Select project"
 						:returnObject="false"
 						multiple
 						chips
 						deletableChips
 						color="cyan darken-1"
-						@change="getFilteredCollections({env, project, name, ref})"/>
+						@change="getFilteredCollections({env, project, name, ref})">
+						<template slot="selection" slot-scope="data">
+							{{ data.item.project }} {{ data.item.service }}
+						</template>
+						<template slot="item" slot-scope="data">
+							{{ data.item.project }} {{ data.item.service }}
+						</template>
+					</v-combobox>
 				</v-flex>
 				<v-flex md3 xs12 class="pr-3">
 					<v-combobox
@@ -57,13 +64,6 @@
 						@change="getFilteredCollections({env, project, name, ref})"/>
 				</v-flex>
 			</v-layout>
-			<!--<table-list-->
-				<!--:headers="tableHeaders"-->
-				<!--:content="collections"-->
-				<!--:loading="loading"-->
-				<!--:pagination="pagination"-->
-				<!--@filterTable ="getFilteredCollections"-->
-			<!--/>-->
 			<v-card class="justify-space-between">
 				<v-data-table
 					:headers="tableHeaders"
@@ -142,7 +142,6 @@ export default {
 	},
 	methods: {
 		getFilteredCollections(params) {
-			console.log('PAG', this.pagination);
 			// const querystring = require('querystring');
 			//
 			// let queryString = querystring.stringify(params);

@@ -152,7 +152,6 @@ export default {
 					this.authors = resp_data.authors;
 					this.statuses = resp_data.statuses;
 					this.targets = resp_data.targets;
-					this.descriptions = resp_data.descriptions;
 				});
 		},
 		tsToDate: function(ts) {

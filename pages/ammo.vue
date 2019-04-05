@@ -55,14 +55,6 @@
 						</template>
 					</v-data-table>
 				</v-card>
-				<!--Enable when backend is ready-->
-				<!--<div class="text-xs-center pt-2">-->
-					<!--<v-pagination-->
-						<!--color="cyan darken-1"-->
-						<!--totalVisible="7"-->
-						<!--v-model="pagination.page"-->
-						<!--:length="pages"/>-->
-				<!--</div>-->
 			</div>
 		</v-container>
 	</div>
