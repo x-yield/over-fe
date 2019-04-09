@@ -4,24 +4,30 @@
 			<app-header/>
 		</template>
 		<v-container fluid>
-			<v-alert class="info" id="firestarter_status" v-show="visibilities.statusVisibility"></v-alert>
-			<v-alert class="error" id="firestarter_message" v-show="visibilities.messageVisibility"></v-alert>
+			<v-alert class="info" id="firestarter_status" v-show="visibilities.statusVisibility"/>
+			<v-alert class="error" id="firestarter_message" v-show="visibilities.messageVisibility"/>
 
-			<button id="validateButton" @click="validateSessions" v-show="visibilities.validateButtonVisibility">Validate</button>
-			<button id="prepareButton" @click="prepareSessions" v-show="visibilities.prepareButtonVisibility">Prepare</button>
-			<button id="runButton" @click="runSessions" v-show="visibilities.runButtonVisibility">Run</button>
-			<button id="stopButton" @click="stopSessions" v-show="visibilities.stopButtonVisibility">Stop</button>
-			<div class="d-flex justify-between align-center mb-3">
-				<v-btn @click="all">all</v-btn>
-				<v-btn @click="none">none</v-btn>
-			</div>
-			<div>
-				<v-expansion-panel
-					v-model="panels"
-					expand
-				>
-				</v-expansion-panel>
-			</div>
+			<v-btn id="validateButton" @click="validate" v-show="visibilities.validateButtonVisibility">Validate</v-btn>
+			<v-btn id="prepareButton" @click="prepare" v-show="visibilities.prepareButtonVisibility">Prepare</v-btn>
+			<v-btn id="runButton" @click="run" v-show="visibilities.runButtonVisibility">Run</v-btn>
+			<v-btn id="stopButton" @click="stop" v-show="visibilities.stopButtonVisibility">Stop</v-btn>
+			<v-icon @click="all">unfold_more</v-icon>
+			<v-icon @click="none">unfold_less</v-icon>
+			<v-expansion-panel
+				v-for="panel in panels"
+				extend=true
+			>
+				<firestarter-panel
+					:is="panel.panel"
+					:externalId="panel.externalId"
+					:valid="panel.valid"
+					:prepared="panel.prepared"
+					:running="panel.running"
+					:stopped="panel.stopped"
+					:locked="panel.disabled"
+				/>
+			</v-expansion-panel>
+			<v-icon @click="createPanel">plus_one</v-icon>
 		</v-container>
 	</div>
 </template>
@@ -33,7 +39,6 @@ import '@ozonui/layout/src/grid.css';
 import '@ozonui/form-input';
 import '@ozonui/custom-button';
 
-
 export default {
 	data() {
 		return {
@@ -42,7 +47,6 @@ export default {
 			success: null,
 			sessions: [],
 			panels: [],
-			stage: '',
 
 			visibilities:{
 				statusVisibility: false,
@@ -56,24 +60,76 @@ export default {
 	},
 	mounted() {
 		this.createPanel();
-		this.createPanel();
 	},
 	components: {
 		FirestarterPanel,
 		AppHeader,
 	},
 	methods: {
-		createPanel: function() {
-			this.panels.push(FirestarterPanel);
+		_findPanel: function(session) {
+			let panel = {};
+			for (let j = 0; j < this.panels.length; j++) {
+				if (this.panels[j].externalId === session.externalId) {
+					panel = this.panels[j];
+					break;
+				}
+			}
+			return panel;
 		},
-		perform: async function(action) {
-			let waitMap = {
+		_findSession: function(panel) {
+			let session = {};
+
+			for (let j = 0; j < this.sessions.length; j++) {
+				if (this.sessions[j].externalId === panel.externalId) {
+					session = this.sessions[j];
+					break;
+				}
+			}
+			return session;
+		},
+		createPanel: function() {
+			let maxId = 0;
+
+			if (this.panels.length > 0) {
+				for (let i = 0; i < this.panels.length; i++) {
+					let panel = this.panels[i];
+
+					if (panel.externalId > maxId) {
+						maxId = panel.externalId;
+					}
+				}
+			}
+			maxId++;
+			let newPanel = FirestarterPanel;
+			let externalId = maxId.toString();
+
+			this.panels.push({
+				'panel': newPanel,
+				'externalId': externalId,
+				'valid': false,
+				'prepared': false,
+				'running': false,
+				'stopped': false,
+				'locked': false,
+			});
+			this.sessions.push({
+				'tank': '',
+				'conf': '',
+				'stage': '',
+				'status': '',
+				'failures': [],
+				'externalId': externalId,
+			});
+			this.activateButton('validate');
+		},
+		_perform: function(action, sessions) {
+			let waitForMap = {
 				'prepare': 'prepare',
 				'run': 'poll',
 				'stop': 'finished',
 			};
 
-			return this.$api.post('/firestarter/'+action, JSON.stringify({'sessions': this.sessions}))
+			return this.$api.post('/firestarter/'+action, JSON.stringify({'sessions': sessions}))
 				.then(response => {
 					return response[0].data.sessions;
 				})
@@ -81,42 +137,116 @@ export default {
 					if (!json) {
 						return;
 					}
-					this.sessions = json;
-				})
-				.then(() => {
-					if (waitMap.hasOwnProperty(action)) {
-						this.waitFor(waitMap[action]);
+					sessions = json;
+					if (waitForMap.hasOwnProperty(action)) {
+						return this._waitFor(waitForMap[action], sessions);
+					} else {
+						return sessions;
 					}
 				});
 		},
-		validateSessions: async function() {
-			this.loading = true;
-			let tank = document.getElementById('tankInput').value;
-			let conf = document.getElementById('confInput').value;
+		_updateSessions: function(sessions) {
+			for (let i = 0; i < sessions.length; i++) {
+				let newSessionsData = sessions[i];
+				let s = this._findSession({'externalId': newSessionsData.externalId});
 
-			this.sessions = [{'tank': tank, 'conf': conf}];
-			await this.perform('validate');
-			await this.findFailures();
+				for (let k in newSessionsData) {
+					s[k] = newSessionsData[k];
+				}
+			}
+		},
+		validate: async function() { // validates not valid panels. locks panel once it is valid;
+			this.loading = true;
+			let sessionsToValidate = [];
+
+			for (let i = 0; i < this.panels.length; i++) {
+				let panel = this.panels[i];
+
+				if (!panel.valid) {
+					let session = this._findSession(panel);
+
+					session['tank'] = document.getElementById('tankInput_'+session.externalId).value;
+					session['conf'] = document.getElementById('confInput_'+session.externalId).value;
+					session['externalId'] = panel.externalId;
+
+					sessionsToValidate.push(session);
+				}
+			}
+
+			sessionsToValidate = await this._perform('validate', sessionsToValidate);
+
+			for (let i in sessionsToValidate) {
+				let session = sessionsToValidate[i];
+				let panel = this._findPanel(session);
+
+				if (!session.hasOwnProperty('failures') || session.failures === []) {
+					panel.locked = true;
+					panel.valid = true;
+				} else {
+					panel.validationOK = false;
+				}
+			}
+			await this._updateSessions(sessionsToValidate);
+			await this.showFailures(sessionsToValidate);
 			if (!this.error) {
 				this.activateButton('prepare');
 			}
 			this.loading = false;
 		},
-		prepareSessions: function() { // needs polling
+		prepare: async function() { // needs polling
 			this.loading = true;
-			return this.perform('prepare');
+			let sessionsToPrepare = [];
+
+			for (let i = 0; i < this.panels.length; i++) {
+				let panel = this.panels[i];
+
+				if (panel.valid && !panel.prepared) {
+					let session = this._findSession(panel);
+
+					sessionsToPrepare.push(session);
+				}
+			}
+
+			await this._perform('prepare', sessionsToPrepare);
+			this.loading = false;
 		},
-		runSessions: function() { // needs polling
+		run: async function() { // needs polling
 			this.loading = true;
-			return this.perform('run');
+			let sessionsToRun = [];
+
+
+			for (let i = 0; i < this.panels.length; i++) {
+				let panel = this.panels[i];
+
+				if (panel.valid && panel.prepared && !panel.running) {
+					let session = this._findSession(panel);
+
+					sessionsToRun.push(session);
+				}
+			}
+			await this._perform('run', sessionsToRun);
+			this.loading = false;
 		},
-		stopSessions: function() { // needs polling
+		stop: async function() { // needs polling
 			this.loading = true;
-			return this.perform('stop');
+			let sessionsToStop = [];
+
+			for (let i = 0; i < this.panels.length; i++) {
+				let panel = this.panels[i];
+
+				if (panel.valid && panel.prepared && panel.running && !panel.stopped) {
+					let session = this._findSession(panel);
+
+					sessionsToStop.push(session);
+				}
+			}
+
+			await this._perform('stop', sessionsToStop);
+			this.loading = false;
 		},
-		pollSessions: function() {
+		poll: function(sessions) {
 			this.loading = true;
-			return this.$api.post('/firestarter/poll', JSON.stringify({'sessions': this.sessions}))
+			return this.$api.post('/firestarter/poll', JSON.stringify({'sessions': sessions}))
 				.then(response => {
 					return response[0].data.sessions;
 				})
@@ -124,23 +254,28 @@ export default {
 					if (!json) {
 						return;
 					}
-					this.sessions = json;
+					return json;
 				});
 		},
-		sleep: function(ms) {
+		_sleep: function(ms) {
 			return new Promise(resolve => setTimeout(resolve, ms));
 		},
-		waitFor: async function(what) {
+		_waitFor: async function(what, sessions) {
 			let reached = true;
 			let finished = false;
 			let nextActionMap = {
 				'prepare': 'run',
 				'poll': 'stop',
 			};
+			let panelPropsMap = {
+				'prepare': 'prepared',
+				'poll': 'running',
+				'finished': 'stopped',
+			};
 
-			await this.pollSessions();
-			for (let i = 0; i < this.sessions.length; i++) {
-				let s = this.sessions[i];
+			sessions = await this.poll(sessions);
+			for (let i = 0; i < sessions.length; i++) {
+				let s = sessions[i];
 
 				if (s['stage'] !== what) {
 					reached = false;
@@ -149,24 +284,32 @@ export default {
 					finished = true;
 				}
 			}
-			await this.findFailures();
+			await this.showFailures(sessions);
 			if (this.error) {
-				let errorsAlert = document.getElementById('firestarter_message');
-
-				errorsAlert.innerText = this.error;
-				this.visibilities.messageVisibility = true;
 				this.loading = false;
-				return;
+				return sessions;
 			}
 			if (!reached && !finished) {
-				await this.sleep(1000);
-				return this.waitFor(what);
+				await this._sleep(1000);
+				return this._waitFor(what, sessions);
 			} else {
 				this.loading = false;
 				if (nextActionMap.hasOwnProperty(what)) {
 					this.activateButton(nextActionMap[what]);
 				}
+				for (let i = 0; i < sessions.length; i++) {
+					let session = sessions[i];
+
+					if (!session.hasOwnProperty('failures') || session.failures === []) {
+						let panel = this._findPanel(session);
+
+						panel[panelPropsMap[what]] = true;
+					}
+				}
+				await this._updateSessions(sessions);
+				await this.showFailures(sessions);
 			}
+			return sessions;
 		},
 		activateButton: function(nextAction) {
 			this.visibilities.validateButtonVisibility = false;
@@ -190,18 +333,18 @@ export default {
 					break;
 			}
 		},
-		findFailures: function() {
+		showFailures: function(sessions) {
 			this.error = '';
 			this.visibilities.messageVisibility = false;
-			for (let i = 0; i < this.sessions.length; i++) {
-				let session = this.sessions[i];
+			for (let i = 0; i < sessions.length; i++) {
+				let session = sessions[i];
 				let failures = '';
 				let sessionLocation = '';
 
 				if (session.hasOwnProperty('name') && session['name'] !== '') {
 					sessionLocation = sessionLocation+ session['name'] + '@';
 				}
-				sessionLocation = sessionLocation+ session['tank'];
+				sessionLocation = sessionLocation + session['tank'];
 				// formatting error message
 				if (session['status'] === 'failed' || (session.hasOwnProperty('failures') && session['failures'].length > 0)) {
 					failures = failures + sessionLocation + ': ';
@@ -231,21 +374,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-	.overload-fe {
-		padding-top: 20px;
-		width: 90%;
-		margin: auto;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-	}
-	.overload-fe-container {
-		flex: 1;
-	}
-	td > * {
-		vertical-align : middle;
-	}
-
-</style>
