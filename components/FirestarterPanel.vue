@@ -1,9 +1,9 @@
 <template>
 	<v-expansion-panel-content :readonly="locked">
-		<template v-slot:actions>
+		<template slot="actions">
 			<v-icon color="primary">$vuetify.icons.expand</v-icon>
 		</template>
-		<template v-slot:header>
+		<template slot="header">
 			<v-stepper>
 				<v-stepper-header>
 					<v-stepper-step :rules="[() => validationOK]" :complete="valid" step="V">&nbsp;Validation</v-stepper-step>

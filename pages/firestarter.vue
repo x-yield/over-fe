@@ -15,6 +15,7 @@
 			<v-icon @click="none">unfold_less</v-icon>
 			<v-expansion-panel
 				v-for="panel in panels"
+				:key="panel.externalId"
 				extend=true
 			>
 				<firestarter-panel
