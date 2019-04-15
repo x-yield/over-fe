@@ -46,7 +46,7 @@
 						<v-combobox
 							v-model="description"
 							:items="descriptions"
-							label="Select description"
+							label="Enter description keywords"
 							multiple
 							chips
 							deletableChips

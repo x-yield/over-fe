@@ -25,6 +25,7 @@ module.exports = {
 		transpile: [
 			/@ozonui/
 		],
+		vendor: ['vue2-ace-editor'],
 		postcss: [
 			require('postcss-preset-env')(),
 			require('postcss-import')(),
