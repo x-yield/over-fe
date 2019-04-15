@@ -8,6 +8,7 @@
 			<v-btn flat href="/">Jobs</v-btn>
 			<v-btn flat href="/collections">Collections</v-btn>
 			<v-btn flat href="/ammo">Ammo</v-btn>
+			<v-btn flat href="/firestarter">Firestarter</v-btn>
 			<v-btn
 				flat
 				icon
