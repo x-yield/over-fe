@@ -58,7 +58,6 @@
 							solo
 							:disabled="panel.locked"/>
 					</v-flex>
-					<editor v-model="content" @init="editorInit" lang="yaml" theme="chrome" width="500" height="100"/>
 				</v-card>
 			</v-expansion-panel-content>
 		</v-expansion-panel>
@@ -66,12 +65,6 @@
 </template>
 
 <script>
-let Editor;
-
-if (process.browser) {
-	Editor = require('vue2-ace-editor');
-}
-
 export default {
 	name: 'FirestarterPanel',
 	props: {
@@ -86,9 +79,6 @@ export default {
 			content: '',
 		};
 	},
-	components: {
-		Editor
-	},
 	methods: {
 		none() {
 			this.openedPanels = [];
@@ -96,13 +86,6 @@ export default {
 		removePanel(externalId) {
 			this.$emit('remove', externalId);
 		},
-		editorInit: function() {
-			require('brace/ext/language_tools');
-			require('brace/mode/html');
-			require('brace/mode/yaml');
-			require('brace/mode/less');
-			require('brace/theme/chrome');
-		}
 	},
 };
 </script>
