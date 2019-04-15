@@ -14,25 +14,26 @@
 							<v-stepper-header>
 								<v-stepper-step
 									step="1"
-									color="light-green"
+									color="blue lighten-2"
+									colorComplete="light-green"
 									:complete="panel.valid"
 									:rules="[() => panel.validationOK]">Validation</v-stepper-step>
 								<v-divider/>
 								<v-stepper-step
 									step="2"
-									color="light-green"
+									color="amber"
 									:complete="panel.prepared"
 									:rules="[() => panel.preparationOK]">Preparation</v-stepper-step>
 								<v-divider/>
 								<v-stepper-step
 									step="3"
-									color="light-green"
+									color="green"
 									:complete="panel.running"
 									:rules="[() => panel.startedOK]">Started</v-stepper-step>
 								<v-divider/>
 								<v-stepper-step
 									step="4"
-									color="light-green"
+									color="purple lighten-2"
 									:complete="panel.stopped"
 									:rules="[() => panel.finishedOK]">Finished</v-stepper-step>
 							</v-stepper-header>
@@ -48,7 +49,7 @@
 							solo
 							:disabled="panel.locked"/>
 					</v-flex>
-					<v-flex sm12 lg12>
+					<v-flex sm12 lg12 class="pb-3">
 						<v-textarea
 							:id='"confInput_"+panel.externalId'
 							label="Tank config"
@@ -64,6 +65,11 @@
 </template>
 
 <script>
+// let Editor;
+//
+// if (process.browser) {
+// 	Editor = require('vue2-ace-editor');
+// }
 
 export default {
 	name: 'FirestarterPanel',
@@ -78,8 +84,6 @@ export default {
 			openedPanels: [],
 		};
 	},
-	components: {
-	},
 	methods: {
 		none() {
 			this.openedPanels = [];
@@ -87,7 +91,6 @@ export default {
 		removePanel(externalId) {
 			this.$emit('remove', externalId);
 		},
-
 	},
 };
 </script>

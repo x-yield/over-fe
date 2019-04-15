@@ -17,7 +17,7 @@
 					id="validateButton"
 					@click="validate"
 					v-show="visibilities.validateButtonVisibility"
-					color="pink darken-1"
+					color="blue lighten-2"
 					:loading="loading"
 					:disabled="loading">Validate</v-btn>
 				<v-btn
@@ -31,7 +31,7 @@
 					id="runButton"
 					@click="run"
 					v-show="visibilities.runButtonVisibility"
-					color="green darken-1"
+					color="green"
 					:loading="loading"
 					:disabled="loading">Run</v-btn>
 				<v-btn
