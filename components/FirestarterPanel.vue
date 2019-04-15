@@ -1,81 +1,96 @@
 <template>
-	<v-expansion-panel-content :readonly="locked">
-		<template slot="actions">
-			<v-icon color="primary">$vuetify.icons.expand</v-icon>
-		</template>
-		<template slot="header">
-			<v-stepper>
-				<v-stepper-header>
-					<v-stepper-step :rules="[() => validationOK]" :complete="valid" step="V">&nbsp;Validation</v-stepper-step>
-					<v-divider/>
-					<v-stepper-step :rules="[() => preparationOK]" :complete="prepared" step="P">&nbsp;Preparation</v-stepper-step>
-					<v-divider/>
-					<v-stepper-step :complete="running" step="S">&nbsp;Started</v-stepper-step>
-				</v-stepper-header>
-			</v-stepper>
-		</template>
-		<br/>
-		<label :for='"tankInput_"+externalId'>танк</label>
-		<input name="tank" :disabled="locked" :id='"tankInput_"+externalId' type="text" value="" style="width: 100%"/>
-		<br/>
-		<label :for='"confInput_"+externalId'>конфиг</label>
-		<textarea name="conf" :id='"confInput_"+externalId' rows="10" style="width: 100%"></textarea>
-	</v-expansion-panel-content>
+	<div>
+		<v-layout class="align-end justify-end row mb-1">
+			<v-btn color="cyan darken-1" dark @click="none">Collapse all</v-btn>
+		</v-layout>
+		<v-expansion-panel color="cyan" v-model="openedPanels" expand>
+			<v-expansion-panel-content v-for="panel in mycontent" :key="panel.externalId">
+				<template slot="header">
+					<v-flex shrink>
+						<v-icon @click="removePanel(panel.externalId)">delete</v-icon>
+					</v-flex>
+					<v-flex>
+						<v-stepper class="elevation-0" :value="panel.step">
+							<v-stepper-header>
+								<v-stepper-step
+									step="1"
+									color="light-green"
+									:complete="panel.valid"
+									:rules="[() => panel.validationOK]">Validation</v-stepper-step>
+								<v-divider/>
+								<v-stepper-step
+									step="2"
+									color="light-green"
+									:complete="panel.prepared"
+									:rules="[() => panel.preparationOK]">Preparation</v-stepper-step>
+								<v-divider/>
+								<v-stepper-step
+									step="3"
+									color="light-green"
+									:complete="panel.running"
+									:rules="[() => panel.startedOK]">Started</v-stepper-step>
+								<v-divider/>
+								<v-stepper-step
+									step="4"
+									color="light-green"
+									:complete="panel.stopped"
+									:rules="[() => panel.finishedOK]">Finished</v-stepper-step>
+							</v-stepper-header>
+						</v-stepper>
+					</v-flex>
+				</template>
+				<v-card class="pl-3 pr-3">
+					<v-flex sm12 md4>
+						<v-text-field
+							:id='"tankInput_"+panel.externalId'
+							label="Tank address"
+							dark
+							solo
+							:disabled="panel.locked"/>
+					</v-flex>
+					<v-flex sm12 lg12>
+						<v-textarea
+							:id='"confInput_"+panel.externalId'
+							label="Tank config"
+							autoGrow
+							dark
+							solo
+							:disabled="panel.locked"/>
+					</v-flex>
+				</v-card>
+			</v-expansion-panel-content>
+		</v-expansion-panel>
+	</div>
 </template>
 
 <script>
-import '@ozonui/layout/src/grid.css';
-import '@ozonui/form-input';
-import '@ozonui/custom-button';
 
 export default {
 	name: 'FirestarterPanel',
 	props: {
-		externalId: {
-			type: String,
-			default: ''
-		},
-		valid: {
-			type: Boolean,
-			default: false,
-		},
-		prepared: {
-			type: Boolean,
-			default: false,
-		},
-		running: {
-			type: Boolean,
-			default: false,
-		},
-		stopped: {
-			type: Boolean,
-			default: false,
-		},
-		locked: {
-			type: Boolean,
-			default: false,
-		},
-		validationOK: {
-			type: Boolean,
-			default: true,
-		},
-		preparationOK: {
-			type: Boolean,
-			default: true,
-		},
+		mycontent: {
+			type: Array,
+			default: null,
+		}
 	},
 	data() {
 		return {
-
+			openedPanels: [],
 		};
-	}
+	},
+	components: {
+	},
+	methods: {
+		none() {
+			this.openedPanels = [];
+		},
+		removePanel(externalId) {
+			this.$emit('remove', externalId);
+		},
+
+	},
 };
 </script>
 
 <style scoped>
-
-	.v-stepper {
-		box-shadow: none;
-	}
-
 </style>

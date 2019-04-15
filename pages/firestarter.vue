@@ -1,34 +1,47 @@
-<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
+<template>
 	<div id="overload">
 		<template>
 			<app-header/>
 		</template>
 		<v-container fluid>
-			<v-alert class="info" id="firestarter_status" v-show="visibilities.statusVisibility"/>
-			<v-alert class="error" id="firestarter_message" v-show="visibilities.messageVisibility"/>
-
-			<v-btn id="validateButton" @click="validate" v-show="visibilities.validateButtonVisibility">Validate</v-btn>
-			<v-btn id="prepareButton" @click="prepare" v-show="visibilities.prepareButtonVisibility">Prepare</v-btn>
-			<v-btn id="runButton" @click="run" v-show="visibilities.runButtonVisibility">Run</v-btn>
-			<v-btn id="stopButton" @click="stop" v-show="visibilities.stopButtonVisibility">Stop</v-btn>
-			<v-icon @click="all">unfold_more</v-icon>
-			<v-icon @click="none">unfold_less</v-icon>
-			<v-expansion-panel
-				v-for="panel in panels"
-				:key="panel.externalId"
-				extend=true
-			>
-				<firestarter-panel
-					:is="panel.panel"
-					:externalId="panel.externalId"
-					:valid="panel.valid"
-					:prepared="panel.prepared"
-					:running="panel.running"
-					:stopped="panel.stopped"
-					:locked="panel.disabled"
-				/>
-			</v-expansion-panel>
-			<v-icon @click="createPanel">plus_one</v-icon>
+			<v-alert type="error" :value="error !== ''">{{ error }}</v-alert>
+			<firestarter-panel :mycontent="panels" @remove="removePanel"/>
+			<v-card color="cyan">
+				<v-layout class="justify-space-around" @click="createPanel">
+					<v-icon color="white" size="23">add</v-icon>
+				</v-layout>
+			</v-card>
+			<v-layout class="align-end justify-end row mt-3">
+				<v-spacer/>
+				<v-btn
+					id="validateButton"
+					@click="validate"
+					v-show="visibilities.validateButtonVisibility"
+					color="pink darken-1"
+					:loading="loading"
+					:disabled="loading">Validate</v-btn>
+				<v-btn
+					id="prepareButton"
+					@click="prepare"
+					v-show="visibilities.prepareButtonVisibility"
+					color="amber"
+					:loading="loading"
+					:disabled="loading">Prepare</v-btn>
+				<v-btn
+					id="runButton"
+					@click="run"
+					v-show="visibilities.runButtonVisibility"
+					color="green darken-1"
+					:loading="loading"
+					:disabled="loading">Run</v-btn>
+				<v-btn
+					id="stopButton"
+					@click="stop"
+					v-show="visibilities.stopButtonVisibility"
+					color="red"
+					:loading="loading"
+					:disabled="loading">Stop</v-btn>
+			</v-layout>
 		</v-container>
 	</div>
 </template>
@@ -36,9 +49,6 @@
 <script>
 import AppHeader from '../components/AppHeader';
 import FirestarterPanel from '../components/FirestarterPanel.vue';
-import '@ozonui/layout/src/grid.css';
-import '@ozonui/form-input';
-import '@ozonui/custom-button';
 
 export default {
 	data() {
@@ -48,10 +58,7 @@ export default {
 			success: null,
 			sessions: [],
 			panels: [],
-
 			visibilities:{
-				statusVisibility: false,
-				messageVisibility: false,
 				validateButtonVisibility: true,
 				prepareButtonVisibility: false,
 				runButtonVisibility: false,
@@ -67,38 +74,30 @@ export default {
 		AppHeader,
 	},
 	methods: {
-		_findPanel: function(session) {
-			let panel = {};
-			for (let j = 0; j < this.panels.length; j++) {
-				if (this.panels[j].externalId === session.externalId) {
-					panel = this.panels[j];
-					break;
-				}
-			}
-			return panel;
-		},
-		_findSession: function(panel) {
-			let session = {};
+		// returns either panel or session by finding single match between them
+		_findItem: function(array, objectToCompareWith) {
+			let resultObject = {};
 
-			for (let j = 0; j < this.sessions.length; j++) {
-				if (this.sessions[j].externalId === panel.externalId) {
-					session = this.sessions[j];
-					break;
+			array.forEach(
+				item => {
+					if (item.externalId === objectToCompareWith.externalId) {
+						resultObject = item;
+					}
 				}
-			}
-			return session;
+			);
+			return resultObject;
 		},
 		createPanel: function() {
 			let maxId = 0;
 
 			if (this.panels.length > 0) {
-				for (let i = 0; i < this.panels.length; i++) {
-					let panel = this.panels[i];
-
-					if (panel.externalId > maxId) {
-						maxId = panel.externalId;
+				this.panels.forEach(
+					panel => {
+						if (panel.externalId > maxId) {
+							maxId = panel.externalId;
+						}
 					}
-				}
+				);
 			}
 			maxId++;
 			let newPanel = FirestarterPanel;
@@ -112,6 +111,11 @@ export default {
 				'running': false,
 				'stopped': false,
 				'locked': false,
+				'validationOK': true,
+				'preparationOK': true,
+				'startedOK': true,
+				'finishedOK': true,
+				'step': 1,
 			});
 			this.sessions.push({
 				'tank': '',
@@ -121,9 +125,19 @@ export default {
 				'failures': [],
 				'externalId': externalId,
 			});
-			this.activateButton('validate');
+			this.activateButton('prepareButtonVisibility', 'validateButtonVisibility');
+		},
+		removePanel: function(externalId) {
+			this.panels.forEach(
+				panel => {
+					if (panel.externalId === externalId) {
+						this.panels.splice(this.panels.indexOf(panel), 1);
+					}
+				}
+			);
 		},
 		_perform: function(action, sessions) {
+			// need to wait for this actions to complete
 			let waitForMap = {
 				'prepare': 'prepare',
 				'run': 'poll',
@@ -147,103 +161,78 @@ export default {
 				});
 		},
 		_updateSessions: function(sessions) {
-			for (let i = 0; i < sessions.length; i++) {
-				let newSessionsData = sessions[i];
-				let s = this._findSession({'externalId': newSessionsData.externalId});
+			sessions.forEach(
+				newSessionsData => {
+					let s = this._findItem(this.sessions, {'externalId': newSessionsData.externalId});
 
-				for (let k in newSessionsData) {
-					s[k] = newSessionsData[k];
+					for (let k in newSessionsData) {
+						s[k] = newSessionsData[k];
+					}
 				}
-			}
+			);
 		},
 		validate: async function() { // validates not valid panels. locks panel once it is valid;
 			this.loading = true;
 			let sessionsToValidate = [];
 
-			for (let i = 0; i < this.panels.length; i++) {
-				let panel = this.panels[i];
+			this.panels.forEach(
+				panel => {
+					if (!panel.valid) {
+						let session = this._findItem(this.sessions, panel);
 
-				if (!panel.valid) {
-					let session = this._findSession(panel);
-
-					session['tank'] = document.getElementById('tankInput_'+session.externalId).value;
-					session['conf'] = document.getElementById('confInput_'+session.externalId).value;
-					session['externalId'] = panel.externalId;
-
-					sessionsToValidate.push(session);
+						session['tank'] = document.getElementById('tankInput_'+session.externalId).value;
+						session['conf'] = document.getElementById('confInput_'+session.externalId).value;
+						session['externalId'] = panel.externalId;
+						sessionsToValidate.push(session);
+					}
 				}
-			}
-
-			sessionsToValidate = await this._perform('validate', sessionsToValidate);
-
-			for (let i in sessionsToValidate) {
-				let session = sessionsToValidate[i];
-				let panel = this._findPanel(session);
-
-				if (!session.hasOwnProperty('failures') || session.failures === []) {
-					panel.locked = true;
-					panel.valid = true;
-				} else {
-					panel.validationOK = false;
-				}
-			}
-			await this._updateSessions(sessionsToValidate);
-			await this.showFailures(sessionsToValidate);
-			if (!this.error) {
-				this.activateButton('prepare');
-			}
-			this.loading = false;
+			);
+			this.setStyles(sessionsToValidate, 'validate');
 		},
 		prepare: async function() { // needs polling
 			this.loading = true;
 			let sessionsToPrepare = [];
 
-			for (let i = 0; i < this.panels.length; i++) {
-				let panel = this.panels[i];
+			this.panels.forEach(
+				panel => {
+					if (panel.valid && !panel.prepared) {
+						let session = this._findItem(this.sessions, panel);
 
-				if (panel.valid && !panel.prepared) {
-					let session = this._findSession(panel);
-
-					sessionsToPrepare.push(session);
+						sessionsToPrepare.push(session);
+					}
 				}
-			}
-
-			await this._perform('prepare', sessionsToPrepare);
-			this.loading = false;
+			);
+			this.setStyles(sessionsToPrepare, 'prepare');
 		},
 		run: async function() { // needs polling
 			this.loading = true;
 			let sessionsToRun = [];
 
+			this.panels.forEach(
+				panel => {
+					if (panel.valid && panel.prepared && !panel.running) {
+						let session = this._findItem(this.sessions, panel);
 
-			for (let i = 0; i < this.panels.length; i++) {
-				let panel = this.panels[i];
-
-				if (panel.valid && panel.prepared && !panel.running) {
-					let session = this._findSession(panel);
-
-					sessionsToRun.push(session);
+						sessionsToRun.push(session);
+					}
 				}
-			}
-			await this._perform('run', sessionsToRun);
-			this.loading = false;
+			);
+			this.setStyles(sessionsToRun, 'run');
 		},
 		stop: async function() { // needs polling
 			this.loading = true;
 			let sessionsToStop = [];
 
-			for (let i = 0; i < this.panels.length; i++) {
-				let panel = this.panels[i];
+			this.panels.forEach(
+				panel => {
+					if (panel.valid && panel.prepared && panel.running && !panel.stopped) {
+						let session = this._findItem(this.sessions, panel);
 
-				if (panel.valid && panel.prepared && panel.running && !panel.stopped) {
-					let session = this._findSession(panel);
-
-					sessionsToStop.push(session);
+						sessionsToStop.push(session);
+					}
 				}
-			}
-
-			await this._perform('stop', sessionsToStop);
-			this.loading = false;
+			);
+			this.setStyles(sessionsToStop, 'stop');
 		},
 		poll: function(sessions) {
 			this.loading = true;
@@ -258,119 +247,123 @@ export default {
 					return json;
 				});
 		},
+		setStyles: async function(sessions, thisStage) {
+			let currentStage = {};
+
+			switch (thisStage) {
+				case 'validate':
+					currentStage['stepperCompleted'] = 'valid';
+					currentStage['stepperError'] = 'validationOK';
+					currentStage['stepNum'] = 2;
+					currentStage['previousStage'] = 'validateButtonVisibility';
+					currentStage['nextStage'] = 'prepareButtonVisibility';
+					break;
+				case 'prepare':
+					currentStage['stepperCompleted'] = 'prepared';
+					currentStage['stepperError'] = 'preparationOK';
+					currentStage['stepNum'] = 3;
+					currentStage['previousStage'] = 'prepareButtonVisibility';
+					currentStage['nextStage'] = 'runButtonVisibility';
+					break;
+				case 'run':
+					currentStage['stepperCompleted'] = 'running';
+					currentStage['stepperError'] = 'startedOK';
+					currentStage['stepNum'] = 4;
+					currentStage['previousStage'] = 'runButtonVisibility';
+					currentStage['nextStage'] = 'stopButtonVisibility';
+					break;
+				case 'stop':
+					currentStage['stepperCompleted'] = 'stopped';
+					currentStage['stepperError'] = 'finishedOK';
+					currentStage['stepNum'] = 1;
+					currentStage['previousStage'] = 'stopButtonVisibility';
+					currentStage['nextStage'] = 'validateButtonVisibility';
+					break;
+			}
+
+			sessions = await this._perform(thisStage, sessions);
+
+			sessions.forEach(
+				session => {
+					let panel = this._findItem(this.panels, session);
+
+					if (!session.hasOwnProperty('failures') || session.failures.length === 0) {
+						// set all to OK in stepper and switch to next stage
+						if (currentStage['stepNum'] !== 1) {
+							panel.locked = true;
+						}
+						panel[currentStage['stepperCompleted']] = true;
+						panel.step = currentStage['stepNum'];
+					} else {
+						//throw an error in stepper
+						panel[currentStage['stepperError']] = false;
+					}
+				}
+			);
+
+			await this.showFailures(sessions);
+			await this._updateSessions(sessions);
+			if (!this.error) {
+				this.activateButton(currentStage['previousStage'], currentStage['nextStage']);
+			}
+			this.loading = false;
+		},
 		_sleep: function(ms) {
 			return new Promise(resolve => setTimeout(resolve, ms));
 		},
 		_waitFor: async function(what, sessions) {
 			let reached = true;
 			let finished = false;
-			let nextActionMap = {
-				'prepare': 'run',
-				'poll': 'stop',
-			};
-			let panelPropsMap = {
-				'prepare': 'prepared',
-				'poll': 'running',
-				'finished': 'stopped',
-			};
 
 			sessions = await this.poll(sessions);
-			for (let i = 0; i < sessions.length; i++) {
-				let s = sessions[i];
-
-				if (s['stage'] !== what) {
-					reached = false;
+			sessions.forEach(
+				session => {
+					if (session['stage'] !== what) {
+						reached = false;
+					}
+					if (session['stage'] === 'finished') {
+						finished = true;
+					}
 				}
-				if (s['stage'] === 'finished') {
-					finished = true;
-				}
-			}
+			);
 			await this.showFailures(sessions);
-			if (this.error) {
-				this.loading = false;
-				return sessions;
-			}
 			if (!reached && !finished) {
 				await this._sleep(1000);
 				return this._waitFor(what, sessions);
-			} else {
-				this.loading = false;
-				if (nextActionMap.hasOwnProperty(what)) {
-					this.activateButton(nextActionMap[what]);
-				}
-				for (let i = 0; i < sessions.length; i++) {
-					let session = sessions[i];
-
-					if (!session.hasOwnProperty('failures') || session.failures === []) {
-						let panel = this._findPanel(session);
-
-						panel[panelPropsMap[what]] = true;
-					}
-				}
-				await this._updateSessions(sessions);
-				await this.showFailures(sessions);
 			}
 			return sessions;
 		},
-		activateButton: function(nextAction) {
-			this.visibilities.validateButtonVisibility = false;
-			this.visibilities.prepareButtonVisibility = false;
-			this.visibilities.runButtonVisibility = false;
-			this.visibilities.stopButtonVisibility = false;
-			switch (nextAction) {
-				case 'validate':
-					this.visibilities.validateButtonVisibility = true;
-					break;
-				case 'prepare':
-					this.visibilities.prepareButtonVisibility = true;
-					break;
-				case 'run':
-					this.visibilities.runButtonVisibility = true;
-					break;
-				case 'stop':
-					this.visibilities.stopButtonVisibility = true;
-					break;
-				default:
-					break;
-			}
+		activateButton: function(previousAction, nextAction) {
+			this.visibilities[previousAction] = false;
+			this.visibilities[nextAction] = true;
 		},
 		showFailures: function(sessions) {
+			// to clean previous error
 			this.error = '';
 			this.visibilities.messageVisibility = false;
-			for (let i = 0; i < sessions.length; i++) {
-				let session = sessions[i];
-				let failures = '';
-				let sessionLocation = '';
 
-				if (session.hasOwnProperty('name') && session['name'] !== '') {
-					sessionLocation = sessionLocation+ session['name'] + '@';
-				}
-				sessionLocation = sessionLocation + session['tank'];
-				// formatting error message
-				if (session['status'] === 'failed' || (session.hasOwnProperty('failures') && session['failures'].length > 0)) {
-					failures = failures + sessionLocation + ': ';
-					for (let j = 0; j < session['failures'].length; j++) {
-						let f = session['failures'][j];
+			sessions.forEach(
+				session => {
+					let failures = '';
+					let sessionLocation = '';
 
-						failures = failures + f + '; \n';
+					if (session.hasOwnProperty('name') && session['name'] !== '') {
+						sessionLocation += session['name'] + '@';
+						sessionLocation += session['tank'] + ': ';
+					}
 
-						this.error = this.error + failures;
+					// formatting error message
+					if (session['status'] === 'failed' || (session.hasOwnProperty('failures') && session['failures'].length > 0)) {
+						failures += sessionLocation;
+						session['failures'].forEach(
+							fail => {
+								failures += fail + '; \n';
+							}
+						);
+						this.error += failures;
 					}
 				}
-			}
-			if (this.error) {
-				let errorsAlert = document.getElementById('firestarter_message');
-
-				errorsAlert.innerText = this.error;
-				this.visibilities.messageVisibility = true;
-			}
-		},
-		all: function() {
-			this.panel = [...Array(this.panel).keys()].map(_ => true);
-		},
-		// Reset the panel
-		none: function() {
-			this.panel = [];
+			);
 		},
 	},
 };
