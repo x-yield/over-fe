@@ -52,6 +52,11 @@
 							<td class="text-lg-center body-2" style="white-space: nowrap;">{{ props.item.lastModified }}</td>
 							<td class="text-lg-center body-2">{{ props.item.lastUsed }}</td>
 							<td class="text-lg-center body-2">{{ props.item.Author }}</td>
+							<td class="text-lg-center">
+								<a style="text-decoration: none;">
+									<v-icon size="30" @click="deleteAmmo(props.item)">delete</v-icon>
+								</a>
+							</td>
 						</template>
 					</v-data-table>
 				</v-card>
@@ -84,7 +89,8 @@ export default {
 				{text: 'Size', align: 'center', value: 'size'},
 				{text: 'Modified', align: 'center', value: 'lastModified'},
 				{text:'Last Used', align: 'center', value: 'lastUsed'},
-				{text: 'Author', align: 'center', value: 'Author'}],
+				{text: 'Author', align: 'center', value: 'Author'},
+				{text: 'Delete', align: 'center', value: 'delete'}],
 		};
 	},
 	components: {
@@ -232,6 +238,16 @@ export default {
 				this.loading = true;
 				this.getAmmoInfo();
 				//this.highlightNewAmmo(this, ammoUrl);
+			}
+		},
+		deleteAmmo: function(item) {
+			if (confirm('Удалить '+item.key+'?')) {
+				this.$api.get('/delete_ammo?key=' + item.key)
+					.then(response => {
+						if (response[0].status === 200) {
+							this.ammo.splice(this.ammo.indexOf(item), 1);
+						}
+					});
 			}
 		}
 	},
