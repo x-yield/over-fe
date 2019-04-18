@@ -8,6 +8,7 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
+				{{ pagination }}
 				<v-card class="mb-2">
 					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em;">
 						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1;"/>
@@ -32,15 +33,19 @@
 							color="cyan"
 							class="font-weight-regular"
 							singleLine
-							hideDetails/>
+							hideDetails
+							@change="getAmmoInfo({search})"/>
 					</v-card-title>
 					<v-data-table
 						:headers="tableHeaders"
 						:items="ammo"
 						:search="search"
-						disableInitialSort
-						hideActions
-						sortIcon="">
+						:totalItems="pagination.totalItems"
+						:pagination.sync="pagination"
+						:loading="loading"
+						:rowsPerPageItems="[10]"
+						sortIcon=""
+						hideActions>
 						<template slot="items" slot-scope="props">
 							<td class="text-lg-center">
 								<a :href="props.item.download" style="text-decoration: none;">
@@ -60,6 +65,14 @@
 						</template>
 					</v-data-table>
 				</v-card>
+				<div class="text-xs-center pt-2">
+					<v-pagination
+						color="cyan darken-1"
+						totalVisible="7"
+						v-model="pagination.page"
+						:length="pages"
+						@input="getAmmoInfo({search})"/>
+				</div>
 			</div>
 		</v-container>
 	</div>
@@ -80,7 +93,7 @@ export default {
 			name: '',
 			ammo: [],
 			pagination: {},
-			loading: true,
+			loading: false,
 			error: null,
 			success: null,
 			tableHeaders: [
@@ -96,8 +109,8 @@ export default {
 	components: {
 		AppHeader
 	},
-	created() {
-		this.getAmmoInfo();
+	mounted() {
+		this.getAmmoInfo({});
 	},
 	methods: {
 		chooseFile: function(event) {
@@ -134,50 +147,34 @@ export default {
 		setFormAction: function($form) {
 			$form.action = '//' + this.$env.endpoint + '/upload_ammo';
 		},
-		getAmmoInfo: function() {
-			this.$api.get('/list_ammo')
+		getAmmoInfo: function(params) {
+			const querystring = require('querystring');
+
+			let queryString = querystring.stringify(params);
+
+			this.loading = true;
+			this.$api.get('/list_ammo?page=' + this.pagination.page + '&limit=' + this.pagination.rowsPerPage +'&'+queryString)
 				.then(response => {
-					return response[0].data;
-				})
-				.then(json => {
-					if (!json.ammo) {
-						return;
-					}
-					json.ammo.forEach(
+					const respData = response[0].data.ammo;
+
+					this.ammo = respData;
+					this.ammo.forEach(
 						ammo => {
-							this.ammo.push(ammo);
+							ammo.size = this.sexyBytes(ammo.size);
+							ammo['download'] = '//' + this.$env.endpoint + '/download_ammo?key=' + ammo.key;
+							let lm = new Date(ammo.lastModified); // локальная таймзона
+
+							// форматируем дату 'YYYY-MM-DD HH:MM'
+							ammo.lastModified = lm.getFullYear() + '-' +
+								this.zfill(lm.getMonth()+1, 2) + '-' +
+								this.zfill(lm.getDate(), 2) + ' ' +
+								this.zfill(lm.getHours(), 2) + ':' +
+								this.zfill(lm.getMinutes(), 2);
 						}
 					);
-					let i = 0;
-					let len_a = this.ammo.length;
-
-					// форматируем данные, чтобы красиво было.
-					// и заполняем массив наименований существующих файлов
-					for (;i<len_a;i++) {
-						let a = this.ammo[i];
-
-						ammoKeys.push(a['key']);
-						a['size'] = this.sexyBytes(a['size']); // мегабайты, гигабайты и прочее
-						a['order'] = new Date(a['lastModified']); // поле для сортировки
-						a['download'] = '//' + this.$env.endpoint + '/download_ammo?key=' + a['key'];
-						let lm = new Date(a['lastModified']); // локальная таймзона
-
-						// форматируем дату 'YYYY-MM-DD HH:MM'
-						a['lastModified'] = lm.getFullYear() + '-' +
-							this.zfill(lm.getMonth()+1, 2) + '-' +
-							this.zfill(lm.getDate(), 2) + ' ' +
-							this.zfill(lm.getHours(), 2) + ':' +
-							this.zfill(lm.getMinutes(), 2);
-					}
-					// сортируем патроны по дате последней модификации в обратном порядке (новые наверху)
-					function compare(a, b) {
-						if (a.order < b.order) { return 1; }
-						if (a.order > b.order) { return -1; }
-						return 0;
-					}
-					this.ammo.sort(compare);
+					this.pagination.totalItems = response[0].data.count;
+					this.loading = false;
 				});
-			this.loading = false;
 		},
 		submitForm: function() {
 			let $form = document.getElementById('ammoUploadForm');
