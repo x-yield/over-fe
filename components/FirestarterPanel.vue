@@ -4,10 +4,10 @@
 			<v-btn color="cyan darken-1" dark @click="none">Collapse all</v-btn>
 		</v-layout>
 		<v-expansion-panel color="cyan" v-model="openedPanels" expand>
-			<v-expansion-panel-content v-for="panel in mycontent" :key="panel.externalId">
+			<v-expansion-panel-content v-for="panel in mycontent" :key="panel.clientId">
 				<template slot="header">
 					<v-flex shrink>
-						<v-icon @click="removePanel(panel.externalId)">delete</v-icon>
+						<v-icon @click="removePanel(panel.clientId)">delete</v-icon>
 					</v-flex>
 					<v-flex>
 						<v-stepper class="elevation-0" :value="panel.step">
@@ -43,7 +43,7 @@
 				<v-card class="pl-3 pr-3">
 					<v-flex sm12 md4>
 						<v-text-field
-							:id='"tankInput_"+panel.externalId'
+							:id='"tankInput_"+panel.clientId'
 							label="Tank address"
 							dark
 							solo
@@ -51,7 +51,7 @@
 					</v-flex>
 					<v-flex sm12 lg12 class="pb-3">
 						<v-textarea
-							:id='"confInput_"+panel.externalId'
+							:id='"confInput_"+panel.clientId'
 							label="Tank config"
 							autoGrow
 							dark
@@ -83,8 +83,8 @@ export default {
 		none() {
 			this.openedPanels = [];
 		},
-		removePanel(externalId) {
-			this.$emit('remove', externalId);
+		removePanel(clientId) {
+			this.$emit('remove', clientId);
 		},
 	},
 };

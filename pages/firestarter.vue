@@ -80,7 +80,7 @@ export default {
 
 			array.forEach(
 				item => {
-					if (item.externalId === objectToCompareWith.externalId) {
+					if (item.clientId === objectToCompareWith.clientId) {
 						resultObject = item;
 					}
 				}
@@ -93,19 +93,19 @@ export default {
 			if (this.panels.length > 0) {
 				this.panels.forEach(
 					panel => {
-						if (panel.externalId > maxId) {
-							maxId = panel.externalId;
+						if (panel.clientId > maxId) {
+							maxId = panel.clientId;
 						}
 					}
 				);
 			}
 			maxId++;
 			let newPanel = FirestarterPanel;
-			let externalId = maxId.toString();
+			let clientId = maxId.toString();
 
 			this.panels.push({
 				'panel': newPanel,
-				'externalId': externalId,
+				'clientId': clientId,
 				'valid': false,
 				'prepared': false,
 				'running': false,
@@ -123,14 +123,14 @@ export default {
 				'stage': '',
 				'status': '',
 				'failures': [],
-				'externalId': externalId,
+				'clientId': clientId,
 			});
 			this.activateButton('prepareButtonVisibility', 'validateButtonVisibility');
 		},
-		removePanel: function(externalId) {
+		removePanel: function(clientId) {
 			this.panels.forEach(
 				panel => {
-					if (panel.externalId === externalId) {
+					if (panel.clientId === clientId) {
 						this.panels.splice(this.panels.indexOf(panel), 1);
 					}
 				}
@@ -163,7 +163,7 @@ export default {
 		_updateSessions: function(sessions) {
 			sessions.forEach(
 				newSessionsData => {
-					let s = this._findItem(this.sessions, {'externalId': newSessionsData.externalId});
+					let s = this._findItem(this.sessions, {'clientId': newSessionsData.clientId});
 
 					for (let k in newSessionsData) {
 						s[k] = newSessionsData[k];
@@ -180,9 +180,9 @@ export default {
 					if (!panel.valid) {
 						let session = this._findItem(this.sessions, panel);
 
-						session['tank'] = document.getElementById('tankInput_'+session.externalId).value;
-						session['conf'] = document.getElementById('confInput_'+session.externalId).value;
-						session['externalId'] = panel.externalId;
+						session['tank'] = document.getElementById('tankInput_'+session.clientId).value;
+						session['conf'] = document.getElementById('confInput_'+session.clientId).value;
+						session['clientId'] = panel.clientId;
 						sessionsToValidate.push(session);
 					}
 				}
