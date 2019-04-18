@@ -8,7 +8,6 @@
 				<h3 align="center">Loading...</h3>
 			</div>
 			<div v-else>
-				{{ pagination }}
 				<v-card class="mb-2">
 					<form id="ammoUploadForm" enctype="multipart/form-data" method="post" style="padding: 1em 0 1em 2em;">
 						<input type="text" name="name" placeholder="Имя" required style="border: 1px solid #00acc1;"/>
