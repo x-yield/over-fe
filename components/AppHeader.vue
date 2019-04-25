@@ -9,14 +9,6 @@
 			<v-btn flat href="/collections">Collections</v-btn>
 			<v-btn flat href="/ammo">Ammo</v-btn>
 			<v-btn flat href="/firestarter">Firestarter</v-btn>
-			<v-btn
-				flat
-				icon
-				href="https://confluence.ozon.ru/pages/viewpage.action?pageId=88220982"
-				target="_blank"
-				slot="activator">
-				<v-icon size="20">help_outline</v-icon>
-			</v-btn>
 		</v-toolbar-items>
 	</v-toolbar>
 </template>

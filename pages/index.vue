@@ -90,7 +90,6 @@
 </template>
 
 <script>
-
 import TableList from '../components/TableList';
 import AppHeader from '../components/AppHeader';
 

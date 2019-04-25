@@ -41,101 +41,186 @@
 			</div>
 		</modal>
 
-		<v-container fluid>
-			<div v-if="loading">
-				<h3 align="center">Loading...</h3>
+		<modal
+			:title="'Resources utilization'"
+			width="1500px"
+			:modalIsVisible="visibilities.resourcesUtilization"
+			@close="toggleVisibility('resourcesUtilization')"
+		>
+			<div slot="body">
+				<resources-panel
+					:content="podsData"
+					:jobStart="job.testStart"
+					:jobStop="job.testStop"/>
 			</div>
-			<div v-else>
-				<v-flex class="row justify-content-end mb-2">
-					<!-- panel with editor buttons -->
-					<v-btn
-						v-show="job.status !== 'finished'"
-						color="red darken-1"
-						@click.once="stopTest"
-						:disabled="job.status === 'stopped'">Stop test</v-btn>
-					<v-btn
-						v-if="job.collections"
-						color="green"
-						@click="toggleVisibility('collectionsListVisibility')">View collections</v-btn>
-					<v-btn
-						v-if="job.environmentDetails && job.environmentDetails !== 'null'"
-						color="primary"
-						@click="toggleVisibility('kubernetesInfoVisibility')">View Kubernetes info</v-btn>
-					<v-btn color="warning" @click="deleteJob">Delete job</v-btn>
-				</v-flex>
-				<!-- test id table -->
-				<table-info
-					:title="'Test #'+job.id"
-					:headers="tableHeaders"
-					:content="tableJob"
-					:isCollection="false"
-					@editItem="editItem"/>
+		</modal>
 
-				<!-- Artifacts accordeon-->
-				<accordeon v-if="artifacts.length" title="ARTIFACTS">
-					<div slot="body">
-						<table id="artifactsTable" style="padding-left: 2em;" v-for="a in artifacts" :key="a.id">
-							<span><a :href="a.path">{{ a.key }}</a></span>
-						</table>
-					</div>
-				</accordeon>
-
-				<!-- grafana graphs for resources -->
-				<div v-if="job.environmentDetails && job.environmentDetails !== 'null'" align="center">
-					<resources-panel
-						:content="podsData"
-						:jobStart="job.testStart"
-						:jobStop="job.testStop"/>
-				</div>
-
-				<h2 align="center">Graphs</h2>
-				<v-flex md4 xs12 v-if="tagged.length > 1">
-					<v-select
-						color="cyan darken-1"
-						v-model="selectedTag"
-						:items="tags"
-						label="Tags"
-						@change="selectGraphs(selectedTag)"/>
-				</v-flex>
-				<v-flex class="row justify-content-between pl-3">
-					<!-- rps -->
-					<v-flex class="md6 sm12 pr-2">
-						<graph :content="job.graphs.rps"/>
-					</v-flex>
-					<!-- quantiles -->
-					<v-flex class="md6 sm12">
-						<graph :content="job.graphs.quantiles"/>
-					</v-flex>
-				</v-flex>
-				<v-flex class="row justify-content-center pl-3">
-					<!-- net codes -->
-					<v-flex class="md6 sm12 pr-2">
-						<graph :content="job.graphs.netcodes"/>
-					</v-flex>
-					<!-- tank threads -->
-					<v-flex class="md6 sm12">
-						<graph :content="job.graphs.threads"/>
-					</v-flex>
-				</v-flex>
-
-				<v-flex>
-					<!-- summary stats -->
-					<h2 align="center">Summary stats</h2>
-					<table-aggregates
-						title="StatsOverall"
-						:headers="aggregatesTableHeaders"
-						:commonAggregates="overall"
-						:detailedAggregates="overallByCode"
-						:isOverall="true"/>
-					<h3 align="center">Detailed stats</h3>
-					<table-aggregates
-						title="DetailedStats"
-						:headers="aggregatesTableHeaders"
-						:commonAggregates="tagged"
-						:detailedAggregates="taggedByCode"
-						:isOverall="false"/>
-				</v-flex>
+		<modal
+			:title="'Artifacts'"
+			width="400px"
+			:modalIsVisible="visibilities.artifactsVisibility"
+			@close="toggleVisibility('artifactsVisibility')"
+		>
+			<div slot="body">
+				<ul id="art">
+					<li v-for="art in artifacts" :key="art.key">
+						<span><a :href="art.path">{{ art.key }}</a></span>
+					</li>
+				</ul>
 			</div>
+		</modal>
+
+		<v-container fluid v-if="loading">
+			<v-layout justify-center row fill-height align-center>
+				<v-progress-circular
+					:size="150"
+					:width="9"
+					color="primary"
+					indeterminate
+				/>
+			</v-layout>
+		</v-container>
+
+		<v-container fluid v-else>
+			<v-layout>
+				<v-flex xs9>
+					<!-- graphs -->
+					<v-toolbar dark color="primary">
+						<v-toolbar-title>Graphs</v-toolbar-title>
+						<v-spacer/>
+					</v-toolbar>
+					<v-flex md4 xs12 v-if="tagged.length > 1">
+						<v-select
+							color="cyan darken-1"
+							v-model="selectedTag"
+							:items="tags"
+							label="Tags"
+							@change="selectGraphs(selectedTag)"/>
+					</v-flex>
+					<v-layout alignSpaceAround justifySpaceAround row>
+						<v-flex xs6 row>
+							<!-- rps -->
+							<v-flex>
+								<graph :content="job.graphs.rps"/>
+								<graph :content="job.graphs.netcodes"/>
+							</v-flex>
+						</v-flex>
+						<v-flex xs6>
+							<!-- net codes -->
+							<v-flex xs12>
+								<graph :content="job.graphs.quantiles"/>
+
+								<graph :content="job.graphs.threads"/>
+							</v-flex>
+						</v-flex>
+					</v-layout>
+
+					<v-flex class="col-sm-vert-offset-1">
+						<!-- summary stats -->
+						<v-toolbar
+							dark
+							color="primary"
+						>
+							<v-toolbar-title>Summary stats</v-toolbar-title>
+							<v-spacer/>
+						</v-toolbar>
+						<table-aggregates
+							title="StatsOverall"
+							:headers="aggregatesTableHeaders"
+							:commonAggregates="overall"
+							:detailedAggregates="overallByCode"
+							:isOverall="true"/>
+					</v-flex>
+					<v-flex class="col-sm-vert-offset-1">
+						<v-toolbar
+							dark
+							color="primary"
+						>
+							<v-toolbar-title>Detailed stats</v-toolbar-title>
+							<v-spacer/>
+						</v-toolbar>
+						<table-aggregates
+							title="DetailedStats"
+							:headers="aggregatesTableHeaders"
+							:commonAggregates="tagged"
+							:detailedAggregates="taggedByCode"
+							:isOverall="false"/>
+					</v-flex>
+				</v-flex>
+
+
+				<v-flex
+					xs3
+					class="col-sm-offset-1 postition-relative"
+				>
+					<v-flex>
+						<v-toolbar
+							dark
+							color="primary"
+						>
+							<v-toolbar-title>Test info #{{ job.id }}</v-toolbar-title>
+							<v-spacer/>
+						</v-toolbar>
+						<!-- test info table -->
+						<table-info
+							:title="'Test #'+job.id"
+							:headers="tableHeaders"
+							:content="tableJob"
+							:isCollection="false"
+							@editItem="editItem"/>
+					</v-flex>
+
+					<v-flex class="col-sm-vert-offset-1">
+						<!-- actions -->
+						<v-flex>
+							<!-- panel with editor buttons -->
+							<v-btn
+								v-show="job.status !== 'finished'"
+								color="red darken-1"
+								@click.once="stopTest"
+								:disabled="job.status === 'stopped'"
+							>
+								<v-icon dark right>stop</v-icon>Stop test
+							</v-btn>
+							<v-btn
+								color="warning"
+								@click="deleteJob"
+							>
+								<v-icon dark left>delete_forever</v-icon>Delete job
+							</v-btn>
+							<v-btn
+								v-if="job.collections"
+								color="primary"
+								@click="toggleVisibility('collectionsListVisibility')"
+							>
+								<v-icon dark left>view_list</v-icon>Collections
+							</v-btn>
+							<v-btn
+								v-if="job.environmentDetails && job.environmentDetails !== 'null'"
+								color="primary"
+								@click="toggleVisibility('kubernetesInfoVisibility')"
+							>
+								<v-icon dark left>view_list</v-icon>k8s info
+							</v-btn>
+							<v-btn
+								v-if="job.environmentDetails && job.environmentDetails !== 'null'"
+								color="primary"
+								@click="toggleVisibility('resourcesUtilization')"
+							>
+								<v-icon dark left>view_list</v-icon>Resources
+							</v-btn>
+							<v-btn
+								v-if="artifacts"
+								color="primary"
+								@click="toggleVisibility('artifactsVisibility')"
+							>
+								<v-icon dark left>cloud_download</v-icon>Artifacts
+							</v-btn>
+						</v-flex>
+					</v-flex>
+
+				</v-flex>
+			</v-layout>
 		</v-container>
 	</div>
 </template>
@@ -148,20 +233,8 @@ import TableInfo from '../components/TableInfo';
 import TableAggregates from '../components/TableAggregates';
 import Graph from '../components/Graph';
 import ResourcesPanel from '../components/ResourcesPanel';
-import Layout from '@ozonui/layout';
-import '@ozonui/layout/src/grid.css';
-import Input from '@ozonui/form-input';
-import FormSelect from '@ozonui/form-select';
 import AppHeader from '../components/AppHeader';
 import Accordeon from '../components/Accordeon';
-
-const {FormSelect: Select, FormSelectOption: Option} = FormSelect;
-
-const {
-	container,
-	row,
-	column,
-} = Layout;
 
 export default {
 	data() {
@@ -197,6 +270,8 @@ export default {
 				editorVisibility: false,
 				kubernetesInfoVisibility: false,
 				collectionsListVisibility: false,
+				resourcesUtilization: false,
+				artifactsVisibility: false,
 			},
 			tableHeaders: {
 				'Author': 'author',
@@ -224,17 +299,11 @@ export default {
 	components: {
 		Accordeon,
 		Modal,
-		Input,
-		Select,
-		Option,
 		TableInfo,
 		TableAggregates,
 		Graph,
 		AppHeader,
 		ResourcesPanel,
-		Row: row,
-		Column: column,
-		Container: container
 	},
 	created() {
 		this.test_id = this.$route.query.id;
@@ -352,6 +421,7 @@ export default {
 							}
 						}
 					);
+					this.tags.push('Overall');
 					this.tagged.forEach(
 						item => {
 							if (this.tags.indexOf(item.label) === -1) {
@@ -359,7 +429,6 @@ export default {
 							}
 						}
 					);
-					this.tags.push('Overall');
 				});
 		},
 		getArtifacts: function(id) {
@@ -397,4 +466,16 @@ export default {
 </script>
 
 <style scoped>
+	.col-sm-offset-1{
+		margin-left: 1em;
+	}
+	.col-sm-vert-offset-1{
+		margin-top: 1em;
+	}
+	.postition-relative{
+		position: fixed;
+		right:0.5%;
+		overflow-y: scroll;
+		max-height: 85%;
+	}
 </style>

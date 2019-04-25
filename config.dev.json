@@ -1,4 +1,3 @@
 {
   "endpoint": "localhost:7000",
-  "CASendpoint": "cas-auth.cas.stg.s.o3.ru"
 }

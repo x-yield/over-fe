@@ -78,9 +78,6 @@
 </template>
 
 <script>
-import '@ozonui/layout/src/grid.css';
-import '@ozonui/form-input';
-import '@ozonui/custom-button';
 import AppHeader from '../components/AppHeader';
 
 let ammoKeys = [];

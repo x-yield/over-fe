@@ -1,4 +1,3 @@
 {
-  "endpoint": "overload-api.qa.stg.s.o3.ru",
-  "CASendpoint": "cas-auth.cas.stg.s.o3.ru"
+  "endpoint": "localhost:7000",
 }

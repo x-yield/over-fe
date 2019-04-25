@@ -23,7 +23,6 @@ module.exports = {
 	loading: {color: '#fff'},
 	build: {
 		transpile: [
-			/@ozonui/
 		],
 		vendor: ['vue2-ace-editor'],
 		postcss: [
@@ -44,7 +43,6 @@ module.exports = {
 		'~/plugins/authentication'
 	],
 	modules: [
-		['@ozon/environment-nuxt-module', {absolutePath: __dirname, defaultConfigPath: 'config.dev.json'}],
 		'@nuxtjs/vuetify'
 	],
 	module: {

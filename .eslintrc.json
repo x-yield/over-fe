@@ -1,8 +1,0 @@
-{
-	"extends": [
-		"@ozon/eslint-config-ozon"
-	],
-	"rules": {
-      "vue/valid-v-for": "off"
-	}
-}

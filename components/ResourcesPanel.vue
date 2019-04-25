@@ -1,6 +1,6 @@
 <template>
 	<v-card>
-		<accordeon title="RESOURCES UTILIZATION">
+		<accordeon title="Select pod from list">
 			{{ content }}
 			<div slot="body">
 				<v-tabs fixedTabs color="grey lighten-4">
@@ -13,16 +13,16 @@
 				</v-tabs>
 			</div>
 		</accordeon>
-		<v-flex align="center" v-show="openedGraphs.length > 0" class="row justify-content-between pr-2 pl-4 pt-2">
-			<v-flex class="md4 sm12">
+		<v-flex v-show="openedGraphs.length > 0" class="justify-content-between pr-2 pl-4 pt-2">
+			<v-flex xs12>
 				<!-- cpu -->
 				<graph :content="resources.graphs.cpu"/>
 			</v-flex>
-			<v-flex class="md4 sm12">
+			<v-flex xs12>
 				<!-- memory -->
 				<graph :content="resources.graphs.memory"/>
 			</v-flex>
-			<v-flex class="md4 sm12">
+			<v-flex xs12>
 				<!-- net codes -->
 				<graph :content="resources.graphs.network"/>
 			</v-flex>

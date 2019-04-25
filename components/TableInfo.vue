@@ -4,7 +4,6 @@
 Если это коллекция - в таблице добавляется дополнительный столбец, содержащий ссылку -->
 <template>
 	<v-card class="justify-space-between pt-2">
-		<h3 align="center">{{ title }}</h3>
 		<v-data-table
 			:items="content"
 			hideActions
@@ -27,10 +26,6 @@
 export default {
 	name: 'TableInfo',
 	props: {
-		title: {
-			type: String,
-			default: 'Title',
-		},
 		headers: {
 			type: Object,
 			default: null,

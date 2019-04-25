@@ -1,4 +1,0 @@
-deploy:
-  env:
-  - name: CONFIG_PATH
-    value: config.production.json

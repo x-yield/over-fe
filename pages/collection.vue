@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import '@ozonui/layout/src/grid.css';
 import TableInfo from '../components/TableInfo';
 import Graph from '../components/Graph';
 import AppHeader from '../components/AppHeader';

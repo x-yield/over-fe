@@ -3,6 +3,7 @@
 		:src="content"
 		class="iframe-graphs"
 		scrolling="No"
+		seamless
 	/>
 </template>
 
